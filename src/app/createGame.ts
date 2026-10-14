@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { GAME_HEIGHT, GAME_WIDTH, IDLE_TIMEOUT_MS } from '@/config/game';
 import { scenes } from '@/scenes';
+import { isIdleAware } from '@/scenes/idleAware';
 import { IDLE_RESET_SCENES, SceneKey } from '@/scenes/keys';
 import { IdleWatcher } from '@/services/idle/idleWatcher';
 
@@ -34,9 +35,9 @@ export function createGame(parent: string): Phaser.Game {
   // Booth-proofing: waiting screens return to attract after a period of no touch.
   new IdleWatcher(IDLE_TIMEOUT_MS, () => {
     const current = game.scene.getScenes(true)[0];
-    if (current && IDLE_RESET_SCENES.includes(current.scene.key as SceneKey)) {
-      current.scene.start(SceneKey.Attract);
-    }
+    if (!current || !IDLE_RESET_SCENES.includes(current.scene.key as SceneKey)) return;
+    if (isIdleAware(current)) current.onIdle();
+    else current.scene.start(SceneKey.Attract);
   }).start();
 
   return game;

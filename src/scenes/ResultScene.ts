@@ -6,11 +6,14 @@ import type { PlayRecord } from '@/domain/play';
 import type { SessionResult } from '@/domain/session';
 import { newId } from '@/util/id';
 import { createButton } from '@/ui/button';
+import type { ResultSceneData } from './data';
 import { SceneKey } from './keys';
-import type { ResultSceneData } from './UnlockScene';
+
+const BOARD_SIZE = 10;
 
 export class ResultScene extends Phaser.Scene {
   private result!: SessionResult;
+  private initials = '';
 
   constructor() {
     super(SceneKey.Result);
@@ -18,6 +21,7 @@ export class ResultScene extends Phaser.Scene {
 
   init(data: ResultSceneData): void {
     this.result = data.result;
+    this.initials = data.initials;
   }
 
   create(): void {
@@ -36,7 +40,13 @@ export class ResultScene extends Phaser.Scene {
       .setOrigin(0.5);
 
     const board = this.add
-      .text(cx, 1000, '', { ...style, fontSize: '44px', lineSpacing: 12 })
+      .text(cx, 1060, '', {
+        ...style,
+        align: 'left',
+        fontFamily: 'monospace',
+        fontSize: '46px',
+        lineSpacing: 12,
+      })
       .setOrigin(0.5);
     void this.saveAndShowBoard(board);
 
@@ -51,8 +61,7 @@ export class ResultScene extends Phaser.Scene {
       id: newId(),
       timestamp: new Date().toISOString(),
       deviceId: env.deviceId,
-      // TODO(client): initials entry via on-screen keyboard (Option A in PLAN.md).
-      initials: '---',
+      initials: this.initials,
       score: this.result.score,
       meterPct: this.result.meterPct,
       catches: this.result.catches,
@@ -63,11 +72,13 @@ export class ResultScene extends Phaser.Scene {
     };
     await repo.add(play);
 
-    const top = await repo.topScores(5);
+    const top = await repo.topScores(BOARD_SIZE);
     // The scene may have been left (idle reset) while the DB was busy.
     if (!this.scene.isActive()) return;
-    board.setText(
-      ['TOP 5', ...top.map((p, i) => `${i + 1}. ${p.initials}   ${p.score}`)].join('\n'),
-    );
+    const rows = top.map((p, i) => {
+      const mark = p.id === play.id ? '>' : ' ';
+      return `${mark} ${String(i + 1).padStart(2, ' ')}.  ${p.initials}   ${p.score}`;
+    });
+    board.setText([`TOP ${BOARD_SIZE}`, ...rows].join('\n'));
   }
 }

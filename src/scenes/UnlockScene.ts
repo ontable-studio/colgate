@@ -1,13 +1,10 @@
 import Phaser from 'phaser';
 import { GAME_HEIGHT, GAME_WIDTH } from '@/config/game';
 import type { SessionResult } from '@/domain/session';
+import type { GameResultData } from './data';
 import { SceneKey } from './keys';
 
-export interface ResultSceneData {
-  result: SessionResult;
-}
-
-/** Short celebration between gameplay and the result screen. */
+/** Short celebration between gameplay and the initials screen. */
 export class UnlockScene extends Phaser.Scene {
   private result!: SessionResult;
 
@@ -15,7 +12,7 @@ export class UnlockScene extends Phaser.Scene {
     super(SceneKey.Unlock);
   }
 
-  init(data: ResultSceneData): void {
+  init(data: GameResultData): void {
     this.result = data.result;
   }
 
@@ -58,7 +55,7 @@ export class UnlockScene extends Phaser.Scene {
     this.tweens.add({ targets: clean, alpha: 1, delay: 500, duration: 1400 });
     this.tweens.add({ targets: glow, alpha: 0.8, delay: 500, duration: 1400, yoyo: true });
     this.time.delayedCall(2500, () => {
-      this.scene.start(SceneKey.Result, { result: this.result } satisfies ResultSceneData);
+      this.scene.start(SceneKey.Initials, { result: this.result } satisfies GameResultData);
     });
   }
 }

@@ -22,9 +22,9 @@ Dependency rule: `scenes -> domain/services/config`, `services -> domain/config`
 ## Flow
 
 ```
-Boot -> Preload -> Attract -> HowToPlay -> Gameplay -> Unlock -> Result -> (Play again -> Gameplay)
+Boot -> Preload -> Attract -> HowToPlay -> Gameplay -> Unlock -> Initials -> Result -> (Play again -> Gameplay)
                       ^                                                   |
-                      +---------- idle 30 s on HowToPlay / Result ----------+
+                      +---------- idle 30 s on HowToPlay / Initials / Result ----------+
 ```
 
 Scene keys are in `src/scenes/keys.ts`. Scenes pass data with `scene.start(key, data)`.
@@ -45,7 +45,7 @@ Idb caveat: a transaction auto-closes if you await unrelated async work (e.g. `f
 
 ## Booth-proofing
 
-- `IdleWatcher` returns to Attract after 30 s without pointer/key activity, but only from HowToPlay and Result (`IDLE_RESET_SCENES` in `scenes/keys.ts`). Gameplay/Unlock are excluded: a round ends by itself, and cutting it short loses the player's result.
+- `IdleWatcher` returns to Attract after 30 s without pointer/key activity, but only from HowToPlay, Initials and Result (`IDLE_RESET_SCENES` in `scenes/keys.ts`). A scene can implement `IdleAware.onIdle()` to handle it itself: Initials saves the play with whatever was typed instead of dropping it. Gameplay/Unlock are excluded: a round ends by itself, and cutting it short loses the player's result.
 - `style.css` disables scroll, zoom, text selection, long-press callouts and pull-to-refresh; Phaser's context menu is disabled.
 - Fullscreen is requested from the first tap on PLAY NOW (needs a user gesture).
 - PWA (`vite-plugin-pwa`, `autoUpdate`) precaches the build so the game runs offline. Asset types must be listed in `workbox.globPatterns` (`vite.config.ts`) or they will not be cached.
@@ -57,4 +57,4 @@ Vitest in a Node environment. Only non-Phaser code is unit tested (`domain`, `se
 
 ## Not built yet (see PLAN.md)
 
-Real assets and animations, on-screen keyboard for initials, hidden admin menu (sync status, CSV export), final end-screen animation, audio.
+Remaining art (basket, stain enemy, UI), hidden admin menu (sync status, CSV export), final end-screen animation, audio.
