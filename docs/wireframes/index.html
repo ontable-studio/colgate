@@ -1,0 +1,706 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Wireframe - Catch the Brightness</title>
+    <style>
+      :root {
+        --bg: #f2f2f2;
+        --frame: #dcdcdc;
+        --box: #bdbdbd;
+        --line: #6b6b6b;
+        --ink: #2b2b2b;
+        --cta: #4a4a4a;
+        --pin: #c8102e;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        padding: 32px;
+        background: var(--bg);
+        color: var(--ink);
+        font:
+          14px/1.45 system-ui,
+          sans-serif;
+      }
+      h1 {
+        margin: 0 0 4px;
+        font-size: 22px;
+      }
+      .sub {
+        margin: 0 0 24px;
+        color: #666;
+      }
+      .flow {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        align-items: center;
+        margin-bottom: 28px;
+        font-weight: 600;
+      }
+      .flow span {
+        padding: 4px 10px;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        background: #fff;
+      }
+      .flow i {
+        font-style: normal;
+        color: #888;
+      }
+      .grid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 36px;
+      }
+      .card {
+        width: 340px;
+      }
+      .card h2 {
+        margin: 0 0 8px;
+        font-size: 16px;
+      }
+      .tag {
+        display: inline-block;
+        margin-left: 6px;
+        padding: 1px 8px;
+        border-radius: 999px;
+        background: #fff;
+        border: 1px solid #aaa;
+        color: #666;
+        font-size: 11px;
+        font-weight: 500;
+        vertical-align: middle;
+      }
+      .wrap {
+        width: 324px;
+        height: 576px;
+        overflow: hidden;
+        border: 2px solid #333;
+        background: var(--frame);
+      }
+      /* Design space is 1080x1920; the wrapper shows it at 30% */
+      .f {
+        position: relative;
+        width: 1080px;
+        height: 1920px;
+        transform: scale(0.3);
+        transform-origin: 0 0;
+        font-family: system-ui, sans-serif;
+        color: var(--ink);
+      }
+      .b {
+        position: absolute;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        background: var(--box);
+        border: 4px dashed var(--line);
+        font-size: 40px;
+        line-height: 1.2;
+      }
+      .t {
+        position: absolute;
+        left: 0;
+        right: 0;
+        text-align: center;
+        font-weight: 700;
+      }
+      .cta {
+        background: var(--cta);
+        color: #fff;
+        border: none;
+        font-weight: 700;
+        font-size: 56px;
+        border-radius: 80px;
+      }
+      .round {
+        border-radius: 50%;
+      }
+      .safe {
+        position: absolute;
+        inset: 80px;
+        border: 3px dotted #9a9a9a;
+        pointer-events: none;
+      }
+      .pin {
+        position: absolute;
+        width: 64px;
+        height: 64px;
+        border-radius: 50%;
+        background: var(--pin);
+        color: #fff;
+        font-size: 36px;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      ol.notes {
+        margin: 10px 0 0;
+        padding-left: 22px;
+        font-size: 13px;
+      }
+      ol.notes li {
+        margin: 3px 0;
+      }
+      .meta {
+        margin-top: 8px;
+        padding: 8px 10px;
+        background: #fff;
+        border-left: 4px solid var(--line);
+        font-size: 12.5px;
+      }
+      .meta b {
+        display: block;
+        margin-bottom: 2px;
+      }
+      .specs {
+        margin-top: 36px;
+        max-width: 1100px;
+      }
+      .specs h2 {
+        font-size: 18px;
+      }
+      table {
+        border-collapse: collapse;
+        width: 100%;
+        background: #fff;
+      }
+      td,
+      th {
+        border: 1px solid #ccc;
+        padding: 6px 10px;
+        text-align: left;
+        vertical-align: top;
+      }
+      th {
+        background: #eee;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Wireframe - Catch the Brightness</h1>
+    <p class="sub">
+      Colgate Optic White Vitamin C · TV touchscreen portrait 1080×1920 (di-scale ke 4K) · Dibuat
+      oleh Irsal (Developer) sebagai dasar mockup Oji · Versi 0.1, 14 Okt 2026
+    </p>
+
+    <div class="flow">
+      <span>1 Attract</span><i>→</i><span>2 How to Play</span><i>→</i><span>3 Gameplay</span><i>→</i
+      ><span>4 Unlock</span><i>→</i><span>5 Initials</span><i>→</i><span>6 Result + Top 10</span
+      ><i>↺</i><span>Play Again → 3</span>
+    </div>
+
+    <div class="grid">
+      <!-- 1. ATTRACT -->
+      <div class="card">
+        <h2>1 · Attract <span class="tag">loop, layar default</span></h2>
+        <div class="wrap">
+          <div class="f">
+            <div class="safe"></div>
+            <div class="b" style="left: 120px; top: 100px; width: 330px; height: 150px">
+              Logo Colgate
+            </div>
+            <div class="b" style="left: 520px; top: 100px; width: 440px; height: 150px">
+              Optic White<br />Vitamin C
+            </div>
+            <div class="t" style="top: 330px; font-size: 130px; line-height: 1.05">
+              CATCH THE<br />BRIGHTNESS
+            </div>
+            <div class="b" style="left: 190px; top: 700px; width: 700px; height: 700px">
+              Hero visual: tube + kapsul Vit C melayang (animasi loop)
+            </div>
+            <div
+              class="b cta"
+              style="left: 200px; top: 1500px; width: 680px; height: 190px; border-radius: 95px"
+            >
+              ▶ PLAY NOW
+            </div>
+            <div class="t" style="top: 1730px; font-size: 38px; font-weight: 400">
+              Sentuh layar untuk mulai
+            </div>
+            <div
+              class="b"
+              style="left: 120px; top: 1800px; width: 840px; height: 70px; font-size: 26px"
+            >
+              Disclaimer klaim (teks final dari klien)
+            </div>
+            <div class="pin" style="left: 40px; top: 90px">1</div>
+            <div class="pin" style="left: 40px; top: 330px">2</div>
+            <div class="pin" style="left: 40px; top: 720px">3</div>
+            <div class="pin" style="left: 100px; top: 1520px">4</div>
+            <div class="pin" style="left: 40px; top: 1800px">5</div>
+          </div>
+        </div>
+        <ol class="notes">
+          <li>Logo Colgate + Optic White Vitamin C</li>
+          <li>Judul game</li>
+          <li>Hero visual beranimasi (loop) untuk menarik pengunjung</li>
+          <li>CTA PLAY NOW (min. 160 px tinggi; juga memicu fullscreen)</li>
+          <li>Disclaimer / klaim wajib</li>
+        </ol>
+        <div class="meta">
+          <b>Perilaku</b>
+          Tap PLAY NOW → fullscreen + ke layar 2. Layar ini tujuan akhir semua reset idle.
+          <b style="margin-top: 6px">Aset (Oji)</b>
+          Logo (2), hero tube + kapsul, latar merah gradient, font Colgate Ready.
+        </div>
+      </div>
+
+      <!-- 2. HOW TO PLAY -->
+      <div class="card">
+        <h2>2 · How to Play <span class="tag">idle 30 dtk → Attract</span></h2>
+        <div class="wrap">
+          <div class="f">
+            <div class="safe"></div>
+            <div class="b" style="left: 340px; top: 100px; width: 400px; height: 130px">Logo</div>
+            <div class="t" style="top: 300px; font-size: 100px">HOW TO PLAY</div>
+            <div
+              class="b"
+              style="
+                left: 120px;
+                top: 520px;
+                width: 840px;
+                height: 330px;
+                justify-content: flex-start;
+                padding-left: 40px;
+                gap: 40px;
+              "
+            >
+              <div class="b" style="position: static; width: 200px; height: 200px">
+                Ikon<br />tangan ↔
+              </div>
+              Geser kiri/kanan<br />untuk gerakkan keranjang
+            </div>
+            <div
+              class="b"
+              style="
+                left: 120px;
+                top: 900px;
+                width: 840px;
+                height: 330px;
+                justify-content: flex-start;
+                padding-left: 40px;
+                gap: 40px;
+              "
+            >
+              <div class="b round" style="position: static; width: 200px; height: 200px">
+                Kapsul<br />Vit C
+              </div>
+              Tangkap kapsul Vitamin C<br />untuk isi Brightness Meter
+            </div>
+            <div
+              class="b"
+              style="
+                left: 120px;
+                top: 1280px;
+                width: 840px;
+                height: 330px;
+                justify-content: flex-start;
+                padding-left: 40px;
+                gap: 40px;
+              "
+            >
+              <div class="b round" style="position: static; width: 200px; height: 200px">
+                Noda ✕
+              </div>
+              Hindari noda<br />dan kapsul pengecoh
+            </div>
+            <div
+              class="b cta"
+              style="left: 240px; top: 1700px; width: 600px; height: 170px; border-radius: 85px"
+            >
+              LET'S PLAY!
+            </div>
+            <div class="pin" style="left: 40px; top: 290px">1</div>
+            <div class="pin" style="left: 40px; top: 600px">2</div>
+            <div class="pin" style="left: 40px; top: 1000px">3</div>
+            <div class="pin" style="left: 40px; top: 1360px">4</div>
+            <div class="pin" style="left: 130px; top: 1710px">5</div>
+          </div>
+        </div>
+        <ol class="notes">
+          <li>Judul layar</li>
+          <li>Kartu 1: kontrol (geser jari)</li>
+          <li>Kartu 2: objek benar (kapsul Vitamin C)</li>
+          <li>Kartu 3: objek salah (noda, pengecoh)</li>
+          <li>CTA LET'S PLAY!</li>
+        </ol>
+        <div class="meta">
+          <b>Perilaku</b>
+          Tap LET'S PLAY! → layar 3. Idle 30 dtk → Attract.
+          <b style="margin-top: 6px">Aset (Oji)</b>
+          Ikon tangan geser, kapsul, noda, pengecoh, panel kartu.
+        </div>
+      </div>
+
+      <!-- 3. GAMEPLAY -->
+      <div class="card">
+        <h2>3 · Gameplay <span class="tag">30–45 dtk</span></h2>
+        <div class="wrap">
+          <div class="f">
+            <div class="safe"></div>
+            <div class="b" style="left: 80px; top: 80px; width: 340px; height: 120px">⏱ 00:40</div>
+            <div class="b" style="left: 660px; top: 80px; width: 340px; height: 120px">
+              SCORE 120
+            </div>
+            <div
+              class="b round"
+              style="left: 200px; top: 360px; width: 130px; height: 130px; font-size: 28px"
+            >
+              Kapsul
+            </div>
+            <div
+              class="b round"
+              style="left: 640px; top: 560px; width: 130px; height: 130px; font-size: 28px"
+            >
+              Noda
+            </div>
+            <div
+              class="b round"
+              style="left: 420px; top: 800px; width: 130px; height: 130px; font-size: 28px"
+            >
+              Kapsul
+            </div>
+            <div
+              class="b round"
+              style="left: 820px; top: 1000px; width: 130px; height: 130px; font-size: 28px"
+            >
+              Pengecoh
+            </div>
+            <div
+              class="b round"
+              style="left: 260px; top: 1240px; width: 130px; height: 130px; font-size: 28px"
+            >
+              Kapsul
+            </div>
+            <div
+              class="b"
+              style="left: 380px; top: 1530px; width: 320px; height: 150px; border-radius: 40px"
+            >
+              Keranjang
+            </div>
+            <div class="t" style="top: 1700px; font-size: 54px; font-weight: 400">← geser →</div>
+            <div
+              class="b"
+              style="
+                left: 140px;
+                top: 1790px;
+                width: 800px;
+                height: 60px;
+                border-radius: 30px;
+                font-size: 28px;
+                justify-content: flex-start;
+                padding-left: 20px;
+                background: linear-gradient(90deg, #8a8a8a 38%, #bdbdbd 38%);
+              "
+            >
+              Brightness Meter 38%
+            </div>
+            <div class="pin" style="left: 30px; top: 100px">1</div>
+            <div class="pin" style="left: 1000px; top: 20px">2</div>
+            <div class="pin" style="left: 40px; top: 760px">3</div>
+            <div class="pin" style="left: 290px; top: 1550px">4</div>
+            <div class="pin" style="left: 40px; top: 1780px">5</div>
+          </div>
+        </div>
+        <ol class="notes">
+          <li>Timer (hitung mundur)</li>
+          <li>Skor berjalan</li>
+          <li>Objek jatuh dari atas: kapsul (+), noda (−), pengecoh (−)</li>
+          <li>Keranjang: mengikuti jari secara horizontal saja</li>
+          <li>Brightness Meter (naik saat kapsul tertangkap)</li>
+        </ol>
+        <div class="meta">
+          <b>Perilaku</b>
+          Mulai langsung saat layar muncul. Selesai saat timer 0 atau meter 100% → layar 4. Tidak
+          ada idle reset di layar ini.
+          <b style="margin-top: 6px">Aset (Oji)</b>
+          Keranjang, kapsul, noda, pengecoh, bar meter (kosong/isi), ikon timer, latar.
+        </div>
+      </div>
+
+      <!-- 4. UNLOCK -->
+      <div class="card">
+        <h2>4 · Unlock <span class="tag">2,5 dtk otomatis</span></h2>
+        <div class="wrap">
+          <div class="f">
+            <div class="safe"></div>
+            <div class="t" style="top: 260px; font-size: 110px; line-height: 1.1">
+              UNLOCK YOUR<br />BRIGHTEST SMILE!
+            </div>
+            <div class="b" style="left: 120px; top: 760px; width: 840px; height: 760px">
+              Animasi akhir (BELUM FINAL):<br />A) gigi kuning → putih (Day 1 → Day 7)<br />B)
+              gelombang Vitamin C + senyum
+            </div>
+            <div
+              class="b"
+              style="left: 220px; top: 1600px; width: 640px; height: 100px; font-size: 32px"
+            >
+              Efek partikel kapsul / kilau
+            </div>
+            <div class="pin" style="left: 40px; top: 280px">1</div>
+            <div class="pin" style="left: 40px; top: 780px">2</div>
+          </div>
+        </div>
+        <ol class="notes">
+          <li>Headline hasil</li>
+          <li>Visual transformasi (menunggu keputusan klien)</li>
+        </ol>
+        <div class="meta">
+          <b>Perilaku</b>
+          Otomatis ke layar 5 setelah ±2,5 dtk. Tanpa tombol.
+          <b style="margin-top: 6px">Terbuka</b>
+          Pertanyaan klien no. 6 (animasi akhir). Jika opsi A, Oji siapkan gigi Day 1 &amp; Day 7
+          sebagai dua gambar (wipe).
+        </div>
+      </div>
+
+      <!-- 5. INITIALS -->
+      <div class="card">
+        <h2>5 · Initials <span class="tag">on-screen keyboard</span></h2>
+        <div class="wrap">
+          <div class="f">
+            <div class="safe"></div>
+            <div class="t" style="top: 140px; font-size: 70px">YOUR SCORE</div>
+            <div class="t" style="top: 230px; font-size: 200px">120</div>
+            <div class="t" style="top: 480px; font-size: 54px; font-weight: 400">
+              Masukkan inisial untuk papan skor
+            </div>
+            <div
+              class="b"
+              style="left: 140px; top: 620px; width: 240px; height: 240px; font-size: 130px"
+            >
+              A
+            </div>
+            <div
+              class="b"
+              style="left: 420px; top: 620px; width: 240px; height: 240px; font-size: 130px"
+            >
+              B
+            </div>
+            <div
+              class="b"
+              style="left: 700px; top: 620px; width: 240px; height: 240px; font-size: 130px"
+            >
+              _
+            </div>
+            <div
+              class="b"
+              style="left: 80px; top: 960px; width: 920px; height: 640px; font-size: 44px"
+            >
+              Keyboard layar: A–Z (3 baris), tombol besar ≥ 120 px, ⌫ hapus
+            </div>
+            <div
+              class="b cta"
+              style="left: 240px; top: 1680px; width: 600px; height: 170px; border-radius: 85px"
+            >
+              SIMPAN
+            </div>
+            <div class="pin" style="left: 40px; top: 240px">1</div>
+            <div class="pin" style="left: 60px; top: 700px">2</div>
+            <div class="pin" style="left: 20px; top: 1100px">3</div>
+            <div class="pin" style="left: 130px; top: 1690px">4</div>
+          </div>
+        </div>
+        <ol class="notes">
+          <li>Skor akhir</li>
+          <li>3 kotak inisial (maks. 3–8 karakter, TBD)</li>
+          <li>Keyboard layar (tombol besar untuk jari)</li>
+          <li>SIMPAN (boleh dilewati?, TBD)</li>
+        </ol>
+        <div class="meta">
+          <b>Perilaku</b>
+          SIMPAN → tulis ke IndexedDB (status pending) → layar 6. Idle 30 dtk → simpan sebagai "---"
+          lalu Attract.
+          <b style="margin-top: 6px">Terbuka</b>
+          Hanya inisial (tanpa HP/email) sampai klien menjawab.
+        </div>
+      </div>
+
+      <!-- 6. RESULT -->
+      <div class="card">
+        <h2>6 · Result + Top 10 <span class="tag">idle 30 dtk → Attract</span></h2>
+        <div class="wrap">
+          <div class="f">
+            <div class="safe"></div>
+            <div class="t" style="top: 120px; font-size: 64px">YOUR SCORE</div>
+            <div class="t" style="top: 200px; font-size: 190px">120</div>
+            <div
+              class="b"
+              style="
+                left: 140px;
+                top: 460px;
+                width: 800px;
+                height: 60px;
+                border-radius: 30px;
+                font-size: 28px;
+                background: linear-gradient(90deg, #8a8a8a 100%, #bdbdbd 100%);
+              "
+            >
+              Brightness Meter 100%
+            </div>
+            <div
+              class="b"
+              style="
+                left: 80px;
+                top: 580px;
+                width: 920px;
+                height: 820px;
+                justify-content: flex-start;
+                align-items: flex-start;
+                text-align: left;
+                padding: 30px 50px;
+                font-size: 44px;
+                line-height: 1.7;
+              "
+            >
+              TOP 10<br />1. AAA ........ 340<br />2. BBB ........ 310<br />3. CCC ........ 290<br />…
+              <br />Baris pemain ini di-highlight
+            </div>
+            <div
+              class="b"
+              style="left: 80px; top: 1440px; width: 920px; height: 150px; font-size: 38px"
+            >
+              Visual produk + "Brighter Smiles, Brighter Days"<br />(teks kampanye final TBD)
+            </div>
+            <div
+              class="b cta"
+              style="left: 240px; top: 1680px; width: 600px; height: 170px; border-radius: 85px"
+            >
+              ↻ PLAY AGAIN
+            </div>
+            <div class="pin" style="left: 40px; top: 200px">1</div>
+            <div class="pin" style="left: 40px; top: 450px">2</div>
+            <div class="pin" style="left: 20px; top: 700px">3</div>
+            <div class="pin" style="left: 20px; top: 1470px">4</div>
+            <div class="pin" style="left: 130px; top: 1690px">5</div>
+          </div>
+        </div>
+        <ol class="notes">
+          <li>Skor akhir</li>
+          <li>Brightness Meter akhir (persen)</li>
+          <li>Papan skor Top 10 (data lokal)</li>
+          <li>Visual produk + pesan kampanye (tanpa panel reward)</li>
+          <li>PLAY AGAIN → layar 3</li>
+        </ol>
+        <div class="meta">
+          <b>Perilaku</b>
+          PLAY AGAIN langsung ke gameplay (lewati How to Play). Idle 30 dtk → Attract.
+          <b style="margin-top: 6px">Aset (Oji)</b>
+          Visual produk (tube), panel papan skor, ikon.
+        </div>
+      </div>
+    </div>
+
+    <div class="specs">
+      <h2>Spesifikasi layout (untuk Oji dan Irsal)</h2>
+      <table>
+        <tr>
+          <th>Hal</th>
+          <th>Nilai</th>
+        </tr>
+        <tr>
+          <td>Kanvas desain</td>
+          <td>1080 × 1920 px (portrait). Ekspor aset @2x (2160 × 3840) agar tajam di 4K.</td>
+        </tr>
+        <tr>
+          <td>Safe area</td>
+          <td>
+            80 px dari tiap sisi (garis titik di wireframe). Teks dan tombol penting tidak boleh di
+            luarnya (bezel TV bisa memotong).
+          </td>
+        </tr>
+        <tr>
+          <td>Ukuran sentuh</td>
+          <td>Tombol minimal 160 px tinggi, jarak antar tombol minimal 40 px.</td>
+        </tr>
+        <tr>
+          <td>Font</td>
+          <td>Colgate Ready (Bold/Light), Myriad Pro sebagai cadangan. Teks isi minimal 44 px.</td>
+        </tr>
+        <tr>
+          <td>Warna</td>
+          <td>
+            Merah Colgate + gradient merah gelap radial, aksen oranye-emas, putih (sesuai brand).
+          </td>
+        </tr>
+        <tr>
+          <td>Format aset</td>
+          <td>PNG/WebP RGB transparan per elemen. Bukan PSD/AI/CMYK.</td>
+        </tr>
+        <tr>
+          <td>Animasi (kapsul, keranjang)</td>
+          <td>Sprite statis dulu. Efek (kilau, partikel) dibuat di kode agar ringan.</td>
+        </tr>
+      </table>
+
+      <h2 style="margin-top: 28px">Daftar aset untuk Oji (prioritas jalur kritis)</h2>
+      <table>
+        <tr>
+          <th>#</th>
+          <th>Aset</th>
+          <th>Dipakai di</th>
+          <th>Prioritas</th>
+        </tr>
+        <tr>
+          <td>1</td>
+          <td>Kapsul Vitamin C (oranye), noda, kapsul pengecoh, keranjang</td>
+          <td>Gameplay, How to Play</td>
+          <td>Tinggi</td>
+        </tr>
+        <tr>
+          <td>2</td>
+          <td>Latar merah gradient (radial) 1080×1920</td>
+          <td>Semua layar</td>
+          <td>Tinggi</td>
+        </tr>
+        <tr>
+          <td>3</td>
+          <td>Bar Brightness Meter (kosong + isi), ikon timer</td>
+          <td>Gameplay, Result</td>
+          <td>Tinggi</td>
+        </tr>
+        <tr>
+          <td>4</td>
+          <td>Logo Colgate dan Optic White Vitamin C</td>
+          <td>Attract, How to Play</td>
+          <td>Sedang</td>
+        </tr>
+        <tr>
+          <td>5</td>
+          <td>Tube produk (render RGB dari `Tube_OpticWhite…psd`)</td>
+          <td>Attract, Result</td>
+          <td>Sedang</td>
+        </tr>
+        <tr>
+          <td>6</td>
+          <td>Gigi Day 1 (kuning) dan Day 7 (putih)</td>
+          <td>Unlock (jika opsi A)</td>
+          <td>Sedang (tunggu klien)</td>
+        </tr>
+        <tr>
+          <td>7</td>
+          <td>Panel kartu, tombol (PLAY NOW, dll.), tombol keyboard</td>
+          <td>Semua layar</td>
+          <td>Rendah (bisa dari kode dulu)</td>
+        </tr>
+      </table>
+
+      <h2 style="margin-top: 28px">Pertanyaan yang memengaruhi layar</h2>
+      <ul>
+        <li>Animasi akhir: gigi Day 1 → Day 7 atau gelombang + senyum? (layar 4)</li>
+        <li>Hanya inisial, atau juga HP/email? Jika ada kontak, perlu layar consent. (layar 5)</li>
+        <li>Perlu reward/voucher? Wireframe ini tanpa panel reward. (layar 6)</li>
+        <li>Timer tetap atau game berakhir saat meter penuh? (layar 3)</li>
+        <li>Teks klaim/disclaimer final dan pesan kampanye. (layar 1, 6)</li>
+      </ul>
+    </div>
+  </body>
+</html>
