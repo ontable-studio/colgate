@@ -8,14 +8,22 @@ import { newId } from '@/util/id';
 import { createButton } from '@/ui/button';
 import { addBackground, addConfetti, addGlow, addHeader, addSparkles } from '@/ui/effects';
 import { createMeter } from '@/ui/meter';
+import { bump, countUp, fadeIn, float, popIn, slideIn } from '@/ui/motion';
 import { createPanel } from '@/ui/panel';
 import { COLORS, textStyle } from '@/ui/theme';
 import type { ResultSceneData } from './data';
 import { SceneKey } from './keys';
 
+/*
+ * Vertical layout (1080x1920); the left and right columns of the first block never overlap:
+ *   285-535   score card (left)      285-755  tube (right)
+ *   542-757   Day 1 > Day 7 card     792-868  Brightness Meter, labels at 905
+ *   970-1570  Top 10 card            1635     tagline        1695-1835  PLAY AGAIN
+ */
 const BOARD_SIZE = 10;
-const BOARD_TOP = 1085;
+const BOARD_TOP = 1050;
 const ROW_STEP = 46;
+const LEFT_X = 330;
 
 export class ResultScene extends Phaser.Scene {
   private result!: SessionResult;
@@ -32,60 +40,30 @@ export class ResultScene extends Phaser.Scene {
 
   create(): void {
     const cx = GAME_WIDTH / 2;
+    fadeIn(this);
     addBackground(this);
     addConfetti(this);
     addSparkles(this, 10, { x: 40, y: 260, width: 1000, height: 700 });
     addHeader(this, false);
 
-    // Score block
-    createPanel(this, cx, 430, 900, 240);
-    this.add
-      .text(cx, 360, 'YOUR SCORE', textStyle({ size: 42, letterSpacing: 6, color: COLORS.cream }))
-      .setOrigin(0.5);
-    this.add
-      .text(
-        cx,
-        465,
-        String(this.result.score),
-        textStyle({ size: 140, color: COLORS.goldLight, glow: 'rgba(255,170,60,0.9)' }),
-      )
-      .setOrigin(0.5);
-
-    // Brightness meter, frozen at the final value
-    createMeter(this, cx, 625).setValue(this.result.meterPct);
-    this.add
-      .text(
-        110,
-        705,
-        'BRIGHTNESS METER',
-        textStyle({ size: 30, align: 'left', letterSpacing: 4, color: COLORS.cream }),
-      )
-      .setOrigin(0, 0.5);
-    this.add
-      .text(
-        970,
-        705,
-        `${Math.round(this.result.meterPct)}%`,
-        textStyle({ size: 44, align: 'right' }),
-      )
-      .setOrigin(1, 0.5);
-
+    this.addScoreCard();
     this.addDayCompare();
     this.addTube();
+    this.addMeter(cx);
 
     // Leaderboard card (filled in once the play is saved)
-    createPanel(this, cx, 1290, 920, 580);
+    createPanel(this, cx, 1270, 920, 600);
     this.add
       .text(
         cx,
-        BOARD_TOP - 42,
+        BOARD_TOP - 40,
         `TOP ${BOARD_SIZE}`,
         textStyle({ size: 42, letterSpacing: 8, color: COLORS.goldSoft }),
       )
       .setOrigin(0.5);
     void this.saveAndShowBoard();
 
-    this.add
+    const tagline = this.add
       .text(
         cx,
         1635,
@@ -93,47 +71,112 @@ export class ResultScene extends Phaser.Scene {
         textStyle({ size: 38, color: COLORS.goldSoft, glow: 'rgba(255,150,40,0.7)' }),
       )
       .setOrigin(0.5);
+    popIn(this, tagline, 1000, 0.85);
 
-    createButton(this, cx, 1765, 'PLAY AGAIN', () => this.scene.start(SceneKey.Gameplay), {
-      width: 760,
-      height: 140,
-      fontSize: 58,
-      icon: 'ico-replay-red',
-      variant: 'gold',
+    const again = createButton(
+      this,
+      cx,
+      1765,
+      'PLAY AGAIN',
+      () => this.scene.start(SceneKey.Gameplay),
+      { width: 760, height: 140, fontSize: 58, icon: 'ico-replay-red', variant: 'gold' },
+    );
+    popIn(this, again, 1100);
+    this.time.delayedCall(1700, () => {
+      this.tweens.add({ targets: again, scale: 1.04, yoyo: true, repeat: -1, duration: 800 });
     });
   }
 
-  /** Small before/after card: stained tooth (Day 1) next to the clean one (Day 7). */
+  /** Score card (left column). The number counts up, then pops. */
+  private addScoreCard(): void {
+    createPanel(this, LEFT_X, 410, 560, 250);
+    this.add
+      .text(
+        LEFT_X,
+        350,
+        'YOUR SCORE',
+        textStyle({ size: 38, letterSpacing: 6, color: COLORS.cream }),
+      )
+      .setOrigin(0.5);
+    const score = this.add
+      .text(
+        LEFT_X,
+        452,
+        '0',
+        textStyle({ size: 130, color: COLORS.goldLight, glow: 'rgba(255,170,60,0.9)' }),
+      )
+      .setOrigin(0.5);
+    countUp(this, score, this.result.score, 1000, 250);
+    this.time.delayedCall(1300, () => bump(this, score, 1.12, 140));
+  }
+
+  /** Brightness meter that fills up to the final value, with the percentage counting along. */
+  private addMeter(cx: number): void {
+    const meter = createMeter(this, cx, 830);
+    const state = { value: 0 };
+    this.tweens.add({
+      targets: state,
+      value: this.result.meterPct,
+      duration: 1000,
+      delay: 400,
+      ease: 'Cubic.easeOut',
+      onUpdate: () => meter.setValue(state.value),
+      onComplete: () => meter.pulse(),
+    });
+
+    this.add
+      .text(
+        110,
+        905,
+        'BRIGHTNESS METER',
+        textStyle({ size: 30, align: 'left', letterSpacing: 4, color: COLORS.cream }),
+      )
+      .setOrigin(0, 0.5);
+    const pct = this.add
+      .text(970, 905, '0%', textStyle({ size: 44, align: 'right' }))
+      .setOrigin(1, 0.5);
+    countUp(this, pct, Math.round(this.result.meterPct), 1000, 400, '%');
+  }
+
+  /** Small before/after card: the stained tooth (Day 1) turns clean (Day 7) a moment after it appears. */
   private addDayCompare(): void {
-    createPanel(this, 330, 880, 560, 230, 34, 'gold');
-    this.add.image(190, 868, 'tooth1').setDisplaySize(110, 140);
-    this.add.image(360, 868, 'tooth4').setDisplaySize(113, 140);
+    createPanel(this, LEFT_X, 650, 560, 215, 34, 'gold');
+    this.add.image(190, 638, 'tooth1').setDisplaySize(100, 127);
+    const clean = this.add.image(360, 638, 'tooth4').setDisplaySize(103, 127).setAlpha(0);
+    this.tweens.add({ targets: clean, alpha: 1, delay: 700, duration: 900 });
+
     const label = (x: number, text: string) =>
       this.add
-        .text(x, 968, text, textStyle({ size: 30, letterSpacing: 3, color: COLORS.goldLight }))
+        .text(x, 722, text, textStyle({ size: 28, letterSpacing: 3, color: COLORS.goldLight }))
         .setOrigin(0.5);
     label(190, 'DAY 1');
     label(360, 'DAY 7');
-    this.add
+    const arrow = this.add
       .text(
         275,
-        868,
+        638,
         '>',
         textStyle({ size: 56, color: COLORS.goldSoft, glow: 'rgba(255,170,60,0.8)' }),
       )
       .setOrigin(0.5);
+    this.tweens.add({ targets: arrow, x: 288, yoyo: true, repeat: -1, duration: 600 });
   }
 
-  /** The product with a warm glow and two capsules, tucked to the right of the compare card. */
+  /** The product on the right with a warm glow and a few capsules, clear of every card. */
   private addTube(): void {
-    addGlow(this, 860, 930, 520, 0.7);
-    this.add.image(860, 930, 'tube').setDisplaySize(118, 330).setAngle(8);
-    for (const [x, y, size] of [
-      [760, 800, 84],
-      [985, 1010, 90],
+    addGlow(this, 850, 520, 560, 0.7);
+    const tube = this.add.image(850, 520, 'tube').setDisplaySize(168, 470).setAngle(6);
+    slideIn(this, tube, 260, 200);
+    this.time.delayedCall(800, () => float(this, tube, 12, 2300));
+
+    for (const [x, y, size, delay] of [
+      [715, 330, 84, 0],
+      [985, 690, 96, 600],
+      [705, 735, 70, 1100],
     ] as const) {
       addGlow(this, x, y, size * 2.2, 0.6);
-      this.add.image(x, y, 'capsule').setDisplaySize(size, size);
+      const capsule = this.add.image(x, y, 'capsule').setDisplaySize(size, size);
+      float(this, capsule, 16, 1900, delay);
     }
   }
 
@@ -162,11 +205,27 @@ export class ResultScene extends Phaser.Scene {
       const y = BOARD_TOP + i * ROW_STEP + ROW_STEP / 2;
       const mine = entry.id === play.id;
       const color = mine ? COLORS.goldLight : COLORS.white;
+      const delay = 350 + i * 70;
       if (mine) {
-        this.add.rectangle(GAME_WIDTH / 2, y, 840, ROW_STEP - 4, 0xffc83d, 0.22).setOrigin(0.5);
+        const row = this.add
+          .rectangle(GAME_WIDTH / 2, y, 840, ROW_STEP - 4, 0xffc83d, 0.22)
+          .setOrigin(0.5);
+        slideIn(this, row, 160, delay);
+        this.tweens.add({
+          targets: row,
+          fillAlpha: 0.42,
+          yoyo: true,
+          repeat: -1,
+          duration: 700,
+          delay: delay + 500,
+        });
       }
-      const cell = (x: number, text: string, origin: number) =>
-        this.add.text(x, y, text, textStyle({ size: 36, color })).setOrigin(origin, 0.5);
+      const cell = (x: number, text: string, origin: number) => {
+        const label = this.add
+          .text(x, y, text, textStyle({ size: 36, color }))
+          .setOrigin(origin, 0.5);
+        slideIn(this, label, 160, delay);
+      };
       cell(210, `${i + 1}.`, 1);
       cell(262, entry.initials, 0);
       cell(870, String(entry.score), 1);

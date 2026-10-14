@@ -6,6 +6,7 @@ import { addArt } from '@/ui/art/canvas';
 import { DECOY_TEXTURES } from '@/ui/art/objects';
 import { addBackground, addGlow } from '@/ui/effects';
 import { createMeter, type Meter } from '@/ui/meter';
+import { bump, fadeIn, floatText, popIn, shards, sparkBurst } from '@/ui/motion';
 import { COLORS, textStyle } from '@/ui/theme';
 import { SceneKey } from './keys';
 
@@ -15,6 +16,7 @@ const BASKET_WIDTH = 300;
 const BASKET_HEIGHT = 194;
 const BASKET_Y = 1470;
 const HINT_VISIBLE_MS = 4500;
+const TIMER_WARNING_SECS = 5;
 
 export class GameplayScene extends Phaser.Scene {
   private session!: GameSession;
@@ -26,6 +28,9 @@ export class GameplayScene extends Phaser.Scene {
   private hint: Phaser.GameObjects.GameObject[] = [];
   private hintHidden = false;
   private spawnAcc = 0;
+  private lastScore = 0;
+  private lastSecs = 0;
+  private lastBasketX = GAME_WIDTH / 2;
 
   constructor() {
     super(SceneKey.Gameplay);
@@ -35,13 +40,18 @@ export class GameplayScene extends Phaser.Scene {
     this.session = new GameSession(RULES);
     this.spawnAcc = 0;
     this.hintHidden = false;
+    this.lastScore = 0;
+    this.lastSecs = RULES.durationSec;
+    this.lastBasketX = GAME_WIDTH / 2;
 
+    fadeIn(this);
     addBackground(this, 'bg-play');
     this.addHud();
     this.addHint();
 
     this.basket = this.physics.add.image(GAME_WIDTH / 2, BASKET_Y, 'basket').setImmovable(true);
     this.basket.setDisplaySize(BASKET_WIDTH, BASKET_HEIGHT);
+    popIn(this, this.basket, 100, 0.6);
     this.falling = this.physics.add.group();
     this.physics.add.overlap(this.basket, this.falling, (_basket, obj) => {
       this.onCaught(obj as Phaser.Physics.Arcade.Image);
@@ -81,14 +91,39 @@ export class GameplayScene extends Phaser.Scene {
       if (obj.y > BASKET_Y + 140) obj.destroy();
     }
 
-    const secs = Math.ceil(this.session.remainingMs / 1000);
-    this.timerText.setText(`00:${String(secs).padStart(2, '0')}`);
-    this.scoreText.setText(String(this.session.score));
-    this.meter.setValue(this.session.meterPct);
+    this.animateBasket();
+    this.updateHud();
 
     if (this.session.isOver) {
       this.scene.start(SceneKey.Unlock, { result: this.session.result() });
     }
+  }
+
+  /** The basket leans into the direction it is being dragged and settles back when it stops. */
+  private animateBasket(): void {
+    const dx = this.basket.x - this.lastBasketX;
+    this.lastBasketX = this.basket.x;
+    const lean = Phaser.Math.Clamp(dx * 0.5, -12, 12);
+    this.basket.angle += (lean - this.basket.angle) * 0.25;
+  }
+
+  private updateHud(): void {
+    const secs = Math.ceil(this.session.remainingMs / 1000);
+    this.timerText.setText(`00:${String(secs).padStart(2, '0')}`);
+    if (secs !== this.lastSecs) {
+      this.lastSecs = secs;
+      if (secs <= TIMER_WARNING_SECS) {
+        this.timerText.setColor('#FF9C8A');
+        bump(this, this.timerText, 1.22, 160);
+      }
+    }
+
+    this.scoreText.setText(String(this.session.score));
+    if (this.session.score !== this.lastScore) {
+      this.lastScore = this.session.score;
+      bump(this, this.scoreText, 1.28, 120);
+    }
+    this.meter.setValue(this.session.meterPct);
   }
 
   /** Stopwatch + timer on the left, score on the right. */
@@ -115,8 +150,8 @@ export class GameplayScene extends Phaser.Scene {
 
   /** "Drag left/right" hint under the basket, shown only at the start of a round. */
   private addHint(): void {
-    const arrows = addArt(this, GAME_WIDTH / 2, 1640, 'ico-arrows').setDisplaySize(560, 156);
-    const hand = this.add.image(GAME_WIDTH / 2, 1650, 'ico-hand').setDisplaySize(120, 120);
+    const arrows = addArt(this, GAME_WIDTH / 2, 1632, 'ico-arrows').setDisplaySize(520, 145);
+    const hand = this.add.image(GAME_WIDTH / 2, 1636, 'ico-hand').setDisplaySize(110, 110);
     this.hint = [arrows, hand];
     this.tweens.add({
       targets: hand,
@@ -145,6 +180,9 @@ export class GameplayScene extends Phaser.Scene {
     obj.setDisplaySize(size, size);
     obj.setData('kind', kind);
     obj.setVelocityY(RULES.spawn.fallSpeed);
+    // Everything tumbles a little as it falls; capsules and stains (which have a face) turn slowly.
+    const spin = kind === 'decoy' ? 170 : 70;
+    obj.setAngularVelocity(Phaser.Math.Between(-spin, spin));
   }
 
   private onCaught(obj: Phaser.Physics.Arcade.Image): void {
@@ -154,15 +192,12 @@ export class GameplayScene extends Phaser.Scene {
     obj.destroy();
   }
 
-  /** Small reward / penalty cue at the moment of the catch. */
+  /** Reward / penalty cue at the moment of the catch. */
   private feedback(kind: FallingKind, x: number, y: number): void {
-    this.tweens.add({
-      targets: this.basket,
-      scaleX: this.basket.scaleX * 1.06,
-      scaleY: this.basket.scaleY * 1.06,
-      yoyo: true,
-      duration: 90,
-    });
+    bump(this, this.basket, 1.06, 90);
+    const points = RULES.points[kind];
+    const label = `${points > 0 ? '+' : ''}${points}`;
+
     if (kind === 'capsule') {
       const burst = addGlow(this, x, y, 120, 1);
       this.tweens.add({
@@ -173,8 +208,15 @@ export class GameplayScene extends Phaser.Scene {
         duration: 380,
         onComplete: () => burst.destroy(),
       });
+      sparkBurst(this, x, y, 6, 150);
+      floatText(this, x, y - 70, label, COLORS.goldLight);
+      this.meter.pulse();
     } else if (kind === 'stain') {
+      shards(this, x, y);
       this.cameras.main.shake(140, 0.006);
+      floatText(this, x, y - 70, label, '#FF8A7A');
+    } else {
+      floatText(this, x, y - 70, label, '#FFC4B8');
     }
   }
 }

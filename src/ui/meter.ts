@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { addArt } from './art/canvas';
+import { bump } from './motion';
 
 const TRACK_WIDTH = 840;
 const FILL_LEFT = 62; // fill starts after the capsule badge
@@ -8,7 +9,9 @@ const FILL_HEIGHT = 44;
 
 export interface Meter {
   /** 0..100 */
-  setValue(percent: number): void;
+  setValue: (percent: number) => void;
+  /** Little bounce of the capsule badge (call when the meter gains). */
+  pulse: () => void;
 }
 
 /** Brightness Meter: gold fill inside a glowing track, with a capsule badge at the left end. */
@@ -24,13 +27,14 @@ export function createMeter(scene: Phaser.Scene, centerX: number, y: number): Me
   const sourceWidth = frame.width;
   const sourceHeight = frame.height;
 
-  scene.add.image(left + 16, y, 'capsule').setDisplaySize(104, 104);
+  const badge = scene.add.image(left + 16, y, 'capsule').setDisplaySize(104, 104);
 
   const setValue = (percent: number): void => {
     const ratio = Phaser.Math.Clamp(percent, 0, 100) / 100;
     fill.setVisible(ratio > 0);
     fill.setCrop(0, 0, Math.max(1, Math.round(sourceWidth * ratio)), sourceHeight);
   };
+  const pulse = (): void => bump(scene, badge, 1.22, 120);
   setValue(0);
-  return { setValue };
+  return { setValue, pulse };
 }

@@ -52,6 +52,12 @@ Idb caveat: a transaction auto-closes if you await unrelated async work (e.g. `f
 - PWA (`vite-plugin-pwa`, `autoUpdate`) precaches the build so the game runs offline. Asset types must be listed in `workbox.globPatterns` (`vite.config.ts`) or they will not be cached.
 - `navigator.storage.persist()` is requested to reduce the chance the TV evicts stored plays.
 
+## Motion and layout checks
+
+- Reusable animation helpers live in `ui/motion.ts` (fade-in, pop-in, slide-in, float, count-up, bump, floating "+10", spark burst, black shards). Every scene fades in; Attract and Result are the liveliest.
+- Each scene documents its vertical layout in a comment block (which y-range belongs to which element). Keep elements in their own ranges so nothing collides.
+- In dev (`pnpm dev`) the game is exposed as `window.__game`, so from the browser console you can jump to any screen, e.g. `__game.scene.getScenes(true)[0].scene.start('Result', { result: { score: 205, meterPct: 62, catches: 14, hits: 3, durationSec: 40 }, initials: 'ABC' })`, and measure element bounds to look for overlaps.
+
 ## Operator (admin) screen
 
 Press and hold the invisible top-left corner of the Attract screen for 2 s. Shows device id, version, online state, sync on/off, plays and pending counts, last sync and error. Buttons: SYNC NOW (flush the queue immediately), EXPORT CSV (`domain/csv.ts`, UTF-8 BOM so Excel opens it; some TV browsers block downloads, so test this on the real TV), RESET DATA (two taps within 4 s, deletes all local plays) and BACK. Idle for 30 s returns to Attract. There is no PIN: it relies on the hidden hotspot, so do not rely on it to protect personal data.

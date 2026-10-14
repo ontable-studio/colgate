@@ -22,6 +22,9 @@ export function createGame(parent: string): Phaser.Game {
     scene: scenes,
   });
 
+  // Dev only: lets the browser console jump to any scene (e.g. __game.scene.start('Result', ...)).
+  if (import.meta.env.DEV) (window as unknown as { __game: Phaser.Game }).__game = game;
+
   // Booth-proofing: a lost WebGL context (weak TV GPU, driver reset) leaves a dead white screen
   // forever, so reload the page; the service worker serves it instantly even when offline.
   game.events.once(Phaser.Core.Events.READY, () => {

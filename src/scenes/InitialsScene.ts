@@ -10,6 +10,7 @@ import type { SessionResult } from '@/domain/session';
 import { createButton } from '@/ui/button';
 import { addBackground, addHeader, addSparkles } from '@/ui/effects';
 import { createKeyboard } from '@/ui/keyboard';
+import { bump, countUp, fadeIn, popIn } from '@/ui/motion';
 import { createPanel } from '@/ui/panel';
 import { COLORS, textStyle } from '@/ui/theme';
 import type { GameResultData, ResultSceneData } from './data';
@@ -36,6 +37,7 @@ export class InitialsScene extends Phaser.Scene implements IdleAware {
 
   create(): void {
     const cx = GAME_WIDTH / 2;
+    fadeIn(this);
     addBackground(this);
     addSparkles(this, 8, { x: 40, y: 300, width: 1000, height: 600 });
     addHeader(this, false);
@@ -43,14 +45,15 @@ export class InitialsScene extends Phaser.Scene implements IdleAware {
     this.add
       .text(cx, 300, 'YOUR SCORE', textStyle({ size: 46, letterSpacing: 6, color: COLORS.cream }))
       .setOrigin(0.5);
-    this.add
+    const score = this.add
       .text(
         cx,
         430,
-        String(this.result.score),
+        '0',
         textStyle({ size: 170, color: COLORS.goldLight, glow: 'rgba(255,170,60,0.9)' }),
       )
       .setOrigin(0.5);
+    countUp(this, score, this.result.score, 700, 150);
     this.add
       .text(cx, 590, 'ENTER YOUR INITIALS', textStyle({ size: 46, weight: 'light' }))
       .setOrigin(0.5);
@@ -69,8 +72,11 @@ export class InitialsScene extends Phaser.Scene implements IdleAware {
 
     createKeyboard(this, cx, 960, {
       onLetter: (letter) => {
+        const before = this.initials.length;
         this.initials = appendInitial(this.initials, letter);
         this.refresh();
+        const slot = this.slots[this.initials.length - 1];
+        if (this.initials.length > before && slot) bump(this, slot, 1.35, 120);
       },
       onBackspace: () => {
         this.initials = removeLastInitial(this.initials);
@@ -78,12 +84,13 @@ export class InitialsScene extends Phaser.Scene implements IdleAware {
       },
     });
 
-    createButton(this, cx, 1745, 'SAVE', () => this.submit(), {
+    const save = createButton(this, cx, 1745, 'SAVE', () => this.submit(), {
       width: 640,
       height: 150,
       fontSize: 60,
       variant: 'gold',
     });
+    popIn(this, save, 450);
   }
 
   /** Idle: do not lose the play, save with whatever was typed (or the placeholder). */
@@ -93,9 +100,21 @@ export class InitialsScene extends Phaser.Scene implements IdleAware {
 
   private refresh(): void {
     this.slots.forEach((slot, i) => {
+      this.tweens.killTweensOf(slot);
       const letter = this.initials[i];
       slot.setText(letter ?? '_').setAlpha(letter ? 1 : 0.35);
     });
+    // The next empty slot blinks like a text cursor.
+    const next = this.slots[this.initials.length];
+    if (next) {
+      this.tweens.add({
+        targets: next,
+        alpha: { from: 0.2, to: 0.75 },
+        yoyo: true,
+        repeat: -1,
+        duration: 480,
+      });
+    }
   }
 
   private submit(): void {
