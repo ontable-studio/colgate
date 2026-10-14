@@ -2,44 +2,50 @@ import type Phaser from 'phaser';
 import { drawTexture, roundRect } from './canvas';
 
 /** Small vector icons drawn on canvas (200x200 unless noted). */
-export function makeIcons(scene: Phaser.Scene): void {
-  drawTexture(scene, 'ico-play', 200, 200, (ctx) => {
-    ctx.save();
-    ctx.shadowColor = 'rgba(255,230,170,0.7)';
-    ctx.shadowBlur = 14;
-    ctx.fillStyle = '#FFF1D6';
-    ctx.beginPath();
-    ctx.arc(100, 100, 84, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.restore();
-    ctx.fillStyle = '#C8101E';
-    ctx.beginPath();
-    ctx.moveTo(80, 56);
-    ctx.lineTo(80, 144);
-    ctx.lineTo(148, 100);
-    ctx.closePath();
-    ctx.fill();
-  });
+function drawPlay(ctx: CanvasRenderingContext2D, disc: string, triangle: string): void {
+  ctx.save();
+  ctx.shadowColor = 'rgba(255,230,170,0.7)';
+  ctx.shadowBlur = 14;
+  ctx.fillStyle = disc;
+  ctx.beginPath();
+  ctx.arc(100, 100, 84, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.restore();
+  ctx.fillStyle = triangle;
+  ctx.beginPath();
+  ctx.moveTo(80, 56);
+  ctx.lineTo(80, 144);
+  ctx.lineTo(148, 100);
+  ctx.closePath();
+  ctx.fill();
+}
 
-  drawTexture(scene, 'ico-replay', 200, 200, (ctx) => {
-    ctx.strokeStyle = '#FFF1D6';
-    ctx.fillStyle = '#FFF1D6';
-    ctx.lineWidth = 22;
-    ctx.lineCap = 'round';
-    ctx.beginPath();
-    ctx.arc(100, 104, 62, Math.PI * 0.15, Math.PI * 1.45);
-    ctx.stroke();
-    // Arrow head at the end of the arc.
-    const a = Math.PI * 1.45;
-    const ex = 100 + Math.cos(a) * 62;
-    const ey = 104 + Math.sin(a) * 62;
-    ctx.beginPath();
-    ctx.moveTo(ex - 34, ey + 4);
-    ctx.lineTo(ex + 30, ey - 6);
-    ctx.lineTo(ex + 4, ey + 40);
-    ctx.closePath();
-    ctx.fill();
-  });
+function drawReplay(ctx: CanvasRenderingContext2D, color: string): void {
+  ctx.strokeStyle = color;
+  ctx.fillStyle = color;
+  ctx.lineWidth = 22;
+  ctx.lineCap = 'round';
+  ctx.beginPath();
+  ctx.arc(100, 104, 62, Math.PI * 0.15, Math.PI * 1.45);
+  ctx.stroke();
+  // Arrow head at the end of the arc.
+  const a = Math.PI * 1.45;
+  const ex = 100 + Math.cos(a) * 62;
+  const ey = 104 + Math.sin(a) * 62;
+  ctx.beginPath();
+  ctx.moveTo(ex - 34, ey + 4);
+  ctx.lineTo(ex + 30, ey - 6);
+  ctx.lineTo(ex + 4, ey + 40);
+  ctx.closePath();
+  ctx.fill();
+}
+
+export function makeIcons(scene: Phaser.Scene): void {
+  // Light icons for red buttons, dark-red icons for the gold call-to-action buttons.
+  drawTexture(scene, 'ico-play', 200, 200, (ctx) => drawPlay(ctx, '#FFF1D6', '#C8101E'));
+  drawTexture(scene, 'ico-play-red', 200, 200, (ctx) => drawPlay(ctx, '#B3101B', '#FFE9A6'));
+  drawTexture(scene, 'ico-replay', 200, 200, (ctx) => drawReplay(ctx, '#FFF1D6'));
+  drawTexture(scene, 'ico-replay-red', 200, 200, (ctx) => drawReplay(ctx, '#7A0A12'));
 
   drawTexture(scene, 'ico-stopwatch', 200, 200, (ctx) => {
     ctx.strokeStyle = '#FFFFFF';

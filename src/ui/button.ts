@@ -1,7 +1,7 @@
 import type Phaser from 'phaser';
 import { addArt } from './art/canvas';
-import { makeButtonSkin } from './art/skins';
-import { textStyle } from './theme';
+import { makeButtonSkin, type ButtonVariant } from './art/skins';
+import { COLORS, textStyle } from './theme';
 
 export interface ButtonOptions {
   width?: number;
@@ -9,6 +9,8 @@ export interface ButtonOptions {
   fontSize?: number;
   /** Texture key of an icon shown to the left of the label (e.g. 'ico-play'). */
   icon?: string;
+  /** 'gold' is the primary call to action (dark label); 'red' is the quiet default. */
+  variant?: ButtonVariant;
 }
 
 const ICON_GAP = 26;
@@ -20,10 +22,11 @@ export function createButton(
   y: number,
   label: string,
   onClick: () => void,
-  { width = 640, height = 150, fontSize = 56, icon }: ButtonOptions = {},
+  { width = 640, height = 150, fontSize = 56, icon, variant = 'red' }: ButtonOptions = {},
 ): Phaser.GameObjects.Container {
-  const skin = addArt(scene, 0, 0, makeButtonSkin(scene, width, height));
-  const text = scene.add.text(0, 0, label, textStyle({ size: fontSize })).setOrigin(0, 0.5);
+  const skin = addArt(scene, 0, 0, makeButtonSkin(scene, width, height, variant));
+  const color = variant === 'gold' ? COLORS.redDark : COLORS.white;
+  const text = scene.add.text(0, 0, label, textStyle({ size: fontSize, color })).setOrigin(0, 0.5);
 
   const iconSize = height * 0.58;
   const hasIcon = icon !== undefined;

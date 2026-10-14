@@ -1,8 +1,9 @@
 import Phaser from 'phaser';
-import { GAME_HEIGHT, GAME_WIDTH, RULES, type FallingKind } from '@/config/game';
+import { GAME_WIDTH, RULES, type FallingKind } from '@/config/game';
 import { pickKind } from '@/domain/spawn';
 import { GameSession } from '@/domain/session';
 import { addArt } from '@/ui/art/canvas';
+import { DECOY_TEXTURES } from '@/ui/art/objects';
 import { addBackground, addGlow } from '@/ui/effects';
 import { createMeter, type Meter } from '@/ui/meter';
 import { COLORS, textStyle } from '@/ui/theme';
@@ -76,7 +77,8 @@ export class GameplayScene extends Phaser.Scene {
 
     for (const child of this.falling.getChildren()) {
       const obj = child as Phaser.Physics.Arcade.Image;
-      if (obj.y > GAME_HEIGHT + 100) obj.destroy();
+      // Missed objects vanish just below the basket instead of sliding over the meter.
+      if (obj.y > BASKET_Y + 140) obj.destroy();
     }
 
     const secs = Math.ceil(this.session.remainingMs / 1000);
@@ -136,7 +138,10 @@ export class GameplayScene extends Phaser.Scene {
     const kind = pickKind(RULES.spawn.weights);
     const size = OBJECT_SIZE[kind];
     const x = Phaser.Math.Between(90, GAME_WIDTH - 90);
-    const obj = this.falling.create(x, -size, kind) as Phaser.Physics.Arcade.Image;
+    // Decoys come in several looks (bubble, pills) but all count as the same kind.
+    const texture: string =
+      kind === 'decoy' ? Phaser.Utils.Array.GetRandom([...DECOY_TEXTURES]) : kind;
+    const obj = this.falling.create(x, -size, texture) as Phaser.Physics.Arcade.Image;
     obj.setDisplaySize(size, size);
     obj.setData('kind', kind);
     obj.setVelocityY(RULES.spawn.fallSpeed);

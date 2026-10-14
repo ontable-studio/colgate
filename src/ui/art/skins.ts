@@ -3,18 +3,62 @@ import { drawTexture, roundRect } from './canvas';
 
 const SKIN_PAD = 36;
 
-export function buttonSkinKey(w: number, h: number): string {
-  return `btn-${w}x${h}`;
+export type ButtonVariant = 'red' | 'gold';
+export type PanelBorder = 'red' | 'gold';
+
+export function buttonSkinKey(w: number, h: number, variant: ButtonVariant): string {
+  return `btn-${variant}-${w}x${h}`;
 }
 
-export function panelSkinKey(w: number, h: number): string {
-  return `panel-${w}x${h}`;
+export function panelSkinKey(w: number, h: number, border: PanelBorder): string {
+  return `panel-${border}-${w}x${h}`;
 }
 
-/** Glowing pill button: deep-red body, soft top gloss, double gold-cream outline. */
-export function makeButtonSkin(scene: Phaser.Scene, w: number, h: number): string {
-  const key = buttonSkinKey(w, h);
+const BUTTON_STYLE: Record<
+  ButtonVariant,
+  {
+    top: string;
+    mid: string;
+    bottom: string;
+    glow: string;
+    rimA: string;
+    rimB: string;
+    gloss: number;
+  }
+> = {
+  red: {
+    top: '#E8161F',
+    mid: '#C80F19',
+    bottom: '#980912',
+    glow: 'rgba(255,170,70,0.9)',
+    rimA: '#FFF1CC',
+    rimB: '#FFBE45',
+    gloss: 0.26,
+  },
+  gold: {
+    top: '#FFE680',
+    mid: '#FFC531',
+    bottom: '#F0951C',
+    glow: 'rgba(255,205,100,0.95)',
+    rimA: '#FFFBEA',
+    rimB: '#FFD36B',
+    gloss: 0.5,
+  },
+};
+
+/**
+ * Glowing pill button with a double outline. 'red' is the quiet default (keys, secondary);
+ * 'gold' is the primary call to action.
+ */
+export function makeButtonSkin(
+  scene: Phaser.Scene,
+  w: number,
+  h: number,
+  variant: ButtonVariant = 'red',
+): string {
+  const key = buttonSkinKey(w, h, variant);
   if (scene.textures.exists(key)) return key;
+  const style = BUTTON_STYLE[variant];
 
   drawTexture(scene, key, w + SKIN_PAD * 2, h + SKIN_PAD * 2, (ctx) => {
     const x = SKIN_PAD;
@@ -23,10 +67,11 @@ export function makeButtonSkin(scene: Phaser.Scene, w: number, h: number): strin
 
     // Outer glow + body.
     const body = ctx.createLinearGradient(0, y, 0, y + h);
-    body.addColorStop(0, '#E8161F');
-    body.addColorStop(1, '#980912');
+    body.addColorStop(0, style.top);
+    body.addColorStop(0.5, style.mid);
+    body.addColorStop(1, style.bottom);
     ctx.save();
-    ctx.shadowColor = 'rgba(255,170,70,0.9)';
+    ctx.shadowColor = style.glow;
     ctx.shadowBlur = 30;
     ctx.fillStyle = body;
     roundRect(ctx, x, y, w, h, r);
@@ -38,17 +83,17 @@ export function makeButtonSkin(scene: Phaser.Scene, w: number, h: number): strin
     roundRect(ctx, x, y, w, h, r);
     ctx.clip();
     const gloss = ctx.createLinearGradient(0, y, 0, y + h * 0.6);
-    gloss.addColorStop(0, 'rgba(255,255,255,0.26)');
+    gloss.addColorStop(0, `rgba(255,255,255,${style.gloss})`);
     gloss.addColorStop(1, 'rgba(255,255,255,0)');
     ctx.fillStyle = gloss;
     ctx.fillRect(x, y, w, h * 0.6);
     ctx.restore();
 
-    // Outer gold-cream rim.
+    // Outer rim.
     const rim = ctx.createLinearGradient(x, 0, x + w, 0);
-    rim.addColorStop(0, '#FFF1CC');
-    rim.addColorStop(0.5, '#FFBE45');
-    rim.addColorStop(1, '#FFF1CC');
+    rim.addColorStop(0, style.rimA);
+    rim.addColorStop(0.5, style.rimB);
+    rim.addColorStop(1, style.rimA);
     ctx.lineWidth = 6;
     ctx.strokeStyle = rim;
     roundRect(ctx, x + 3, y + 3, w - 6, h - 6, r - 3);
@@ -56,7 +101,7 @@ export function makeButtonSkin(scene: Phaser.Scene, w: number, h: number): strin
 
     // Fine inner line.
     ctx.lineWidth = 2;
-    ctx.strokeStyle = 'rgba(255,255,255,0.32)';
+    ctx.strokeStyle = 'rgba(255,255,255,0.4)';
     roundRect(ctx, x + 13, y + 13, w - 26, h - 26, r - 13);
     ctx.stroke();
   });
@@ -64,8 +109,14 @@ export function makeButtonSkin(scene: Phaser.Scene, w: number, h: number): strin
 }
 
 /** Dark translucent card used for instructions and the leaderboard. */
-export function makePanelSkin(scene: Phaser.Scene, w: number, h: number, radius = 40): string {
-  const key = panelSkinKey(w, h);
+export function makePanelSkin(
+  scene: Phaser.Scene,
+  w: number,
+  h: number,
+  radius = 40,
+  border: PanelBorder = 'red',
+): string {
+  const key = panelSkinKey(w, h, border);
   if (scene.textures.exists(key)) return key;
 
   drawTexture(scene, key, w + 16, h + 16, (ctx) => {
@@ -88,10 +139,21 @@ export function makePanelSkin(scene: Phaser.Scene, w: number, h: number, radius 
     ctx.fillRect(x, y, w, h * 0.35);
     ctx.restore();
 
-    ctx.lineWidth = 3;
-    ctx.strokeStyle = 'rgba(255,92,72,0.7)';
-    roundRect(ctx, x + 1.5, y + 1.5, w - 3, h - 3, radius - 1.5);
-    ctx.stroke();
+    if (border === 'gold') {
+      ctx.save();
+      ctx.shadowColor = 'rgba(255,190,80,0.55)';
+      ctx.shadowBlur = 10;
+      ctx.lineWidth = 3;
+      ctx.strokeStyle = 'rgba(255,214,130,0.95)';
+      roundRect(ctx, x + 1.5, y + 1.5, w - 3, h - 3, radius - 1.5);
+      ctx.stroke();
+      ctx.restore();
+    } else {
+      ctx.lineWidth = 3;
+      ctx.strokeStyle = 'rgba(255,92,72,0.7)';
+      roundRect(ctx, x + 1.5, y + 1.5, w - 3, h - 3, radius - 1.5);
+      ctx.stroke();
+    }
   });
   return key;
 }

@@ -82,6 +82,7 @@ export class InitialsScene extends Phaser.Scene implements IdleAware {
       width: 640,
       height: 150,
       fontSize: 60,
+      variant: 'gold',
     });
   }
 

@@ -73,6 +73,49 @@ export function makeRing(scene: Phaser.Scene): void {
   });
 }
 
+/** The "C" of Vitamin C as a glowing white letter (460x460) plus a gold orbit that circles it. */
+export function makeBigC(scene: Phaser.Scene): void {
+  drawTexture(scene, 'big-c', 460, 460, (ctx, w, h) => {
+    const fill = ctx.createLinearGradient(0, 0, 0, h);
+    fill.addColorStop(0, '#FFFFFF');
+    fill.addColorStop(1, '#FFE9B8');
+    ctx.save();
+    ctx.shadowColor = 'rgba(255,190,80,1)';
+    ctx.shadowBlur = 50;
+    ctx.lineWidth = 80;
+    ctx.lineCap = 'butt';
+    ctx.strokeStyle = fill;
+    ctx.beginPath();
+    ctx.arc(w / 2, h / 2, 150, (42 * Math.PI) / 180, (318 * Math.PI) / 180);
+    ctx.stroke();
+    ctx.restore();
+  });
+
+  drawTexture(scene, 'c-orbit', 640, 640, (ctx, w, h) => {
+    ctx.save();
+    ctx.translate(w / 2, h / 2);
+    ctx.shadowColor = 'rgba(255,170,50,0.95)';
+    ctx.shadowBlur = 22;
+    ctx.lineCap = 'round';
+    for (const [rx, ry, rot, alpha, width] of [
+      [290, 110, -0.5, 0.95, 5],
+      [260, 90, 0.7, 0.7, 3],
+      [300, 150, 1.4, 0.55, 3],
+    ] as const) {
+      const stroke = ctx.createLinearGradient(-rx, 0, rx, 0);
+      stroke.addColorStop(0, `rgba(255,214,120,0)`);
+      stroke.addColorStop(0.5, `rgba(255,236,170,${alpha})`);
+      stroke.addColorStop(1, `rgba(255,170,50,${alpha * 0.3})`);
+      ctx.strokeStyle = stroke;
+      ctx.lineWidth = width;
+      ctx.beginPath();
+      ctx.ellipse(0, 0, rx, ry, rot, 0, Math.PI * 1.75);
+      ctx.stroke();
+    }
+    ctx.restore();
+  });
+}
+
 export interface TitleLine {
   text: string;
   size: number;

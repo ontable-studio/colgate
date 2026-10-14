@@ -57,6 +57,30 @@ export function addSparkles(
   }
 }
 
+const CONFETTI_TINTS = [0xffffff, 0xffe08a, 0xffb52e] as const;
+
+/** Gold confetti drifting down the whole screen on a loop (add it before the UI so it sits behind). */
+export function addConfetti(scene: Phaser.Scene, count = 26): void {
+  for (let i = 0; i < count; i++) {
+    const x = Math.random() * GAME_WIDTH;
+    const piece = scene.add
+      .image(x, -60, 'confetti')
+      .setScale(Phaser.Math.FloatBetween(0.45, 0.8))
+      .setTint(Phaser.Utils.Array.GetRandom([...CONFETTI_TINTS]))
+      .setAngle(Phaser.Math.Between(0, 360));
+    const duration = Phaser.Math.Between(5200, 9000);
+    scene.tweens.add({
+      targets: piece,
+      y: GAME_HEIGHT + 60,
+      x: x + Phaser.Math.Between(-90, 90),
+      angle: piece.angle + Phaser.Math.Between(360, 900),
+      duration,
+      delay: Phaser.Math.Between(0, duration),
+      repeat: -1,
+    });
+  }
+}
+
 /** Logo tab at the top plus the "Optic White Vitamin C" lockup below it. */
 export function addHeader(scene: Phaser.Scene, withLockup = true): void {
   addArt(scene, GAME_WIDTH / 2, 0, 'logo-tab').setOrigin(0.5, 0);

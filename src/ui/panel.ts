@@ -1,8 +1,8 @@
 import type Phaser from 'phaser';
 import { addArt } from './art/canvas';
-import { makePanelSkin } from './art/skins';
+import { makePanelSkin, type PanelBorder } from './art/skins';
 
-/** Dark translucent rounded card, centred at (x, y). */
+/** Dark translucent rounded card, centred at (x, y). `border: 'gold'` gives the thin gold frame. */
 export function createPanel(
   scene: Phaser.Scene,
   x: number,
@@ -10,6 +10,7 @@ export function createPanel(
   width: number,
   height: number,
   radius = 40,
+  border: PanelBorder = 'red',
 ): Phaser.GameObjects.Image {
-  return addArt(scene, x, y, makePanelSkin(scene, width, height, radius));
+  return addArt(scene, x, y, makePanelSkin(scene, width, height, radius, border));
 }

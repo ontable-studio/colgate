@@ -39,7 +39,7 @@ export class AttractScene extends Phaser.Scene {
         }
         this.scene.start(SceneKey.HowToPlay);
       },
-      { width: 760, height: 170, fontSize: 68, icon: 'ico-play' },
+      { width: 760, height: 170, fontSize: 68, icon: 'ico-play-red', variant: 'gold' },
     );
     this.tweens.add({ targets: cta, scale: 1.04, yoyo: true, repeat: -1, duration: 800 });
   }
@@ -80,24 +80,41 @@ export class AttractScene extends Phaser.Scene {
       .on('pointerout', cancel);
   }
 
-  /** Hero: tube over a slow-turning glow, with glowing capsules floating around it. */
+  /** Hero: tube on the left, the glowing "C" of Vitamin C on the right, capsules floating around. */
   private addHero(cx: number): void {
     const cy = 1290;
+    const tubeX = 390;
+    const cX = 735;
     const flare = this.add
       .image(cx, cy, 'flare')
       .setDisplaySize(1150, 1150)
       .setBlendMode(Phaser.BlendModes.ADD)
-      .setAlpha(0.55);
+      .setAlpha(0.5);
     this.tweens.add({ targets: flare, angle: 360, duration: 26_000, repeat: -1 });
 
-    this.add.image(cx, cy, 'tube').setDisplaySize(250, 700);
+    // Big "C" with orbiting light trails.
+    addGlow(this, cX, cy - 20, 760, 0.6);
+    const orbit = addArt(this, cX, cy - 20, 'c-orbit').setDisplaySize(620, 620);
+    this.tweens.add({ targets: orbit, angle: 360, duration: 18_000, repeat: -1 });
+    const letter = addArt(this, cX, cy - 20, 'big-c').setDisplaySize(400, 400);
+    this.tweens.add({
+      targets: letter,
+      scale: letter.scale * 1.05,
+      yoyo: true,
+      repeat: -1,
+      duration: 1700,
+      ease: 'Sine.easeInOut',
+    });
+
+    this.add.image(tubeX, cy, 'tube').setDisplaySize(250, 700);
 
     const capsules = [
       { x: 135, y: 560, size: 150, delay: 0 },
       { x: 965, y: 640, size: 120, delay: 500 },
-      { x: 120, y: 1190, size: 130, delay: 1000 },
-      { x: 950, y: 1380, size: 200, delay: 1500 },
-      { x: 230, y: 1500, size: 100, delay: 700 },
+      { x: 110, y: 1190, size: 120, delay: 1000 },
+      { x: 985, y: 1030, size: 140, delay: 1500 },
+      { x: 905, y: 1560, size: 120, delay: 700 },
+      { x: 560, y: 1560, size: 100, delay: 300 },
     ];
     for (const c of capsules) {
       const glow = addGlow(this, c.x, c.y, c.size * 2.4, 0.65);

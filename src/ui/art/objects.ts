@@ -1,8 +1,83 @@
 import type Phaser from 'phaser';
 import { drawTexture } from './canvas';
 
-/** In-game objects: decoy bubble, stain enemy and the Colgate basket. */
+/** Texture keys of the decoy look-alikes; gameplay picks one at random for every decoy. */
+export const DECOY_TEXTURES = ['decoy', 'decoy-pill-a', 'decoy-pill-b'] as const;
+
+/** A tilted two-tone pill (150x150): `left` and `right` are the two half colours. */
+function drawPill(
+  ctx: CanvasRenderingContext2D,
+  left: [string, string],
+  right: [string, string],
+): void {
+  ctx.save();
+  ctx.translate(75, 75);
+  ctx.rotate(-0.7);
+  const length = 124;
+  const thick = 54;
+  const r = thick / 2;
+
+  const path = (): void => {
+    ctx.beginPath();
+    ctx.moveTo(-length / 2 + r, -r);
+    ctx.lineTo(length / 2 - r, -r);
+    ctx.arc(length / 2 - r, 0, r, -Math.PI / 2, Math.PI / 2);
+    ctx.lineTo(-length / 2 + r, r);
+    ctx.arc(-length / 2 + r, 0, r, Math.PI / 2, (Math.PI * 3) / 2);
+    ctx.closePath();
+  };
+
+  ctx.shadowColor = 'rgba(0,0,0,0.45)';
+  ctx.shadowBlur = 10;
+  ctx.shadowOffsetY = 4;
+  ctx.fillStyle = '#000';
+  path();
+  ctx.fill();
+  ctx.shadowColor = 'transparent';
+
+  ctx.save();
+  path();
+  ctx.clip();
+  const a = ctx.createLinearGradient(0, -r, 0, r);
+  a.addColorStop(0, left[0]);
+  a.addColorStop(1, left[1]);
+  ctx.fillStyle = a;
+  ctx.fillRect(-length / 2, -r, length / 2, thick);
+  const b = ctx.createLinearGradient(0, -r, 0, r);
+  b.addColorStop(0, right[0]);
+  b.addColorStop(1, right[1]);
+  ctx.fillStyle = b;
+  ctx.fillRect(0, -r, length / 2, thick);
+  ctx.fillStyle = 'rgba(255,255,255,0.5)';
+  ctx.fillRect(-length / 2, -r + 7, length, 8);
+  ctx.restore();
+
+  ctx.lineWidth = 2.5;
+  ctx.strokeStyle = 'rgba(0,0,0,0.35)';
+  path();
+  ctx.stroke();
+  ctx.restore();
+}
+
+/** In-game objects: decoys (bubble and pills), stain enemy and the Colgate basket. */
 export function makeObjects(scene: Phaser.Scene): void {
+  drawTexture(scene, 'decoy-pill-a', 150, 150, (ctx) =>
+    drawPill(ctx, ['#FFFFFF', '#C9CDD2'], ['#E6E8EB', '#A9AEB5']),
+  );
+  drawTexture(scene, 'decoy-pill-b', 150, 150, (ctx) =>
+    drawPill(ctx, ['#F0343A', '#B30F1A'], ['#3A3A3A', '#0E0E0E']),
+  );
+
+  // Gold confetti piece (22x34), tinted per piece in the scene.
+  drawTexture(scene, 'confetti', 22, 34, (ctx) => {
+    const g = ctx.createLinearGradient(0, 0, 22, 34);
+    g.addColorStop(0, '#FFF3B8');
+    g.addColorStop(0.5, '#FFC83D');
+    g.addColorStop(1, '#E58A12');
+    ctx.fillStyle = g;
+    ctx.fillRect(1, 1, 20, 32);
+  });
+
   // Decoy: glassy red-pink bubble with a white rim (150x150).
   drawTexture(scene, 'decoy', 150, 150, (ctx) => {
     const body = ctx.createRadialGradient(75, 80, 8, 75, 75, 68);

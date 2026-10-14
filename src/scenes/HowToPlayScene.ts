@@ -8,8 +8,8 @@ import { textStyle } from '@/ui/theme';
 import { SceneKey } from './keys';
 
 const PANEL_WIDTH = 920;
-const PANEL_HEIGHT = 290;
-const ROW_Y = [800, 1120, 1440] as const;
+const PANEL_HEIGHT = 250;
+const ROW_Y = [770, 1050, 1330] as const;
 
 export class HowToPlayScene extends Phaser.Scene {
   constructor() {
@@ -23,40 +23,52 @@ export class HowToPlayScene extends Phaser.Scene {
     addHeader(this);
     addArt(this, cx, 520, 'title-how');
 
-    for (const y of ROW_Y) createPanel(this, cx, y, PANEL_WIDTH, PANEL_HEIGHT);
+    for (const y of ROW_Y) createPanel(this, cx, y, PANEL_WIDTH, PANEL_HEIGHT, 36, 'gold');
     this.rowDrag(ROW_Y[0]);
     this.rowCatch(ROW_Y[1]);
     this.rowAvoid(ROW_Y[2]);
 
-    createButton(this, cx, 1745, "LET'S PLAY!", () => this.scene.start(SceneKey.Gameplay), {
+    // The basket, gently swaying, shows what the player will be moving.
+    const basket = this.add.image(cx, 1570, 'basket').setDisplaySize(300, 194);
+    this.tweens.add({
+      targets: basket,
+      x: { from: cx - 120, to: cx + 120 },
+      yoyo: true,
+      repeat: -1,
+      duration: 1600,
+      ease: 'Sine.easeInOut',
+    });
+
+    createButton(this, cx, 1760, "LET'S PLAY!", () => this.scene.start(SceneKey.Gameplay), {
       width: 760,
-      height: 160,
-      fontSize: 64,
+      height: 150,
+      fontSize: 62,
+      variant: 'gold',
     });
   }
 
   private label(x: number, y: number, text: string, width: number): void {
     this.add
-      .text(x, y, text, textStyle({ size: 46, align: 'left', wrapWidth: width, lineSpacing: 6 }))
+      .text(x, y, text, textStyle({ size: 52, align: 'left', wrapWidth: width, lineSpacing: 4 }))
       .setOrigin(0, 0.5);
   }
 
   private rowDrag(y: number): void {
-    this.add.image(190, y, 'ico-hand').setDisplaySize(190, 190);
-    addArt(this, 700, y - 62, 'ico-arrows').setDisplaySize(380, 105);
-    this.label(360, y + 52, 'Drag left or right\nto move the basket', 520);
+    this.add.image(190, y, 'ico-hand').setDisplaySize(170, 170);
+    addArt(this, 450, y, 'ico-arrows').setDisplaySize(250, 70);
+    this.label(600, y, 'DRAG LEFT\nOR RIGHT', 300);
   }
 
   private rowCatch(y: number): void {
-    addGlow(this, 190, y, 330, 0.7);
-    this.add.image(190, y, 'capsule').setDisplaySize(190, 190);
-    this.label(360, y, 'Catch the Vitamin C capsules to fill your Brightness Meter', 520);
+    addGlow(this, 190, y, 300, 0.7);
+    this.add.image(190, y, 'capsule').setDisplaySize(170, 170);
+    this.label(340, y, 'CATCH VITAMIN\nC CAPSULES', 540);
   }
 
   private rowAvoid(y: number): void {
-    addArt(this, 160, y, 'stain').setDisplaySize(170, 170);
-    addArt(this, 320, y, 'decoy').setDisplaySize(130, 130);
-    addArt(this, 450, y, 'ico-x').setDisplaySize(96, 96);
-    this.label(520, y, 'Avoid the stains and decoy capsules', 380);
+    addArt(this, 160, y, 'stain').setDisplaySize(150, 150);
+    addArt(this, 300, y, 'decoy-pill-a').setDisplaySize(120, 120);
+    addArt(this, 420, y, 'ico-x').setDisplaySize(86, 86);
+    this.label(520, y, 'AVOID STAINS\n& DECOYS', 380);
   }
 }

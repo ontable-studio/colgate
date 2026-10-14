@@ -72,7 +72,7 @@ Sumber: `.resources/` (banyak duplikat; hampir semua CMYK dan berlapis).
 
 - Oji ekspor PNG/WebP **RGB** per elemen: kapsul, noda, pengecoh, keranjang, meter, gigi Day 1/Day 7, tube, background, logo, ikon
 - Font: Colgate Ready (Bold, BoldItalic, Light), Myriad Pro — boleh dipakai di game (konfirmasi klien)
-- Referensi visual: `.resources/moodboard/` (storyboard Catch the Brightness; 2 video belum dibuka)
+- Referensi visual: `.resources/moodboard/` (storyboard Catch the Brightness; 2 video animasi alur game: satu landscape 1024x576, satu **portrait 576x1024** yang jadi acuan utama UI)
 - Jangan masukkan PSD/AI ke project game
 
 Brand: merah Colgate dengan gradient merah gelap radial, aksen oranye-emas. Klaim dan disclaimer wajib sesuai teks final dari klien (termasuk asterisk). Hati-hati karakter noda berduri — feedback sebelumnya menyebut molekul "terlihat seram".
@@ -150,7 +150,9 @@ Draft pesan WhatsApp untuk klien ada di riwayat percakapan.
 
 ## 13. Belum diperiksa
 
-- 2 video moodboard (`WhatsApp Video ... .mp4`) belum dibuka
+- Video moodboard sudah dilihat per frame (tanpa suara). Keduanya dibuat dengan AI dan berisi teks ngawur ("TRANSFOST SMILE", "UNLOB BEFORE & REWARD"), jadi teks final tetap dari dokumen mekanisme klien.
+- Belum ada aset: **foto mulut Day 1/Day 7** untuk layar Unlock versi video (saat ini memakai render gigi Tooth 1 -> Tooth 4), dan efek pecahan hitam saat noda tertangkap.
+- Belum diputuskan klien: tombol utama **emas** (video portrait) atau **merah** (storyboard gambar); saat ini emas untuk tombol utama, merah untuk tombol keyboard.
 - File `.ai`, `.psd`, `.tif`, `.skp` hanya dilihat dari nama dan ukuran
 - Slide Photo Booth dan Live Streaming tidak masuk scope
 - Dokumen `Technical Drawing POSM OW Vit C.pptx` (116 slide, POSM fisik) tidak relevan untuk game
