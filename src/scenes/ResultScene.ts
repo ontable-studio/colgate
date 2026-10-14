@@ -1,15 +1,21 @@
 import Phaser from 'phaser';
 import { getServices } from '@/app/container';
 import { env } from '@/config/env';
-import { GAME_HEIGHT, GAME_WIDTH } from '@/config/game';
+import { GAME_WIDTH } from '@/config/game';
 import type { PlayRecord } from '@/domain/play';
 import type { SessionResult } from '@/domain/session';
 import { newId } from '@/util/id';
 import { createButton } from '@/ui/button';
+import { addBackground, addHeader, addSparkles } from '@/ui/effects';
+import { createMeter } from '@/ui/meter';
+import { createPanel } from '@/ui/panel';
+import { COLORS, textStyle } from '@/ui/theme';
 import type { ResultSceneData } from './data';
 import { SceneKey } from './keys';
 
 const BOARD_SIZE = 10;
+const BOARD_TOP = 955;
+const ROW_STEP = 54;
 
 export class ResultScene extends Phaser.Scene {
   private result!: SessionResult;
@@ -26,36 +32,73 @@ export class ResultScene extends Phaser.Scene {
 
   create(): void {
     const cx = GAME_WIDTH / 2;
-    const style = { fontFamily: 'sans-serif', color: '#ffffff', align: 'center' };
+    addBackground(this);
+    addSparkles(this, 10, { x: 40, y: 260, width: 1000, height: 700 });
+    addHeader(this, false);
 
-    this.add.text(cx, 300, 'YOUR SCORE', { ...style, fontSize: '56px' }).setOrigin(0.5);
+    // Score block
+    createPanel(this, cx, 470, 900, 290);
     this.add
-      .text(cx, 440, String(this.result.score), { ...style, fontSize: '200px', fontStyle: 'bold' })
+      .text(cx, 385, 'YOUR SCORE', textStyle({ size: 44, letterSpacing: 6, color: COLORS.cream }))
       .setOrigin(0.5);
     this.add
-      .text(cx, 620, `Brightness Meter ${Math.round(this.result.meterPct)}%`, {
-        ...style,
-        fontSize: '52px',
-      })
+      .text(
+        cx,
+        495,
+        String(this.result.score),
+        textStyle({ size: 150, color: COLORS.goldLight, glow: 'rgba(255,170,60,0.9)' }),
+      )
       .setOrigin(0.5);
 
-    const board = this.add
-      .text(cx, 1060, '', {
-        ...style,
-        align: 'left',
-        fontFamily: 'monospace',
-        fontSize: '46px',
-        lineSpacing: 12,
-      })
-      .setOrigin(0.5);
-    void this.saveAndShowBoard(board);
+    // Brightness meter, frozen at the final value
+    createMeter(this, cx, 690).setValue(this.result.meterPct);
+    this.add
+      .text(
+        110,
+        772,
+        'BRIGHTNESS METER',
+        textStyle({ size: 32, align: 'left', letterSpacing: 4, color: COLORS.cream }),
+      )
+      .setOrigin(0, 0.5);
+    this.add
+      .text(
+        970,
+        772,
+        `${Math.round(this.result.meterPct)}%`,
+        textStyle({ size: 46, align: 'right' }),
+      )
+      .setOrigin(1, 0.5);
 
-    createButton(this, cx, GAME_HEIGHT - 300, 'PLAY AGAIN', () => {
-      this.scene.start(SceneKey.Gameplay);
+    // Leaderboard card (filled in once the play is saved)
+    createPanel(this, cx, 1190, 920, 700);
+    this.add
+      .text(
+        cx,
+        BOARD_TOP - 62,
+        `TOP ${BOARD_SIZE}`,
+        textStyle({ size: 46, letterSpacing: 8, color: COLORS.goldSoft }),
+      )
+      .setOrigin(0.5);
+    void this.saveAndShowBoard();
+
+    this.add
+      .text(
+        cx,
+        1610,
+        'BRIGHTER SMILES, BRIGHTER DAYS',
+        textStyle({ size: 40, color: COLORS.goldSoft, glow: 'rgba(255,150,40,0.7)' }),
+      )
+      .setOrigin(0.5);
+
+    createButton(this, cx, 1745, 'PLAY AGAIN', () => this.scene.start(SceneKey.Gameplay), {
+      width: 760,
+      height: 150,
+      fontSize: 60,
+      icon: 'ico-replay',
     });
   }
 
-  private async saveAndShowBoard(board: Phaser.GameObjects.Text): Promise<void> {
+  private async saveAndShowBoard(): Promise<void> {
     const { repo } = getServices();
     const play: PlayRecord = {
       id: newId(),
@@ -75,10 +118,19 @@ export class ResultScene extends Phaser.Scene {
     const top = await repo.topScores(BOARD_SIZE);
     // The scene may have been left (idle reset) while the DB was busy.
     if (!this.scene.isActive()) return;
-    const rows = top.map((p, i) => {
-      const mark = p.id === play.id ? '>' : ' ';
-      return `${mark} ${String(i + 1).padStart(2, ' ')}.  ${p.initials}   ${p.score}`;
+
+    top.forEach((entry, i) => {
+      const y = BOARD_TOP + i * ROW_STEP + ROW_STEP / 2;
+      const mine = entry.id === play.id;
+      const color = mine ? COLORS.goldLight : COLORS.white;
+      if (mine) {
+        this.add.rectangle(GAME_WIDTH / 2, y, 840, ROW_STEP - 4, 0xffc83d, 0.22).setOrigin(0.5);
+      }
+      const cell = (x: number, text: string, origin: number) =>
+        this.add.text(x, y, text, textStyle({ size: 38, color })).setOrigin(origin, 0.5);
+      cell(210, `${i + 1}.`, 1);
+      cell(262, entry.initials, 0);
+      cell(870, String(entry.score), 1);
     });
-    board.setText([`TOP ${BOARD_SIZE}`, ...rows].join('\n'));
   }
 }

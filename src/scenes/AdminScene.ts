@@ -4,6 +4,8 @@ import { env } from '@/config/env';
 import { GAME_WIDTH } from '@/config/game';
 import { playsToCsv } from '@/domain/csv';
 import { createButton } from '@/ui/button';
+import { addBackground } from '@/ui/effects';
+import { textStyle } from '@/ui/theme';
 import { downloadText } from '@/util/download';
 import { SceneKey } from './keys';
 
@@ -24,15 +26,9 @@ export class AdminScene extends Phaser.Scene {
   create(): void {
     const cx = GAME_WIDTH / 2;
     this.resetArmed = false;
+    addBackground(this);
 
-    this.add
-      .text(cx, 130, 'ADMIN', {
-        fontFamily: 'sans-serif',
-        fontSize: '90px',
-        fontStyle: 'bold',
-        color: '#ffffff',
-      })
-      .setOrigin(0.5);
+    this.add.text(cx, 130, 'ADMIN', textStyle({ size: 90 })).setOrigin(0.5);
 
     this.info = this.add
       .text(110, 240, '', {

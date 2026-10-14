@@ -12,7 +12,8 @@ src/
   domain/            PURE logic, no Phaser, no browser APIs  -> unit tested
   services/          I/O: storage (IndexedDB), sync (Google Sheets), idle watcher
   scenes/            Phaser scenes (thin: input, rendering, call into domain/services)
-  ui/                reusable Phaser UI pieces (button, later: keyboard, meter)
+  ui/                reusable Phaser UI pieces: button, panel, keyboard, meter, effects, theme
+  ui/art/            procedural canvas textures (background, skins, icons, objects, brand marks)
   util/              small helpers
 tests/               Vitest, mirrors src/ (domain, services)
 ```

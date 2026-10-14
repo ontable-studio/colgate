@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { GAME_HEIGHT, GAME_WIDTH } from '@/config/game';
+import { GAME_WIDTH } from '@/config/game';
 import {
   appendInitial,
   finalizeInitials,
@@ -8,7 +8,10 @@ import {
 } from '@/domain/initials';
 import type { SessionResult } from '@/domain/session';
 import { createButton } from '@/ui/button';
+import { addBackground, addHeader, addSparkles } from '@/ui/effects';
 import { createKeyboard } from '@/ui/keyboard';
+import { createPanel } from '@/ui/panel';
+import { COLORS, textStyle } from '@/ui/theme';
 import type { GameResultData, ResultSceneData } from './data';
 import type { IdleAware } from './idleAware';
 import { SceneKey } from './keys';
@@ -33,21 +36,34 @@ export class InitialsScene extends Phaser.Scene implements IdleAware {
 
   create(): void {
     const cx = GAME_WIDTH / 2;
-    const style = { fontFamily: 'sans-serif', color: '#ffffff', align: 'center' };
+    addBackground(this);
+    addSparkles(this, 8, { x: 40, y: 300, width: 1000, height: 600 });
+    addHeader(this, false);
 
-    this.add.text(cx, 200, 'YOUR SCORE', { ...style, fontSize: '64px' }).setOrigin(0.5);
     this.add
-      .text(cx, 340, String(this.result.score), { ...style, fontSize: '200px', fontStyle: 'bold' })
+      .text(cx, 300, 'YOUR SCORE', textStyle({ size: 46, letterSpacing: 6, color: COLORS.cream }))
       .setOrigin(0.5);
-    this.add.text(cx, 560, 'ENTER YOUR INITIALS', { ...style, fontSize: '50px' }).setOrigin(0.5);
+    this.add
+      .text(
+        cx,
+        430,
+        String(this.result.score),
+        textStyle({ size: 170, color: COLORS.goldLight, glow: 'rgba(255,170,60,0.9)' }),
+      )
+      .setOrigin(0.5);
+    this.add
+      .text(cx, 590, 'ENTER YOUR INITIALS', textStyle({ size: 46, weight: 'light' }))
+      .setOrigin(0.5);
 
     const boxSize = 200;
-    const gap = 60;
+    const gap = 50;
     const left = cx - ((MAX_INITIALS - 1) * (boxSize + gap)) / 2;
     for (let i = 0; i < MAX_INITIALS; i++) {
       const x = left + i * (boxSize + gap);
-      this.add.rectangle(x, 730, boxSize, boxSize, 0xffffff, 0.12).setStrokeStyle(6, 0xffffff);
-      this.slots.push(this.add.text(x, 730, '', { ...style, fontSize: '130px' }).setOrigin(0.5));
+      createPanel(this, x, 745, boxSize, boxSize, 36);
+      this.slots.push(
+        this.add.text(x, 745, '', textStyle({ size: 132, color: COLORS.goldLight })).setOrigin(0.5),
+      );
     }
     this.refresh();
 
@@ -62,9 +78,10 @@ export class InitialsScene extends Phaser.Scene implements IdleAware {
       },
     });
 
-    createButton(this, cx, GAME_HEIGHT - 180, 'SAVE', () => this.submit(), {
-      width: 600,
+    createButton(this, cx, 1745, 'SAVE', () => this.submit(), {
+      width: 640,
       height: 150,
+      fontSize: 60,
     });
   }
 
@@ -74,7 +91,10 @@ export class InitialsScene extends Phaser.Scene implements IdleAware {
   }
 
   private refresh(): void {
-    this.slots.forEach((slot, i) => slot.setText(this.initials[i] ?? '_'));
+    this.slots.forEach((slot, i) => {
+      const letter = this.initials[i];
+      slot.setText(letter ?? '_').setAlpha(letter ? 1 : 0.35);
+    });
   }
 
   private submit(): void {

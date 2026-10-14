@@ -1,13 +1,14 @@
 import Phaser from 'phaser';
+import { registerUiArt } from '@/ui/art';
 import { SceneKey } from './keys';
 
-/** Game-ready assets exported by tools/export-assets (texture key = file name). */
-const IMAGES = ['capsule', 'decoy', 'tube', 'dropper', 'flare', 'tooth1', 'tooth4'] as const;
+/** Game-ready assets exported by tools/export-assets (texture key = file name without extension). */
+const IMAGES = ['capsule', 'tube', 'dropper', 'flare', 'tooth1', 'tooth4', 'logo-colgate'] as const;
 
 /**
- * Loads assets. Anything not yet delivered as art (basket, stain) is generated as a placeholder
- * texture so the game loop stays playable. When Oji's art lands, load it with this.load.image(...)
- * under the same texture key and delete the matching make* call.
+ * Loads the supplied art, then draws the rest of the UI kit (backgrounds, buttons, icons,
+ * basket, stain, ...) procedurally. To replace any generated texture with real art from Oji,
+ * load it here under the same key and drop the matching draw call in `ui/art`.
  */
 export class PreloadScene extends Phaser.Scene {
   constructor() {
@@ -19,23 +20,7 @@ export class PreloadScene extends Phaser.Scene {
   }
 
   create(): void {
-    // TODO(art, Oji): stain enemy and basket. Placeholders for now.
-    this.makeCircle('stain', 0x2b2b2b, 75);
-    this.makeBasket('basket');
+    registerUiArt(this);
     this.scene.start(SceneKey.Attract);
-  }
-
-  private makeCircle(key: string, color: number, radius: number): void {
-    const g = this.make.graphics({}, false);
-    g.fillStyle(color, 1).fillCircle(radius, radius, radius);
-    g.generateTexture(key, radius * 2, radius * 2);
-    g.destroy();
-  }
-
-  private makeBasket(key: string): void {
-    const g = this.make.graphics({}, false);
-    g.fillStyle(0xffffff, 1).fillRoundedRect(0, 0, 280, 120, 40);
-    g.generateTexture(key, 280, 120);
-    g.destroy();
   }
 }

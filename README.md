@@ -56,12 +56,14 @@ Google Sheet setup: [docs/apps-script/README.md](docs/apps-script/README.md).
 
 - `.resources/` holds the raw client files (CMYK PSD/AI/TIF, zips, ~14 GB). It is **git-ignored**. Do not commit it.
 - Game-ready assets (RGB WebP) live in `public/assets/` and are loaded in `src/scenes/PreloadScene.ts` (texture key = file name).
-- Most are generated from the raw files by `tools/export-assets/export_assets.py` (CMYK TIF/PSD -> trimmed, resized, transparent WebP; the decoy capsule is the real capsule recoloured). Re-run it when Oji sends a new source file:
+- Most are generated from the raw files by `tools/export-assets/export_assets.py` (CMYK TIF/PSD -> trimmed, resized, transparent WebP; it also cuts the white Colgate wordmark out of the tube artwork). Re-run it when Oji sends a new source file:
 
   ```bash
   pip install -r tools/export-assets/requirements.txt
   python tools/export-assets/export_assets.py
   ```
 
-- Still placeholders drawn in code (waiting for Oji's art): basket and stain enemy. UI (buttons, meter) is also code-drawn for now.
+- The rest of the UI kit is drawn in code from the client's storyboard (`src/ui/art/`): red radial background with light rays, glowing pill buttons, panels, HUD icons, Brightness Meter, gold gradient titles, Colgate basket, stain and decoy bubble. Drawing them in code keeps the download small and sharp at 4K. If Oji delivers final art for any of these, load it in `PreloadScene` under the same texture key and delete the matching draw call.
+- Brand font: Colgate Ready (Light, Bold, Bold Italic) is in `public/assets/fonts/` and loaded in `src/style.css`; `src/main.ts` waits for it before the game starts.
+- Brand colours come from the client's palette file (`COLGATE COLOR.ai`): red `#ED1C24`, orange `#F37021`, gold `#FDB415` (see `src/ui/theme.ts`).
 - The PWA icons in `public/icons/` are solid-colour placeholders.

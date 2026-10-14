@@ -1,0 +1,140 @@
+import type Phaser from 'phaser';
+import { canvasFont } from '@/ui/theme';
+import { drawTexture, trackedText, trackedWidth } from './canvas';
+
+/** Red half-disc tab at the top carrying the white Colgate wordmark (560x250). */
+export function makeLogoTab(scene: Phaser.Scene): void {
+  drawTexture(scene, 'logo-tab', 560, 250, (ctx) => {
+    const fill = ctx.createRadialGradient(280, 40, 20, 280, 0, 270);
+    fill.addColorStop(0, '#F5202A');
+    fill.addColorStop(1, '#D3101B');
+    ctx.save();
+    ctx.shadowColor = 'rgba(60,0,6,0.55)';
+    ctx.shadowBlur = 18;
+    ctx.shadowOffsetY = 6;
+    ctx.fillStyle = fill;
+    ctx.beginPath();
+    ctx.arc(280, -20, 228, 0, Math.PI);
+    ctx.closePath();
+    ctx.fill();
+    ctx.restore();
+
+    const logo = scene.textures.get('logo-colgate').getSourceImage() as CanvasImageSource;
+    const w = 330;
+    const h = (w * 167) / 781;
+    ctx.drawImage(logo, 280 - w / 2, 96, w, h);
+  });
+}
+
+/** "OPTIC WHITE+ / VITAMIN C" lockup, set in the brand font (640x190). */
+export function makeLockup(scene: Phaser.Scene): void {
+  drawTexture(scene, 'lockup', 640, 190, (ctx, w) => {
+    ctx.textBaseline = 'alphabetic';
+
+    ctx.font = canvasFont('light', 46);
+    ctx.fillStyle = '#FFFFFF';
+    const line1 = trackedWidth(ctx, 'OPTIC WHITE', 7);
+    const startX = (w - line1) / 2;
+    trackedText(ctx, 'OPTIC WHITE', startX, 56, 7);
+    ctx.font = canvasFont('light', 26);
+    ctx.fillText('+', startX + line1 + 6, 34);
+
+    ctx.font = canvasFont('light', 84);
+    ctx.fillStyle = '#FFC93C';
+    const line2 = trackedWidth(ctx, 'VITAMIN C', 13);
+    trackedText(ctx, 'VITAMIN C', (w - line2) / 2, 148, 13);
+  });
+}
+
+/** Glowing open ring (gap at the upper right) that frames the game title (820x820). */
+export function makeRing(scene: Phaser.Scene): void {
+  drawTexture(scene, 'ring', 820, 820, (ctx, w, h) => {
+    const rim = ctx.createLinearGradient(0, h, w, 0);
+    rim.addColorStop(0, '#FFE9A6');
+    rim.addColorStop(0.5, '#FFF7DD');
+    rim.addColorStop(1, '#FFB52E');
+    ctx.lineCap = 'round';
+
+    ctx.save();
+    ctx.shadowColor = 'rgba(255,150,40,0.95)';
+    ctx.shadowBlur = 44;
+    ctx.lineWidth = 18;
+    ctx.strokeStyle = rim;
+    ctx.beginPath();
+    ctx.arc(w / 2, h / 2, 350, (-20 * Math.PI) / 180, (285 * Math.PI) / 180);
+    ctx.stroke();
+    ctx.restore();
+
+    ctx.lineWidth = 7;
+    ctx.strokeStyle = 'rgba(255,255,255,0.9)';
+    ctx.beginPath();
+    ctx.arc(w / 2, h / 2, 350, (-20 * Math.PI) / 180, (285 * Math.PI) / 180);
+    ctx.stroke();
+  });
+}
+
+export interface TitleLine {
+  text: string;
+  size: number;
+}
+
+interface GradientTextOptions {
+  weight: 'bold' | 'boldItalic';
+  maxWidth: number;
+  /** Extra space between lines, as a fraction of the line size. */
+  gap?: number;
+}
+
+/** Headline with a cream-to-gold gradient, dark edge and warm glow. Fits itself to maxWidth. */
+export function makeGradientText(
+  scene: Phaser.Scene,
+  key: string,
+  lines: readonly TitleLine[],
+  { weight, maxWidth, gap = 0.08 }: GradientTextOptions,
+): void {
+  const probe = document.createElement('canvas').getContext('2d');
+  if (!probe) throw new Error('2D canvas is not available');
+  const widest = Math.max(
+    ...lines.map((line) => {
+      probe.font = canvasFont(weight, line.size);
+      return probe.measureText(line.text).width;
+    }),
+  );
+  const fit = Math.min(1, maxWidth / widest);
+  const sized = lines.map((line) => ({ text: line.text, size: Math.round(line.size * fit) }));
+
+  const pad = 48;
+  const height = sized.reduce((sum, l) => sum + l.size * (1 + gap), 0) + pad * 2;
+  const width = Math.round(maxWidth + pad * 2);
+
+  drawTexture(scene, key, width, height, (ctx) => {
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'alphabetic';
+    ctx.lineJoin = 'round';
+    let top = pad;
+    for (const line of sized) {
+      ctx.font = canvasFont(weight, line.size);
+      const baseline = top + line.size * 0.88;
+
+      ctx.save();
+      ctx.shadowColor = 'rgba(255,140,30,0.95)';
+      ctx.shadowBlur = 30;
+      ctx.fillStyle = '#FFB13B';
+      ctx.fillText(line.text, width / 2, baseline);
+      ctx.restore();
+
+      ctx.lineWidth = Math.max(3, line.size * 0.05);
+      ctx.strokeStyle = 'rgba(120,28,0,0.55)';
+      ctx.strokeText(line.text, width / 2, baseline);
+
+      const fill = ctx.createLinearGradient(0, top, 0, top + line.size);
+      fill.addColorStop(0, '#FFFCEA');
+      fill.addColorStop(0.5, '#FFDC6E');
+      fill.addColorStop(1, '#FFA21F');
+      ctx.fillStyle = fill;
+      ctx.fillText(line.text, width / 2, baseline);
+
+      top += line.size * (1 + gap);
+    }
+  });
+}

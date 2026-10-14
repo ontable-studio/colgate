@@ -2,18 +2,28 @@ import Phaser from 'phaser';
 import { GAME_HEIGHT, GAME_WIDTH, RULES, type FallingKind } from '@/config/game';
 import { pickKind } from '@/domain/spawn';
 import { GameSession } from '@/domain/session';
+import { addArt } from '@/ui/art/canvas';
+import { addBackground, addGlow } from '@/ui/effects';
+import { createMeter, type Meter } from '@/ui/meter';
+import { COLORS, textStyle } from '@/ui/theme';
 import { SceneKey } from './keys';
 
-const OBJECT_SIZE = 150; // on-screen size of every falling object (textures differ in resolution)
-const BASKET_Y = GAME_HEIGHT - 260;
-const BASKET_HALF_WIDTH = 140;
+/** On-screen size (px) of each falling object; textures differ in resolution. */
+const OBJECT_SIZE: Readonly<Record<FallingKind, number>> = { capsule: 150, decoy: 150, stain: 175 };
+const BASKET_WIDTH = 300;
+const BASKET_HEIGHT = 194;
+const BASKET_Y = 1470;
+const HINT_VISIBLE_MS = 4500;
 
 export class GameplayScene extends Phaser.Scene {
   private session!: GameSession;
   private basket!: Phaser.Physics.Arcade.Image;
   private falling!: Phaser.Physics.Arcade.Group;
-  private hud!: Phaser.GameObjects.Text;
-  private meterFill!: Phaser.GameObjects.Rectangle;
+  private timerText!: Phaser.GameObjects.Text;
+  private scoreText!: Phaser.GameObjects.Text;
+  private meter!: Meter;
+  private hint: Phaser.GameObjects.GameObject[] = [];
+  private hintHidden = false;
   private spawnAcc = 0;
 
   constructor() {
@@ -23,34 +33,36 @@ export class GameplayScene extends Phaser.Scene {
   create(): void {
     this.session = new GameSession(RULES);
     this.spawnAcc = 0;
+    this.hintHidden = false;
+
+    addBackground(this, 'bg-play');
+    this.addHud();
+    this.addHint();
 
     this.basket = this.physics.add.image(GAME_WIDTH / 2, BASKET_Y, 'basket').setImmovable(true);
+    this.basket.setDisplaySize(BASKET_WIDTH, BASKET_HEIGHT);
     this.falling = this.physics.add.group();
     this.physics.add.overlap(this.basket, this.falling, (_basket, obj) => {
       this.onCaught(obj as Phaser.Physics.Arcade.Image);
     });
 
-    this.hud = this.add.text(48, 48, '', {
-      fontFamily: 'sans-serif',
-      fontSize: '56px',
-      color: '#ffffff',
-    });
-
-    // Brightness meter (placeholder bar)
-    this.add.rectangle(GAME_WIDTH / 2, GAME_HEIGHT - 80, 800, 36, 0x000000, 0.35);
-    this.meterFill = this.add
-      .rectangle(GAME_WIDTH / 2 - 400, GAME_HEIGHT - 80, 0, 36, 0xffc13a)
-      .setOrigin(0, 0.5);
+    this.meter = createMeter(this, GAME_WIDTH / 2, 1745);
+    this.add
+      .text(
+        GAME_WIDTH / 2,
+        1822,
+        'BRIGHTNESS METER',
+        textStyle({ size: 34, letterSpacing: 5, color: COLORS.cream }),
+      )
+      .setOrigin(0.5);
 
     const follow = (pointer: Phaser.Input.Pointer): void => {
-      this.basket.x = Phaser.Math.Clamp(
-        pointer.x,
-        BASKET_HALF_WIDTH,
-        GAME_WIDTH - BASKET_HALF_WIDTH,
-      );
+      this.basket.x = Phaser.Math.Clamp(pointer.x, BASKET_WIDTH / 2, GAME_WIDTH - BASKET_WIDTH / 2);
+      this.hideHint();
     };
     this.input.on('pointermove', follow);
     this.input.on('pointerdown', follow);
+    this.time.delayedCall(HINT_VISIBLE_MS, () => this.hideHint());
   }
 
   override update(_time: number, delta: number): void {
@@ -68,25 +80,96 @@ export class GameplayScene extends Phaser.Scene {
     }
 
     const secs = Math.ceil(this.session.remainingMs / 1000);
-    this.hud.setText(`00:${String(secs).padStart(2, '0')}    SCORE ${this.session.score}`);
-    this.meterFill.width = 800 * (this.session.meterPct / 100);
+    this.timerText.setText(`00:${String(secs).padStart(2, '0')}`);
+    this.scoreText.setText(String(this.session.score));
+    this.meter.setValue(this.session.meterPct);
 
     if (this.session.isOver) {
       this.scene.start(SceneKey.Unlock, { result: this.session.result() });
     }
   }
 
+  /** Stopwatch + timer on the left, score on the right. */
+  private addHud(): void {
+    const stopwatch = addArt(this, 135, 112, 'ico-stopwatch').setDisplaySize(84, 84);
+    this.timerText = this.add
+      .text(196, 112, '00:00', textStyle({ size: 76, align: 'left' }))
+      .setOrigin(0, 0.5);
+    const scoreLabel = this.add
+      .text(
+        1000,
+        76,
+        'SCORE',
+        textStyle({ size: 36, align: 'right', letterSpacing: 6, color: COLORS.cream }),
+      )
+      .setOrigin(1, 0.5);
+    this.scoreText = this.add
+      .text(1000, 146, '0', textStyle({ size: 90, align: 'right', glow: 'rgba(255,170,60,0.8)' }))
+      .setOrigin(1, 0.5);
+
+    // Keep the HUD above falling objects.
+    for (const item of [stopwatch, this.timerText, scoreLabel, this.scoreText]) item.setDepth(10);
+  }
+
+  /** "Drag left/right" hint under the basket, shown only at the start of a round. */
+  private addHint(): void {
+    const arrows = addArt(this, GAME_WIDTH / 2, 1640, 'ico-arrows').setDisplaySize(560, 156);
+    const hand = this.add.image(GAME_WIDTH / 2, 1650, 'ico-hand').setDisplaySize(120, 120);
+    this.hint = [arrows, hand];
+    this.tweens.add({
+      targets: hand,
+      x: { from: GAME_WIDTH / 2 - 130, to: GAME_WIDTH / 2 + 130 },
+      yoyo: true,
+      repeat: -1,
+      duration: 900,
+      ease: 'Sine.easeInOut',
+    });
+  }
+
+  private hideHint(): void {
+    if (this.hintHidden) return;
+    this.hintHidden = true;
+    this.tweens.add({ targets: this.hint, alpha: 0, duration: 500 });
+  }
+
   private spawn(): void {
     const kind = pickKind(RULES.spawn.weights);
-    const x = Phaser.Math.Between(80, GAME_WIDTH - 80);
-    const obj = this.falling.create(x, -60, kind) as Phaser.Physics.Arcade.Image;
-    obj.setDisplaySize(OBJECT_SIZE, OBJECT_SIZE);
+    const size = OBJECT_SIZE[kind];
+    const x = Phaser.Math.Between(90, GAME_WIDTH - 90);
+    const obj = this.falling.create(x, -size, kind) as Phaser.Physics.Arcade.Image;
+    obj.setDisplaySize(size, size);
     obj.setData('kind', kind);
     obj.setVelocityY(RULES.spawn.fallSpeed);
   }
 
   private onCaught(obj: Phaser.Physics.Arcade.Image): void {
-    this.session.catch(obj.getData('kind') as FallingKind);
+    const kind = obj.getData('kind') as FallingKind;
+    this.session.catch(kind);
+    this.feedback(kind, obj.x, obj.y);
     obj.destroy();
+  }
+
+  /** Small reward / penalty cue at the moment of the catch. */
+  private feedback(kind: FallingKind, x: number, y: number): void {
+    this.tweens.add({
+      targets: this.basket,
+      scaleX: this.basket.scaleX * 1.06,
+      scaleY: this.basket.scaleY * 1.06,
+      yoyo: true,
+      duration: 90,
+    });
+    if (kind === 'capsule') {
+      const burst = addGlow(this, x, y, 120, 1);
+      this.tweens.add({
+        targets: burst,
+        displayWidth: 380,
+        displayHeight: 380,
+        alpha: 0,
+        duration: 380,
+        onComplete: () => burst.destroy(),
+      });
+    } else if (kind === 'stain') {
+      this.cameras.main.shake(140, 0.006);
+    }
   }
 }

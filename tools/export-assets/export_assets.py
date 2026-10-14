@@ -11,7 +11,6 @@ Re-run whenever Oji sends a new version of a source file.
 from __future__ import annotations
 
 import argparse
-import colorsys
 import glob
 import os
 import sys
@@ -71,26 +70,21 @@ def remove_white_bg(im: Image.Image, thresh: int = 14) -> Image.Image:
     return out
 
 
-def recolor(im: Image.Image, hue_deg: float, sat_mul: float, val_mul: float = 1.0) -> Image.Image:
-    """Shift hue/saturation (used to derive the decoy capsule from the real one)."""
-    rgba = im.convert("RGBA")
-    h, w = rgba.height, rgba.width
-    flat = np.asarray(rgba).reshape(-1, 4)
-    out = flat.copy()
-    # Per-pixel colorsys is slow, so cache by colour quantised to steps of 4 (use on small images).
-    cache: dict[tuple[int, int, int], tuple[int, int, int]] = {}
-    for i in range(flat.shape[0]):
-        key = (int(flat[i, 0]) // 4, int(flat[i, 1]) // 4, int(flat[i, 2]) // 4)
-        rgb = cache.get(key)
-        if rgb is None:
-            _, ss, vv = colorsys.rgb_to_hsv(key[0] * 4 / 255, key[1] * 4 / 255, key[2] * 4 / 255)
-            r, g, b = colorsys.hsv_to_rgb(
-                hue_deg / 360.0, min(1.0, ss * sat_mul), min(1.0, vv * val_mul)
-            )
-            rgb = (round(r * 255), round(g * 255), round(b * 255))
-            cache[key] = rgb
-        out[i, :3] = rgb
-    return Image.fromarray(out.reshape(h, w, 4), "RGBA")
+def white_wordmark(tube: Image.Image) -> Image.Image:
+    """White Colgate wordmark cut out of the tube artwork (white text on red -> alpha from G/B)."""
+    left, top, right, bottom = 320, 410, 1135, 610  # wordmark + (R) on the 1500x3000 tube PNG
+    crop = np.asarray(tube.crop((left, top, right, bottom)).convert("RGB")).astype("float32")
+    alpha = np.clip((crop[..., 1:].min(axis=-1) - 95.0) / (245.0 - 95.0), 0.0, 1.0)
+    # Blank the small "Fluoride Toothpaste" line that sits under the wordmark.
+    alpha[570 - top :, 745 - left :] = 0.0
+    out = np.dstack([np.full(alpha.shape, 255, dtype="uint8")] * 3 + [(alpha * 255).astype("uint8")])
+    return trim(Image.fromarray(out, "RGBA"))
+
+
+def save_lossless(im: Image.Image, out_dir: str, name: str) -> None:
+    path = os.path.join(out_dir, f"{name}.webp")
+    im.save(path, "WEBP", lossless=True, method=6)
+    print(f"{name}.webp  {im.width}x{im.height}  {os.path.getsize(path) / 1024:.0f} KB (lossless)")
 
 
 def save(im: Image.Image, out_dir: str, name: str) -> None:
@@ -106,16 +100,13 @@ def main() -> None:
     args = ap.parse_args()
     os.makedirs(args.out, exist_ok=True)
 
-    # Vitamin C capsule (transparent orange orb with molecule) + derived decoy.
-    capsule = fit(trim(read_cmyk_alpha(find(args.src, "VitC_Ball_Main_FLAT.tif"))), width=280)
-    save(capsule, args.out, "capsule")
-    # TODO(art): confirm decoy look with Oji. For now: capsule shifted to pink/crimson.
-    small = recolor(fit(capsule, width=140), hue_deg=345, sat_mul=0.75)
-    save(small.resize(capsule.size, Image.LANCZOS), args.out, "decoy")
+    # Vitamin C capsule (transparent orange orb with molecule).
+    save(fit(trim(read_cmyk_alpha(find(args.src, "VitC_Ball_Main_FLAT.tif"))), width=280), args.out, "capsule")
 
     # Product tube (already RGBA PNG).
-    tube = Image.open(find(args.src, "CP11548-OW-Vit-C---Color-Conversion-80g-tube-Front-2.png"))
-    save(fit(trim(tube.convert("RGBA")), height=1200), args.out, "tube")
+    tube = Image.open(find(args.src, "CP11548-OW-Vit-C---Color-Conversion-80g-tube-Front-2.png")).convert("RGBA")
+    save(fit(trim(tube), height=1200), args.out, "tube")
+    save_lossless(white_wordmark(tube), args.out, "logo-colgate")
 
     # Dropper + glow flare for the attract screen.
     save(fit(trim(read_cmyk_alpha(find(args.src, "VitC_Dropper_Main_FLAT.tif"))), height=900), args.out, "dropper")

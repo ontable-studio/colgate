@@ -1,27 +1,70 @@
 import type Phaser from 'phaser';
+import { addArt } from './art/canvas';
+import { makeButtonSkin } from './art/skins';
+import { textStyle } from './theme';
 
 export interface ButtonOptions {
   width?: number;
   height?: number;
   fontSize?: number;
+  /** Texture key of an icon shown to the left of the label (e.g. 'ico-play'). */
+  icon?: string;
 }
 
-/** Placeholder pill button (replace with real art from Oji). */
+const ICON_GAP = 26;
+
+/** Glowing pill button with an optional icon. Fires on release; shrinks slightly while pressed. */
 export function createButton(
   scene: Phaser.Scene,
   x: number,
   y: number,
   label: string,
   onClick: () => void,
-  { width = 560, height = 140, fontSize = 56 }: ButtonOptions = {},
+  { width = 640, height = 150, fontSize = 56, icon }: ButtonOptions = {},
 ): Phaser.GameObjects.Container {
-  const bg = scene.add
-    .rectangle(0, 0, width, height, 0xffffff, 0.12)
-    .setStrokeStyle(6, 0xffffff)
+  const skin = addArt(scene, 0, 0, makeButtonSkin(scene, width, height));
+  const text = scene.add.text(0, 0, label, textStyle({ size: fontSize })).setOrigin(0, 0.5);
+
+  const iconSize = height * 0.58;
+  const hasIcon = icon !== undefined;
+  const contentWidth = (hasIcon ? iconSize + (label ? ICON_GAP : 0) : 0) + (label ? text.width : 0);
+  let cursor = -contentWidth / 2;
+
+  const children: Phaser.GameObjects.GameObject[] = [skin];
+  if (hasIcon) {
+    const image = scene.add
+      .image(cursor + iconSize / 2, 0, icon)
+      .setDisplaySize(iconSize, iconSize);
+    children.push(image);
+    cursor += iconSize + (label ? ICON_GAP : 0);
+  }
+  text.setX(cursor);
+  children.push(text);
+
+  const hit = scene.add
+    .rectangle(0, 0, width, height, 0xffffff, 0)
     .setInteractive({ useHandCursor: true });
-  const text = scene.add
-    .text(0, 0, label, { fontFamily: 'sans-serif', fontSize: `${fontSize}px`, color: '#ffffff' })
-    .setOrigin(0.5);
-  bg.on('pointerdown', onClick);
-  return scene.add.container(x, y, [bg, text]);
+  children.push(hit);
+
+  const container = scene.add.container(x, y, children);
+  const createdAt = performance.now();
+  let pressed = false;
+  const release = (): void => {
+    pressed = false;
+    container.setScale(1);
+  };
+  hit.on('pointerdown', () => {
+    pressed = true;
+    container.setScale(0.96);
+  });
+  hit.on('pointerup', (pointer: Phaser.Input.Pointer) => {
+    // A very quick tap (or a slow frame rate) can deliver down+up in the same frame, so `pressed`
+    // may not be set yet. The press only counts if it began after this button appeared; a finger
+    // still held down from the previous screen must not trigger it.
+    const startedHere = pressed || pointer.downTime >= createdAt;
+    release();
+    if (startedHere) onClick();
+  });
+  hit.on('pointerout', release);
+  return container;
 }
