@@ -4,6 +4,7 @@ import { pickKind } from '@/domain/spawn';
 import { GameSession } from '@/domain/session';
 import { SceneKey } from './keys';
 
+const OBJECT_SIZE = 150; // on-screen size of every falling object (textures differ in resolution)
 const BASKET_Y = GAME_HEIGHT - 260;
 const BASKET_HALF_WIDTH = 140;
 
@@ -79,6 +80,7 @@ export class GameplayScene extends Phaser.Scene {
     const kind = pickKind(RULES.spawn.weights);
     const x = Phaser.Math.Between(80, GAME_WIDTH - 80);
     const obj = this.falling.create(x, -60, kind) as Phaser.Physics.Arcade.Image;
+    obj.setDisplaySize(OBJECT_SIZE, OBJECT_SIZE);
     obj.setData('kind', kind);
     obj.setVelocityY(RULES.spawn.fallSpeed);
   }

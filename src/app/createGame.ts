@@ -21,6 +21,16 @@ export function createGame(parent: string): Phaser.Game {
     scene: scenes,
   });
 
+  // Booth-proofing: a lost WebGL context (weak TV GPU, driver reset) leaves a dead white screen
+  // forever, so reload the page; the service worker serves it instantly even when offline.
+  game.events.once(Phaser.Core.Events.READY, () => {
+    game.canvas.addEventListener('webglcontextlost', () => {
+      setTimeout(() => {
+        location.reload();
+      }, 1000);
+    });
+  });
+
   // Booth-proofing: waiting screens return to attract after a period of no touch.
   new IdleWatcher(IDLE_TIMEOUT_MS, () => {
     const current = game.scene.getScenes(true)[0];

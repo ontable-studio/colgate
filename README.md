@@ -55,5 +55,13 @@ Google Sheet setup: [docs/apps-script/README.md](docs/apps-script/README.md).
 ## Assets
 
 - `.resources/` holds the raw client files (CMYK PSD/AI/TIF, zips, ~14 GB). It is **git-ignored**. Do not commit it.
-- Game-ready assets (RGB PNG/WebP, fonts) go in `public/assets/`. Use the same texture keys as the placeholders generated in `src/scenes/PreloadScene.ts`.
+- Game-ready assets (RGB WebP) live in `public/assets/` and are loaded in `src/scenes/PreloadScene.ts` (texture key = file name).
+- Most are generated from the raw files by `tools/export-assets/export_assets.py` (CMYK TIF/PSD -> trimmed, resized, transparent WebP; the decoy capsule is the real capsule recoloured). Re-run it when Oji sends a new source file:
+
+  ```bash
+  pip install -r tools/export-assets/requirements.txt
+  python tools/export-assets/export_assets.py
+  ```
+
+- Still placeholders drawn in code (waiting for Oji's art): basket and stain enemy. UI (buttons, meter) is also code-drawn for now.
 - The PWA icons in `public/icons/` are solid-colour placeholders.

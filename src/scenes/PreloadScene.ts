@@ -1,10 +1,13 @@
 import Phaser from 'phaser';
 import { SceneKey } from './keys';
 
+/** Game-ready assets exported by tools/export-assets (texture key = file name). */
+const IMAGES = ['capsule', 'decoy', 'tube', 'dropper', 'flare', 'tooth1', 'tooth4'] as const;
+
 /**
- * Loads assets. Until Oji's final art lands in public/assets, generates placeholder textures
- * so the game loop is playable. Replace each generated texture with this.load.image(...) later,
- * keeping the same texture keys.
+ * Loads assets. Anything not yet delivered as art (basket, stain) is generated as a placeholder
+ * texture so the game loop stays playable. When Oji's art lands, load it with this.load.image(...)
+ * under the same texture key and delete the matching make* call.
  */
 export class PreloadScene extends Phaser.Scene {
   constructor() {
@@ -12,13 +15,12 @@ export class PreloadScene extends Phaser.Scene {
   }
 
   preload(): void {
-    // TODO(assets): this.load.image('capsule', 'assets/capsule.webp'), etc.
+    for (const key of IMAGES) this.load.image(key, `assets/${key}.webp`);
   }
 
   create(): void {
-    this.makeCircle('capsule', 0xffa31a, 44);
-    this.makeCircle('stain', 0x2b2b2b, 44);
-    this.makeCircle('decoy', 0xff6b6b, 44);
+    // TODO(art, Oji): stain enemy and basket. Placeholders for now.
+    this.makeCircle('stain', 0x2b2b2b, 75);
     this.makeBasket('basket');
     this.scene.start(SceneKey.Attract);
   }
