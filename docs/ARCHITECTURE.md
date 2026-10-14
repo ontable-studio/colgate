@@ -51,10 +51,14 @@ Idb caveat: a transaction auto-closes if you await unrelated async work (e.g. `f
 - PWA (`vite-plugin-pwa`, `autoUpdate`) precaches the build so the game runs offline. Asset types must be listed in `workbox.globPatterns` (`vite.config.ts`) or they will not be cached.
 - `navigator.storage.persist()` is requested to reduce the chance the TV evicts stored plays.
 
+## Operator (admin) screen
+
+Press and hold the invisible top-left corner of the Attract screen for 2 s. Shows device id, version, online state, sync on/off, plays and pending counts, last sync and error. Buttons: SYNC NOW (flush the queue immediately), EXPORT CSV (`domain/csv.ts`, UTF-8 BOM so Excel opens it; some TV browsers block downloads, so test this on the real TV), RESET DATA (two taps within 4 s, deletes all local plays) and BACK. Idle for 30 s returns to Attract. There is no PIN: it relies on the hidden hotspot, so do not rely on it to protect personal data.
+
 ## Testing
 
 Vitest in a Node environment. Only non-Phaser code is unit tested (`domain`, `services`); IndexedDB is provided by `fake-indexeddb`. Scenes are verified manually on a real screen, see the TV checklist in PLAN.md.
 
 ## Not built yet (see PLAN.md)
 
-Remaining art (basket, stain enemy, UI), hidden admin menu (sync status, CSV export), final end-screen animation, audio.
+Remaining art (basket, stain enemy, UI), final end-screen animation, audio.

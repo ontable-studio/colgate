@@ -3,6 +3,9 @@ import { GAME_HEIGHT, GAME_WIDTH } from '@/config/game';
 import { createButton } from '@/ui/button';
 import { SceneKey } from './keys';
 
+const ADMIN_HOTSPOT_SIZE = 220;
+const ADMIN_HOLD_MS = 2000;
+
 /** Looping idle screen that invites people to play. Everything else returns here when idle. */
 export class AttractScene extends Phaser.Scene {
   constructor() {
@@ -29,6 +32,7 @@ export class AttractScene extends Phaser.Scene {
       .setOrigin(0.5);
 
     this.addHero(cx);
+    this.addAdminHotspot();
 
     const cta = createButton(this, cx, GAME_HEIGHT - 330, 'PLAY NOW', () => {
       // Fullscreen needs a user gesture, so request it from the first tap. Best effort.
@@ -42,6 +46,27 @@ export class AttractScene extends Phaser.Scene {
       this.scene.start(SceneKey.HowToPlay);
     });
     this.tweens.add({ targets: cta, scale: 1.06, yoyo: true, repeat: -1, duration: 700 });
+  }
+
+  /** Invisible top-left corner: press and hold for 2 s to open the operator screen. */
+  private addAdminHotspot(): void {
+    let timer: Phaser.Time.TimerEvent | undefined;
+    const cancel = (): void => {
+      timer?.remove(false);
+      timer = undefined;
+    };
+    this.add
+      .zone(0, 0, ADMIN_HOTSPOT_SIZE, ADMIN_HOTSPOT_SIZE)
+      .setOrigin(0)
+      .setInteractive()
+      .on('pointerdown', () => {
+        cancel();
+        timer = this.time.delayedCall(ADMIN_HOLD_MS, () => {
+          this.scene.start(SceneKey.Admin);
+        });
+      })
+      .on('pointerup', cancel)
+      .on('pointerout', cancel);
   }
 
   /** Hero: tube with a slow glow behind it and capsules floating around it. */

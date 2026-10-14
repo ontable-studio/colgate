@@ -47,6 +47,15 @@ describe('PlaysRepository', () => {
     expect((await repo.all()).find((p) => p.id === a.id)?.syncStatus).toBe('synced');
   });
 
+  it('counts and clears all plays', async () => {
+    await repo.add(play());
+    await repo.add(play());
+    expect(await repo.count()).toBe(2);
+    await repo.clear();
+    expect(await repo.count()).toBe(0);
+    expect(await repo.pendingCount()).toBe(0);
+  });
+
   it('ignores unknown ids when marking synced', async () => {
     await expect(repo.markSynced(['nope'])).resolves.toBeUndefined();
   });

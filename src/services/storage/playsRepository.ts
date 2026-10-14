@@ -40,4 +40,13 @@ export class PlaysRepository {
   async all(): Promise<PlayRecord[]> {
     return this.db.getAll('plays');
   }
+
+  async count(): Promise<number> {
+    return this.db.count('plays');
+  }
+
+  /** Delete every stored play (admin reset). */
+  async clear(): Promise<void> {
+    await this.db.clear('plays');
+  }
 }

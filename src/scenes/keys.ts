@@ -7,6 +7,7 @@ export const SceneKey = {
   Unlock: 'Unlock',
   Initials: 'Initials',
   Result: 'Result',
+  Admin: 'Admin',
 } as const;
 
 export type SceneKey = (typeof SceneKey)[keyof typeof SceneKey];
@@ -20,4 +21,5 @@ export const IDLE_RESET_SCENES: readonly SceneKey[] = [
   SceneKey.HowToPlay,
   SceneKey.Initials,
   SceneKey.Result,
+  SceneKey.Admin,
 ];
