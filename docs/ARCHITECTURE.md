@@ -58,6 +58,18 @@ Idb caveat: a transaction auto-closes if you await unrelated async work (e.g. `f
 - Each scene documents its vertical layout in a comment block (which y-range belongs to which element). Keep elements in their own ranges so nothing collides.
 - In dev (`pnpm dev`) the game is exposed as `window.__game`, so from the browser console you can jump to any screen, e.g. `__game.scene.getScenes(true)[0].scene.start('Result', { result: { score: 205, meterPct: 62, catches: 14, hits: 3, durationSec: 40 }, initials: 'ABC' })`, and measure element bounds to look for overlaps.
 
+## Sound
+
+All audio is synthesised by `tools/generate-audio/generate_audio.py` (no samples), so it is royalty free and reproducible: 14 effects and two music loops, each written as OGG (gapless loops) and MP3 (fallback for TV browsers without Vorbis) into `public/assets/audio/`.
+
+- **Direction:** bright and clean like the product. Rewards are high, short and rising (glass bells); penalties are low and dull but never harsh; music stays well below the effects.
+- **Music:** `bgm-attract` (92 BPM, 8 bars, calm and sparkling) plays on Attract, How to Play, Initials and Result. `bgm-game` (124 BPM, 16 bars, four sections that build up) plays during a round and cross-fades in and out.
+- **Moments:** button taps, keyboard keys (with random pitch jitter), catch (a streak of capsules climbs one semitone each, up to 8), stain and decoy hits, last-5-seconds ticks (rising pitch), time-up, the Unlock stinger (its chord is timed to the sparkle burst), score count ticks and the Result jingle.
+- **Code:** `config/audio.ts` lists keys and relative volumes; `domain/audioSettings.ts` is the testable logic (settings parsing, volume steps, combo pitch); `audio/audioManager.ts` wraps Phaser's sound manager (music cross-fades, mute and master volume saved in localStorage); scenes call the safe `audio` facade from `audio/index.ts`.
+- **Operator:** the admin screen has SOUND ON/OFF and a VOLUME button (25, 50, 75, 100%).
+- **Autoplay:** browsers only allow sound after the first touch. Effects before that are dropped, and music starts on the first tap (PLAY NOW). For attract music with nobody touching the screen, launch the booth browser with `--autoplay-policy=no-user-gesture-required`.
+- **Changing the sound:** edit the generator (tempo, chords, patterns and levels are plain constants at the top of each function) and re-run it; the random seed is fixed, so output is identical between runs.
+
 ## Operator (admin) screen
 
 Press and hold the invisible top-left corner of the Attract screen for 2 s. Shows device id, version, online state, sync on/off, plays and pending counts, last sync and error. Buttons: SYNC NOW (flush the queue immediately), EXPORT CSV (`domain/csv.ts`, UTF-8 BOM so Excel opens it; some TV browsers block downloads, so test this on the real TV), RESET DATA (two taps within 4 s, deletes all local plays) and BACK. Idle for 30 s returns to Attract. There is no PIN: it relies on the hidden hotspot, so do not rely on it to protect personal data.
@@ -68,4 +80,4 @@ Vitest in a Node environment. Only non-Phaser code is unit tested (`domain`, `se
 
 ## Not built yet (see PLAN.md)
 
-Remaining art (basket, stain enemy, UI), final end-screen animation, audio.
+Remaining art (basket, stain enemy, UI) and the final end-screen animation.

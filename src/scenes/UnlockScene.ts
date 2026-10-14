@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { audio } from '@/audio';
 import { GAME_WIDTH } from '@/config/game';
 import type { SessionResult } from '@/domain/session';
 import { addArt } from '@/ui/art/canvas';
@@ -30,6 +31,9 @@ export class UnlockScene extends Phaser.Scene {
     const cx = GAME_WIDTH / 2;
     const cy = 1130;
     fadeIn(this);
+    audio.stopMusic(300);
+    // The chord inside the stinger lands about 0.9 s in; start it so it meets the sparkle burst.
+    this.time.delayedCall(300, () => audio.playSfx('sfx-unlock'));
     addBackground(this);
     addSparkles(this, 16, { x: 60, y: 560, width: 960, height: 1150 });
     addHeader(this, false);

@@ -41,6 +41,8 @@ export function createKeyboard(
           width: KEY_SIZE,
           height: KEY_SIZE,
           fontSize: 56,
+          sound: 'sfx-key',
+          pitchJitter: 90,
         }),
       );
     });
@@ -50,6 +52,7 @@ export function createKeyboard(
           width: KEY_SIZE,
           height: KEY_SIZE,
           fontSize: 40,
+          sound: 'sfx-key-del',
         }),
       );
     }

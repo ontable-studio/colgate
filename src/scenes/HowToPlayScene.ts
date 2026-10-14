@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { audio } from '@/audio';
 import { GAME_WIDTH } from '@/config/game';
 import { addArt } from '@/ui/art/canvas';
 import { createButton } from '@/ui/button';
@@ -22,6 +23,7 @@ export class HowToPlayScene extends Phaser.Scene {
   create(): void {
     const cx = GAME_WIDTH / 2;
     fadeIn(this);
+    audio.playMusic('bgm-attract');
     addBackground(this);
     addSparkles(this, 8, { x: 40, y: 420, width: 1000, height: 1300 });
     addHeader(this);
@@ -29,11 +31,17 @@ export class HowToPlayScene extends Phaser.Scene {
 
     // Each card slides in from alternating sides, one after the other.
     const rows = [this.rowDrag(ROW_Y[0]), this.rowCatch(ROW_Y[1]), this.rowAvoid(ROW_Y[2])];
-    rows.forEach((row, i) => slideIn(this, row, i % 2 === 0 ? -460 : 460, 220 + i * 170));
+    rows.forEach((row, i) => {
+      slideIn(this, row, i % 2 === 0 ? -460 : 460, 220 + i * 170);
+      this.time.delayedCall(220 + i * 170, () =>
+        audio.playSfx('sfx-whoosh', { volume: 1 - i * 0.2 }),
+      );
+    });
 
     // The basket, gently swaying, shows what the player will be moving.
     const basket = this.add.image(cx, BASKET_Y, 'basket').setDisplaySize(300, 194);
     popIn(this, basket, 760);
+    this.time.delayedCall(760, () => audio.playSfx('sfx-pop'));
     this.time.delayedCall(1300, () => {
       this.tweens.add({
         targets: basket,
@@ -51,7 +59,7 @@ export class HowToPlayScene extends Phaser.Scene {
       BUTTON_Y,
       "LET'S PLAY!",
       () => this.scene.start(SceneKey.Gameplay),
-      { width: 760, height: 150, fontSize: 62, variant: 'gold' },
+      { width: 760, height: 150, fontSize: 62, variant: 'gold', sound: 'sfx-ui-start' },
     );
     popIn(this, start, 900);
     this.time.delayedCall(1500, () => {

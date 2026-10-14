@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { audio } from '@/audio';
 import { GAME_WIDTH } from '@/config/game';
 import {
   appendInitial,
@@ -38,6 +39,7 @@ export class InitialsScene extends Phaser.Scene implements IdleAware {
   create(): void {
     const cx = GAME_WIDTH / 2;
     fadeIn(this);
+    audio.playMusic('bgm-attract', 1200);
     addBackground(this);
     addSparkles(this, 8, { x: 40, y: 300, width: 1000, height: 600 });
     addHeader(this, false);

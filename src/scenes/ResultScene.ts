@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { audio } from '@/audio';
 import { getServices } from '@/app/container';
 import { env } from '@/config/env';
 import { GAME_WIDTH } from '@/config/game';
@@ -41,6 +42,7 @@ export class ResultScene extends Phaser.Scene {
   create(): void {
     const cx = GAME_WIDTH / 2;
     fadeIn(this);
+    audio.playMusic('bgm-attract', 1200);
     addBackground(this);
     addConfetti(this);
     addSparkles(this, 10, { x: 40, y: 260, width: 1000, height: 700 });
@@ -79,7 +81,14 @@ export class ResultScene extends Phaser.Scene {
       1765,
       'PLAY AGAIN',
       () => this.scene.start(SceneKey.Gameplay),
-      { width: 760, height: 140, fontSize: 58, icon: 'ico-replay-red', variant: 'gold' },
+      {
+        width: 760,
+        height: 140,
+        fontSize: 58,
+        icon: 'ico-replay-red',
+        variant: 'gold',
+        sound: 'sfx-ui-start',
+      },
     );
     popIn(this, again, 1100);
     this.time.delayedCall(1700, () => {
@@ -107,7 +116,27 @@ export class ResultScene extends Phaser.Scene {
       )
       .setOrigin(0.5);
     countUp(this, score, this.result.score, 1000, 250);
-    this.time.delayedCall(1300, () => bump(this, score, 1.12, 140));
+    this.playCountTicks();
+    this.time.delayedCall(1300, () => {
+      bump(this, score, 1.12, 140);
+      audio.playSfx('sfx-result');
+    });
+  }
+
+  /** A run of soft ticks, rising in pitch, while the score counts up. */
+  private playCountTicks(): void {
+    const ticks = 14;
+    let i = 0;
+    this.time.delayedCall(250, () => {
+      this.time.addEvent({
+        delay: 1000 / ticks,
+        repeat: ticks - 1,
+        callback: () => {
+          audio.playSfx('sfx-count', { detune: i * 35 });
+          i += 1;
+        },
+      });
+    });
   }
 
   /** Brightness meter that fills up to the final value, with the percentage counting along. */

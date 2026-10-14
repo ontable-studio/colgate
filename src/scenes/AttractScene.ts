@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { audio } from '@/audio';
 import { GAME_WIDTH } from '@/config/game';
 import { addArt } from '@/ui/art/canvas';
 import { createButton } from '@/ui/button';
@@ -28,6 +29,7 @@ export class AttractScene extends Phaser.Scene {
   create(): void {
     const cx = GAME_WIDTH / 2;
     fadeIn(this);
+    audio.playMusic('bgm-attract');
     addBackground(this);
     addSparkles(this, 14, { x: 60, y: 440, width: 960, height: 1200 });
     this.addHero();
@@ -61,7 +63,14 @@ export class AttractScene extends Phaser.Scene {
         }
         this.scene.start(SceneKey.HowToPlay);
       },
-      { width: 760, height: 170, fontSize: 68, icon: 'ico-play-red', variant: 'gold' },
+      {
+        width: 760,
+        height: 170,
+        fontSize: 68,
+        icon: 'ico-play-red',
+        variant: 'gold',
+        sound: 'sfx-ui-start',
+      },
     );
     this.tweens.add({ targets: cta, scale: 1.04, yoyo: true, repeat: -1, duration: 800 });
   }
@@ -74,6 +83,7 @@ export class AttractScene extends Phaser.Scene {
     const title = addArt(this, cx, RING_Y, 'title-game').setAngle(-4);
     title.setScale(title.scale * 0.82);
     popIn(this, title, 150, 0.5);
+    this.time.delayedCall(150, () => audio.playSfx('sfx-pop'));
     this.time.delayedCall(900, () => {
       this.tweens.add({
         targets: title,

@@ -1,6 +1,8 @@
 import Phaser from 'phaser';
+import { audio } from '@/audio';
 import { GAME_WIDTH, RULES, type FallingKind } from '@/config/game';
 import { pickKind } from '@/domain/spawn';
+import { comboDetune } from '@/domain/audioSettings';
 import { GameSession } from '@/domain/session';
 import { addArt } from '@/ui/art/canvas';
 import { DECOY_TEXTURES } from '@/ui/art/objects';
@@ -31,6 +33,7 @@ export class GameplayScene extends Phaser.Scene {
   private lastScore = 0;
   private lastSecs = 0;
   private lastBasketX = GAME_WIDTH / 2;
+  private combo = 0;
 
   constructor() {
     super(SceneKey.Gameplay);
@@ -43,8 +46,10 @@ export class GameplayScene extends Phaser.Scene {
     this.lastScore = 0;
     this.lastSecs = RULES.durationSec;
     this.lastBasketX = GAME_WIDTH / 2;
+    this.combo = 0;
 
     fadeIn(this);
+    audio.playMusic('bgm-game');
     addBackground(this, 'bg-play');
     this.addHud();
     this.addHint();
@@ -95,6 +100,8 @@ export class GameplayScene extends Phaser.Scene {
     this.updateHud();
 
     if (this.session.isOver) {
+      audio.stopMusic(500);
+      if (this.session.meterPct < 100) audio.playSfx('sfx-timeup', { volume: 0.8 });
       this.scene.start(SceneKey.Unlock, { result: this.session.result() });
     }
   }
@@ -115,6 +122,8 @@ export class GameplayScene extends Phaser.Scene {
       if (secs <= TIMER_WARNING_SECS) {
         this.timerText.setColor('#FF9C8A');
         bump(this, this.timerText, 1.22, 160);
+        // The last seconds tick higher in pitch as they run out.
+        audio.playSfx('sfx-tick', { detune: (TIMER_WARNING_SECS - secs) * 70 });
       }
     }
 
@@ -197,8 +206,11 @@ export class GameplayScene extends Phaser.Scene {
     bump(this, this.basket, 1.06, 90);
     const points = RULES.points[kind];
     const label = `${points > 0 ? '+' : ''}${points}`;
+    this.combo = kind === 'capsule' ? this.combo + 1 : 0;
 
     if (kind === 'capsule') {
+      // Capsules caught in a row climb the scale one semitone at a time.
+      audio.playSfx('sfx-catch', { detune: comboDetune(this.combo) });
       const burst = addGlow(this, x, y, 120, 1);
       this.tweens.add({
         targets: burst,
@@ -212,10 +224,12 @@ export class GameplayScene extends Phaser.Scene {
       floatText(this, x, y - 70, label, COLORS.goldLight);
       this.meter.pulse();
     } else if (kind === 'stain') {
+      audio.playSfx('sfx-stain');
       shards(this, x, y);
       this.cameras.main.shake(140, 0.006);
       floatText(this, x, y - 70, label, '#FF8A7A');
     } else {
+      audio.playSfx('sfx-decoy');
       floatText(this, x, y - 70, label, '#FFC4B8');
     }
   }

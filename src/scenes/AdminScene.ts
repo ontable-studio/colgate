@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { audio } from '@/audio';
 import { getServices } from '@/app/container';
 import { env } from '@/config/env';
 import { GAME_WIDTH } from '@/config/game';
@@ -17,6 +18,8 @@ export class AdminScene extends Phaser.Scene {
   private info!: Phaser.GameObjects.Text;
   private message!: Phaser.GameObjects.Text;
   private resetLabel!: Phaser.GameObjects.Text;
+  private soundLabel!: Phaser.GameObjects.Text;
+  private volumeLabel!: Phaser.GameObjects.Text;
   private resetArmed = false;
 
   constructor() {
@@ -46,11 +49,25 @@ export class AdminScene extends Phaser.Scene {
     const button = (y: number, label: string, onClick: () => void) =>
       createButton(this, cx, y, label, onClick, { width: 720, height: 130, fontSize: 48 });
 
-    button(1030, 'SYNC NOW', () => void this.syncNow());
-    button(1190, 'EXPORT CSV', () => void this.exportCsv());
-    const reset = button(1350, 'RESET DATA', () => void this.resetData());
+    button(990, 'SYNC NOW', () => void this.syncNow());
+    button(1125, 'EXPORT CSV', () => void this.exportCsv());
+    const reset = button(1260, 'RESET DATA', () => void this.resetData());
     this.resetLabel = reset.getAt<Phaser.GameObjects.Text>(1);
-    button(1580, 'BACK', () => {
+    const sound = button(1395, '', () => {
+      audio.toggleMuted();
+      this.updateSoundLabels();
+      void this.refresh();
+    });
+    this.soundLabel = sound.getAt<Phaser.GameObjects.Text>(1).setOrigin(0.5).setX(0);
+    const volume = button(1530, '', () => {
+      audio.cycleVolume();
+      audio.playSfx('sfx-catch'); // preview at the new level
+      this.updateSoundLabels();
+      void this.refresh();
+    });
+    this.volumeLabel = volume.getAt<Phaser.GameObjects.Text>(1).setOrigin(0.5).setX(0);
+    this.updateSoundLabels();
+    button(1690, 'BACK', () => {
       this.scene.start(SceneKey.Attract);
     });
 
@@ -82,8 +99,19 @@ export class AdminScene extends Phaser.Scene {
       ['LAST SYNC', status?.lastSyncAt ? status.lastSyncAt.slice(0, 19).replace('T', ' ') : '-'],
       ['LAST ERROR', status?.lastError ? status.lastError.slice(0, 30) : '-'],
       ['STORAGE', persisted ? 'persistent' : 'best effort'],
+      [
+        'SOUND',
+        audio.settings.muted ? 'muted' : `on, volume ${Math.round(audio.settings.volume * 100)}%`,
+      ],
     ];
     this.info.setText(rows.map(([k, v]) => `${k.padEnd(11)}${v}`).join('\n'));
+  }
+
+  /** Buttons show the current state; pressing one changes it. */
+  private updateSoundLabels(): void {
+    const { muted, volume } = audio.settings;
+    this.soundLabel.setText(muted ? 'SOUND: OFF' : 'SOUND: ON');
+    this.volumeLabel.setText(`VOLUME ${Math.round(volume * 100)}%`);
   }
 
   private async syncNow(): Promise<void> {

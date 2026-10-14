@@ -67,3 +67,7 @@ Google Sheet setup: [docs/apps-script/README.md](docs/apps-script/README.md).
 - Brand font: Colgate Ready (Light, Bold, Bold Italic) is in `public/assets/fonts/` and loaded in `src/style.css`; `src/main.ts` waits for it before the game starts.
 - Brand colours come from the client's palette file (`COLGATE COLOR.ai`): red `#ED1C24`, orange `#F37021`, gold `#FDB415` (see `src/ui/theme.ts`).
 - The PWA icons in `public/icons/` are solid-colour placeholders.
+
+## Sound
+
+Music and effects are generated, not recorded: `pip install -r tools/generate-audio/requirements.txt` then `python tools/generate-audio/generate_audio.py --report` (writes OGG + MP3 to `public/assets/audio/` and prints levels). Volumes per effect live in `src/config/audio.ts`; the operator can mute or change the master volume on the admin screen. See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md#sound) for the sound design and the browser autoplay note.
