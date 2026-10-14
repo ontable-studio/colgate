@@ -1,0 +1,23 @@
+# Dependencies & build
+node_modules/
+dist/
+dev-dist/
+coverage/
+*.tsbuildinfo
+
+# Env
+.env
+.env.*
+!.env.example
+
+# Raw client assets (CMYK/PSD/AI/zip, ~14 GB) - never commit. Export game-ready assets to public/assets instead.
+.resources/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+
+# Logs
+*.log
+pnpm-debug.log*
