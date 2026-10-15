@@ -4,6 +4,7 @@ import { GAME_WIDTH } from '@/config/game';
 import { addArt } from '@/ui/art/canvas';
 import { createButton } from '@/ui/button';
 import { addBackground, addGlow, addHeader, addSparkles } from '@/ui/effects';
+import { addHomeButton } from '@/ui/homeButton';
 import { fadeIn, popIn, slideIn } from '@/ui/motion';
 import { createPanel } from '@/ui/panel';
 import { textStyle } from '@/ui/theme';
@@ -27,6 +28,7 @@ export class HowToPlayScene extends Phaser.Scene {
     addBackground(this);
     addSparkles(this, 8, { x: 40, y: 420, width: 1000, height: 1300 });
     addHeader(this);
+    addHomeButton(this);
     popIn(this, addArt(this, cx, 520, 'title-how'), 100, 0.8);
 
     // Each card slides in from alternating sides, one after the other.

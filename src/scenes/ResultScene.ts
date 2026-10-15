@@ -10,6 +10,7 @@ import { createButton } from '@/ui/button';
 import { addBackground, addConfetti, addGlow, addHeader, addSparkles } from '@/ui/effects';
 import { createMeter } from '@/ui/meter';
 import { bump, countUp, fadeIn, float, popIn, slideIn } from '@/ui/motion';
+import { addHomeButton } from '@/ui/homeButton';
 import { createPanel } from '@/ui/panel';
 import { COLORS, textStyle } from '@/ui/theme';
 import type { ResultSceneData } from './data';
@@ -47,6 +48,7 @@ export class ResultScene extends Phaser.Scene {
     addConfetti(this);
     addSparkles(this, 10, { x: 40, y: 260, width: 1000, height: 700 });
     addHeader(this, false);
+    addHomeButton(this);
 
     this.addScoreCard();
     this.addDayCompare();

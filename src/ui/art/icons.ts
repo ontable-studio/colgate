@@ -51,6 +51,26 @@ export function makeIcons(scene: Phaser.Scene): void {
   drawTexture(scene, 'ico-replay', 200, 200, (ctx) => drawReplay(ctx, '#FFF1D6'));
   drawTexture(scene, 'ico-replay-red', 200, 200, (ctx) => drawReplay(ctx, '#7A0A12'));
 
+  drawTexture(scene, 'ico-home', 200, 200, (ctx) => {
+    ctx.fillStyle = '#FFF1D6';
+    ctx.strokeStyle = '#FFF1D6';
+    ctx.lineJoin = 'round';
+    ctx.lineWidth = 16;
+    // Roof.
+    ctx.beginPath();
+    ctx.moveTo(24, 104);
+    ctx.lineTo(100, 34);
+    ctx.lineTo(176, 104);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+    // Body with a door cut out.
+    ctx.fillRect(46, 100, 108, 70);
+    ctx.globalCompositeOperation = 'destination-out';
+    ctx.fillRect(84, 124, 32, 46);
+    ctx.globalCompositeOperation = 'source-over';
+  });
+
   drawTexture(scene, 'ico-stopwatch', 200, 200, (ctx) => {
     ctx.strokeStyle = '#FFFFFF';
     ctx.fillStyle = '#FFFFFF';
