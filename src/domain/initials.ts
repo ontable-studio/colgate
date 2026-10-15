@@ -19,3 +19,49 @@ export function removeLastInitial(current: string): string {
 export function finalizeInitials(current: string): string {
   return current.length > 0 ? current : EMPTY_INITIALS;
 }
+
+/**
+ * Three-letter combinations that must never appear on a brand's public leaderboard.
+ * Add to this list freely; matching is exact and case-insensitive.
+ */
+export const BLOCKED_INITIALS: ReadonlySet<string> = new Set([
+  // English
+  'ASS',
+  'SEX',
+  'FUK',
+  'FCK',
+  'FUC',
+  'DIK',
+  'DIC',
+  'COK',
+  'TIT',
+  'CUM',
+  'KKK',
+  'NZI',
+  'WTF',
+  'BCH',
+  'SHT',
+  'FAG',
+  'NIG',
+  'PIS',
+  'CNT',
+  'DMN',
+  'XXX',
+  // Indonesian
+  'AJG',
+  'ANJ',
+  'BGS',
+  'KNT',
+  'MMK',
+  'KON',
+  'JNC',
+  'TLL',
+  'NGN',
+  'PNT',
+  'CBL',
+  'BNG',
+]);
+
+export function isBlockedInitials(initials: string): boolean {
+  return BLOCKED_INITIALS.has(initials.toUpperCase());
+}

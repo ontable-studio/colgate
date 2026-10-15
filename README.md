@@ -2,7 +2,7 @@
 
 Booth touchscreen game by Ontable Studio. Portrait TV (43"/55", Full HD/4K) running in the TV browser, offline-first.
 
-See [PLAN.md](PLAN.md) for scope, schedule, assumptions and open client questions, and [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for how the code is organised.
+See [docs/INSTALL.md](docs/INSTALL.md) for the on-site installation and operation checklist (Indonesian), [PLAN.md](PLAN.md) for scope, schedule, assumptions and open client questions, and [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for how the code is organised.
 
 ## Stack
 

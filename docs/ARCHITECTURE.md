@@ -70,6 +70,16 @@ All audio is synthesised by `tools/generate-audio/generate_audio.py` (no samples
 - **Autoplay:** browsers only allow sound after the first touch. Effects before that are dropped, and music starts on the first tap (PLAY NOW). For attract music with nobody touching the screen, launch the booth browser with `--autoplay-policy=no-user-gesture-required`.
 - **Changing the sound:** edit the generator (tempo, chords, patterns and levels are plain constants at the top of each function) and re-run it; the random seed is fixed, so output is identical between runs.
 
+## Resilience (unattended booth)
+
+- **Crash guard** (`app/watchdog.ts`): an uncaught error or rejected promise reloads the page back to Attract. A rate limit (`domain/reloadGuard.ts`, 3 reloads per minute) stops a bug that fails on every boot from looping; after the limit it shows "Something went wrong" and retries once the window has passed, so an unattended booth recovers by itself. WebGL context loss and a failed boot use the same path.
+- **Frame watchdog:** if the render loop stops advancing for 15 s while the page is visible, the page reloads.
+- **Safe updates** (`app/updates.ts`, `domain/updateController.ts`): the service worker uses `registerType: 'prompt'`, so a new build waits instead of replacing the running one. The page asks for updates every 10 minutes (a kiosk never navigates) and activates a waiting build only while the attract screen is showing, never mid-round. Verified end to end: held during How to Play, applied after the idle reset to Attract.
+- **Light mode** (`config/quality.ts`, `domain/lowPower.ts`): if the frame rate stays below 38 fps for five checks in a row, sparkles and confetti are cut to a third for the rest of the session. `?quality=low` forces it (useful to test on a weak TV); the admin screen shows the current quality.
+- **Initials filter** (`domain/initials.ts`): a short block list of offensive three-letter combinations. SAVE refuses them ("TRY OTHER LETTERS"); the idle timeout never loses a play and stores it as `---` instead.
+
+The operator checklist lives in [INSTALL.md](INSTALL.md).
+
 ## Operator (admin) screen
 
 Press and hold the invisible top-left corner of the Attract screen for 2 s. Shows device id, version, online state, sync on/off, plays and pending counts, last sync and error. Buttons: SYNC NOW (flush the queue immediately), EXPORT CSV (`domain/csv.ts`, UTF-8 BOM so Excel opens it; some TV browsers block downloads, so test this on the real TV), RESET DATA (two taps within 4 s, deletes all local plays) and BACK. Idle for 30 s returns to Attract. There is no PIN: it relies on the hidden hotspot, so do not rely on it to protect personal data.

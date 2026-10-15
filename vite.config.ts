@@ -21,7 +21,8 @@ export default defineConfig({
   },
   plugins: [
     VitePWA({
-      registerType: 'autoUpdate',
+      // 'prompt' = a new version waits until the app (src/app/updates.ts) says the booth is idle.
+      registerType: 'prompt',
       includeAssets: ['icons/*.png'],
       manifest: {
         name: 'Colgate Optic White Vitamin C - Catch the Brightness',

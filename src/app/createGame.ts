@@ -4,6 +4,7 @@ import { scenes } from '@/scenes';
 import { isIdleAware } from '@/scenes/idleAware';
 import { IDLE_RESET_SCENES, SceneKey } from '@/scenes/keys';
 import { IdleWatcher } from '@/services/idle/idleWatcher';
+import { reloadIfAllowed } from './watchdog';
 
 export function createGame(parent: string): Phaser.Game {
   const game = new Phaser.Game({
@@ -29,9 +30,7 @@ export function createGame(parent: string): Phaser.Game {
   // forever, so reload the page; the service worker serves it instantly even when offline.
   game.events.once(Phaser.Core.Events.READY, () => {
     game.canvas.addEventListener('webglcontextlost', () => {
-      setTimeout(() => {
-        location.reload();
-      }, 1000);
+      reloadIfAllowed('WebGL context lost');
     });
   });
 

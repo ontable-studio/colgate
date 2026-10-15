@@ -4,6 +4,7 @@ import { GAME_WIDTH } from '@/config/game';
 import {
   appendInitial,
   finalizeInitials,
+  isBlockedInitials,
   MAX_INITIALS,
   removeLastInitial,
 } from '@/domain/initials';
@@ -24,6 +25,7 @@ export class InitialsScene extends Phaser.Scene implements IdleAware {
   private initials = '';
   private submitted = false;
   private slots: Phaser.GameObjects.Text[] = [];
+  private notice!: Phaser.GameObjects.Text;
 
   constructor() {
     super(SceneKey.Initials);
@@ -72,6 +74,11 @@ export class InitialsScene extends Phaser.Scene implements IdleAware {
     }
     this.refresh();
 
+    this.notice = this.add
+      .text(cx, 872, '', textStyle({ size: 38, color: '#FFB3A0' }))
+      .setOrigin(0.5)
+      .setAlpha(0);
+
     createKeyboard(this, cx, 960, {
       onLetter: (letter) => {
         const before = this.initials.length;
@@ -86,7 +93,7 @@ export class InitialsScene extends Phaser.Scene implements IdleAware {
       },
     });
 
-    const save = createButton(this, cx, 1745, 'SAVE', () => this.submit(), {
+    const save = createButton(this, cx, 1745, 'SAVE', () => this.submit(false), {
       width: 640,
       height: 150,
       fontSize: 60,
@@ -97,7 +104,7 @@ export class InitialsScene extends Phaser.Scene implements IdleAware {
 
   /** Idle: do not lose the play, save with whatever was typed (or the placeholder). */
   onIdle(): void {
-    this.submit();
+    this.submit(true);
   }
 
   private refresh(): void {
@@ -119,12 +126,39 @@ export class InitialsScene extends Phaser.Scene implements IdleAware {
     }
   }
 
-  private submit(): void {
+  /** `force` (idle) never blocks: a blocked combination is saved as the placeholder instead. */
+  private submit(force: boolean): void {
     if (this.submitted) return;
+    if (isBlockedInitials(this.initials)) {
+      if (!force) {
+        this.rejectInitials();
+        return;
+      }
+      this.initials = '';
+    }
     this.submitted = true;
     this.scene.start(SceneKey.Result, {
       result: this.result,
       initials: finalizeInitials(this.initials),
     } satisfies ResultSceneData);
+  }
+
+  /** Shake the letters and ask for different ones when the combination is not allowed. */
+  private rejectInitials(): void {
+    audio.playSfx('sfx-decoy');
+    this.tweens.killTweensOf(this.notice);
+    this.notice.setText('TRY OTHER LETTERS').setAlpha(1);
+    this.tweens.add({ targets: this.notice, alpha: 0, delay: 1600, duration: 400 });
+    for (const slot of this.slots) {
+      const x = slot.x;
+      this.tweens.add({
+        targets: slot,
+        x: { from: x - 14, to: x + 14 },
+        yoyo: true,
+        repeat: 2,
+        duration: 55,
+        onComplete: () => slot.setX(x),
+      });
+    }
   }
 }

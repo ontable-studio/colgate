@@ -1,10 +1,17 @@
 import './style.css';
-import { registerSW } from 'virtual:pwa-register';
 import { initServices } from '@/app/container';
 import { createGame } from '@/app/createGame';
+import { initUpdates } from '@/app/updates';
+import {
+  installCrashGuard,
+  installFpsMonitor,
+  installFrameWatchdog,
+  reloadIfAllowed,
+} from '@/app/watchdog';
+import { SceneKey } from '@/scenes/keys';
 
-// Offline support + silent auto-update (new build is picked up on next reload).
-registerSW({ immediate: true });
+// Any uncaught error reloads the booth back to the attract screen (rate limited).
+installCrashGuard();
 
 async function bootstrap(): Promise<void> {
   // Canvas-drawn art uses the brand font, so it must be loaded before any texture is generated.
@@ -14,7 +21,11 @@ async function bootstrap(): Promise<void> {
     document.fonts.load('italic 700 48px "Colgate Ready"'),
   ]);
   await initServices();
-  createGame('game');
+  const game = createGame('game');
+  installFrameWatchdog(game);
+  installFpsMonitor(game);
+  // Offline support + auto-update that only applies while the attract screen is showing.
+  initUpdates(() => game.scene.isActive(SceneKey.Attract));
 }
 
-void bootstrap();
+bootstrap().catch((error: unknown) => reloadIfAllowed(`boot failed: ${String(error)}`));

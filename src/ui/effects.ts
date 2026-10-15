@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { quality } from '@/config/quality';
 import { addArt } from './art/canvas';
 import { GAME_HEIGHT, GAME_WIDTH } from '@/config/game';
 
@@ -33,7 +34,7 @@ export function addSparkles(
   count: number,
   area: { x: number; y: number; width: number; height: number },
 ): void {
-  for (let i = 0; i < count; i++) {
+  for (let i = 0; i < quality.count(count); i++) {
     const size = Phaser.Math.Between(26, 60);
     const star = addArt(
       scene,
@@ -61,7 +62,7 @@ const CONFETTI_TINTS = [0xffffff, 0xffe08a, 0xffb52e] as const;
 
 /** Gold confetti drifting down the whole screen on a loop (add it before the UI so it sits behind). */
 export function addConfetti(scene: Phaser.Scene, count = 26): void {
-  for (let i = 0; i < count; i++) {
+  for (let i = 0; i < quality.count(count); i++) {
     const x = Math.random() * GAME_WIDTH;
     const piece = scene.add
       .image(x, -60, 'confetti')

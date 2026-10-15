@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import { audio } from '@/audio';
 import { getServices } from '@/app/container';
 import { env } from '@/config/env';
+import { quality } from '@/config/quality';
 import { GAME_WIDTH } from '@/config/game';
 import { playsToCsv } from '@/domain/csv';
 import { createButton } from '@/ui/button';
@@ -103,6 +104,7 @@ export class AdminScene extends Phaser.Scene {
         'SOUND',
         audio.settings.muted ? 'muted' : `on, volume ${Math.round(audio.settings.volume * 100)}%`,
       ],
+      ['QUALITY', quality.isLow ? 'low (light effects)' : 'normal'],
     ];
     this.info.setText(rows.map(([k, v]) => `${k.padEnd(11)}${v}`).join('\n'));
   }
