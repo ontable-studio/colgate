@@ -101,10 +101,12 @@ export class ResultScene extends Phaser.Scene {
   /** Score card (left column). The number counts up, then pops. */
   private addScoreCard(): void {
     createPanel(this, LEFT_X, 410, 560, 250);
+    // The extra line of the time bonus makes the block taller, so lift it to stay centred in the card.
+    const dy = this.result.timeBonus > 0 ? -17 : 0;
     this.add
       .text(
-        LEFT_X,
-        345,
+        LEFT_X + 3, // letter spacing leaves a trailing gap, nudge to look centred
+        345 + dy,
         'YOUR SCORE',
         textStyle({ size: 38, letterSpacing: 6, color: COLORS.cream }),
       )
@@ -112,7 +114,7 @@ export class ResultScene extends Phaser.Scene {
     const score = this.add
       .text(
         LEFT_X,
-        432,
+        432 + dy,
         '0',
         textStyle({ size: 130, color: COLORS.goldLight, glow: 'rgba(255,170,60,0.9)' }),
       )
@@ -122,8 +124,8 @@ export class ResultScene extends Phaser.Scene {
     if (this.result.timeBonus > 0) {
       const bonus = this.add
         .text(
-          LEFT_X,
-          513,
+          LEFT_X + 1,
+          513 + dy,
           `INCLUDES TIME BONUS +${this.result.timeBonus}`,
           textStyle({ size: 28, letterSpacing: 2, color: COLORS.goldSoft }),
         )
