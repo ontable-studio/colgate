@@ -209,9 +209,9 @@ export function makeObjects(scene: Phaser.Scene): void {
     ctx.fill();
 
     // Wordmark.
-    const logo = scene.textures.get('logo-colgate').getSourceImage() as CanvasImageSource;
+    const logo = scene.textures.get('logo-wordmark').getSourceImage() as CanvasImageSource;
     const logoW = 200;
-    const logoH = (logoW * 167) / 781;
+    const logoH = (logoW * 322) / 1448;
     ctx.drawImage(logo, cx - logoW / 2, 96 - logoH / 2 + 8, logoW, logoH);
   });
 }

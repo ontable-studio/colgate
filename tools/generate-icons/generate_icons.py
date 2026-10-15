@@ -37,32 +37,13 @@ def glow(size: int, color=(255, 200, 80)) -> Image.Image:
     return g.filter(ImageFilter.GaussianBlur(size * 0.12))
 
 
-def smile(draw: ImageDraw.ImageDraw, cx: float, y: float, k: float, steps: int = 40) -> None:
-    """The swoosh under the wordmark, thick in the middle, thin at both ends. Same shape as
-    the logo tab in src/ui/art/brand.ts (k = icon wordmark width / 280)."""
-
-    def bez(p0, p1, p2, t):
-        return tuple((1 - t) ** 2 * a + 2 * (1 - t) * t * b + t**2 * c for a, b, c in zip(p0, p1, p2))
-
-    p = lambda dx, dy: (cx + dx * k, y + dy * k)
-    lower = [bez(p(-96, -4), p(6, 36), p(104, -14), i / steps) for i in range(steps + 1)]
-    upper = [bez(p(104, -14), p(6, 18), p(-96, -4), i / steps) for i in range(steps + 1)]
-    draw.polygon(lower + upper, fill=(255, 255, 255, 255))
-
-
 def icon(size: int, scale: float, rounded: bool) -> Image.Image:
-    """Red tile with the white Colgate wordmark and smile. `scale` is the wordmark width relative to the tile."""
+    """Red tile with the white Colgate logo (wordmark + smile). `scale` is the logo width relative to the tile."""
     base = gradient((size, size))
     logo = asset("logo-colgate.webp")
     w = round(size * scale)
     h = round(w * logo.height / logo.width)
-    k = w / 280
-    smile_h = 36 * k  # space the swoosh takes below the wordmark
-    top = (size - (h + 12 * k + smile_h * 0.6)) / 2
-    base.alpha_composite(logo.resize((w, h), Image.LANCZOS), ((size - w) // 2, round(top)))
-    layer = Image.new("RGBA", (size * 4, size * 4), (0, 0, 0, 0))  # supersampled for smooth edges
-    smile(ImageDraw.Draw(layer), size * 2, (top + h + 12 * k) * 4, k * 4)
-    base.alpha_composite(layer.resize((size, size), Image.LANCZOS))
+    base.alpha_composite(logo.resize((w, h), Image.LANCZOS), ((size - w) // 2, (size - h) // 2))
     if rounded:
         mask = Image.new("L", (size, size), 0)
         ImageDraw.Draw(mask).rounded_rectangle((0, 0, size - 1, size - 1), radius=round(size * 0.22), fill=255)
@@ -83,13 +64,9 @@ def share_image() -> Image.Image:
     img.alpha_composite(rays)
 
     logo = asset("logo-colgate.webp")
-    lw = 300
+    lw = 230
     lh = round(lw * logo.height / logo.width)
-    img.alpha_composite(logo.resize((lw, lh), Image.LANCZOS), (70, 62))
-    layer = Image.new("RGBA", (w * 2, h * 2), (0, 0, 0, 0))
-    k = lw / 280
-    smile(ImageDraw.Draw(layer), (70 + lw / 2) * 2, (62 + lh + 12 * k) * 2, k * 2)
-    img.alpha_composite(layer.resize((w, h), Image.LANCZOS))
+    img.alpha_composite(logo.resize((lw, lh), Image.LANCZOS), (70, 50))
 
     bold = os.path.join(ASSETS, "fonts", "ColgateReady-Bold.otf")
     light = os.path.join(ASSETS, "fonts", "ColgateReady-Light.otf")
@@ -112,13 +89,13 @@ def share_image() -> Image.Image:
 
 def main() -> None:
     os.makedirs(ICONS, exist_ok=True)
-    icon(512, 0.84, True).save(os.path.join(ICONS, "icon-512.png"))
-    icon(192, 0.84, True).save(os.path.join(ICONS, "icon-192.png"))
+    icon(512, 0.68, True).save(os.path.join(ICONS, "icon-512.png"))
+    icon(192, 0.68, True).save(os.path.join(ICONS, "icon-192.png"))
     # Maskable: full-bleed background, artwork inside the 80% safe zone.
-    icon(512, 0.62, False).save(os.path.join(ICONS, "icon-maskable-512.png"))
-    icon(180, 0.84, False).convert("RGB").save(os.path.join(ICONS, "apple-touch-icon.png"))
-    icon(64, 0.9, True).resize((32, 32), Image.LANCZOS).save(os.path.join(ICONS, "favicon-32.png"))
-    icon(256, 0.9, True).save(os.path.join(ROOT, "public", "favicon.ico"), sizes=[(16, 16), (32, 32), (48, 48)])
+    icon(512, 0.5, False).save(os.path.join(ICONS, "icon-maskable-512.png"))
+    icon(180, 0.68, False).convert("RGB").save(os.path.join(ICONS, "apple-touch-icon.png"))
+    icon(64, 0.74, True).resize((32, 32), Image.LANCZOS).save(os.path.join(ICONS, "favicon-32.png"))
+    icon(256, 0.74, True).save(os.path.join(ROOT, "public", "favicon.ico"), sizes=[(16, 16), (32, 32), (48, 48)])
     share_image().save(os.path.join(ICONS, "og-image.png"), optimize=True)
     print("done")
 

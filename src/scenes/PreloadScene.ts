@@ -5,7 +5,16 @@ import { registerUiArt } from '@/ui/art';
 import { SceneKey } from './keys';
 
 /** Game-ready assets exported by tools/export-assets (texture key = file name without extension). */
-const IMAGES = ['capsule', 'tube', 'dropper', 'flare', 'tooth1', 'tooth4', 'logo-colgate'] as const;
+const IMAGES = [
+  'capsule',
+  'tube',
+  'dropper',
+  'flare',
+  'tooth1',
+  'tooth4',
+  'logo-colgate',
+  'logo-wordmark',
+] as const;
 
 /**
  * Loads the supplied art and the sound files, then draws the rest of the UI kit (backgrounds,

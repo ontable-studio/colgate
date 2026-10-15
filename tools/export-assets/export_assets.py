@@ -106,7 +106,9 @@ def main() -> None:
     # Product tube (already RGBA PNG).
     tube = Image.open(find(args.src, "CP11548-OW-Vit-C---Color-Conversion-80g-tube-Front-2.png")).convert("RGBA")
     save(fit(trim(tube), height=1200), args.out, "tube")
-    save_lossless(white_wordmark(tube), args.out, "logo-colgate")
+    # logo-colgate.webp / logo-wordmark.webp are NOT generated here any more: they come from the
+    # Colgate logo with the smile (Wikimedia Commons "Colgate.svg"), rendered white on transparent.
+    # Replace them with the official logo from the client when available.
 
     # Dropper + glow flare for the attract screen.
     save(fit(trim(read_cmyk_alpha(find(args.src, "VitC_Dropper_Main_FLAT.tif"))), height=900), args.out, "dropper")
