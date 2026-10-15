@@ -78,6 +78,7 @@ Plain random spawning and box collisions felt unfair, so the round is built from
 - `spawner.ts` schedules what falls and where. The opening is all capsules, hazards never come more than twice in a row, a hazard is due after four capsules in a row, and each object lands only where a player can reach it from the previous one in the time between them.
 - `catching.ts` decides, the frame an object's centre crosses the rim line, whether it counts: capsules are forgiving (a rim touch scores), hazards strict (only a clear drop into the bowl hits). Physics only moves the objects.
 - `session.ts` adds a time bonus when the meter fills early, which also spreads the leaderboard (without it every winner tops out near 200).
+- A combo multiplier (`RULES.combo`, streak of capsules in a row; broken by stain, decoy or a missed capsule) scales capsule points only, never the meter, so winning stays as fair as before while top scores vary widely (simulated expert 435–694). `PlaysRepository.topScores` breaks ties by faster finish, then earlier play.
 
 `tests/domain/balance.test.ts` simulates players from novice to expert over hundreds of rounds and fails if the rules become brutal, trivial or unable to tell good players apart. The player model (`tests/support/simulate.ts`) is an assumption: calibrate it with real play-tests. To see the numbers, run `BALANCE_REPORT=1 pnpm exec vitest run tests/domain/balance.test.ts --reporter=verbose`; to explore other values, `SWEEP=1 pnpm exec vitest run tests/domain/balance.sweep.test.ts --reporter=verbose`.
 

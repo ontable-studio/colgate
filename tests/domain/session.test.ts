@@ -33,7 +33,7 @@ describe('GameSession', () => {
     expect(s.meterPct).toBe(100);
     expect(s.isOver).toBe(true);
     s.catch('capsule');
-    expect(s.score).toBe(40);
+    expect(s.score).toBe(60); // 10 + 10 + 20 + 20: the third and fourth catch pay double
   });
 
   it('ends when time runs out and reports elapsed seconds', () => {
@@ -72,5 +72,57 @@ describe('time bonus', () => {
     const result = s.result();
     expect(result.timeBonus).toBe(0);
     expect(result.score).toBe(s.score);
+  });
+});
+
+describe('combo multiplier', () => {
+  const comboRules: GameRules = { ...rules, meter: { capsule: 1, stain: -1, decoy: -1 } };
+
+  it('pays more the longer the streak: x1, x1, x2 from the third capsule in a row', () => {
+    const s = new GameSession(comboRules);
+    s.catch('capsule');
+    s.catch('capsule');
+    expect(s.score).toBe(20);
+    expect(s.multiplier).toBe(1);
+    s.catch('capsule');
+    expect(s.lastPoints).toBe(20);
+    expect(s.score).toBe(40);
+    expect(s.multiplier).toBe(2);
+  });
+
+  it('climbs through every tier up to the highest', () => {
+    const s = new GameSession(comboRules);
+    for (let i = 0; i < 40; i++) s.catch('capsule');
+    expect(s.multiplier).toBe(5);
+    expect(s.lastPoints).toBe(50);
+  });
+
+  it('breaks on a stain, a decoy or a missed capsule', () => {
+    for (const breakIt of [
+      (s: GameSession) => s.catch('stain'),
+      (s: GameSession) => s.catch('decoy'),
+      (s: GameSession) => s.missCapsule(),
+    ]) {
+      const s = new GameSession(comboRules);
+      for (let i = 0; i < 6; i++) s.catch('capsule');
+      expect(s.multiplier).toBe(3);
+      breakIt(s);
+      expect(s.streak).toBe(0);
+      expect(s.multiplier).toBe(1);
+    }
+  });
+
+  it('does not multiply penalties', () => {
+    const s = new GameSession(comboRules);
+    for (let i = 0; i < 6; i++) s.catch('capsule');
+    const before = s.score;
+    s.catch('stain');
+    expect(s.score).toBe(before - 10);
+  });
+
+  it('does not change the meter', () => {
+    const s = new GameSession(comboRules);
+    for (let i = 0; i < 10; i++) s.catch('capsule');
+    expect(s.meterPct).toBe(10);
   });
 });

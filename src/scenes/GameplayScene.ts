@@ -33,6 +33,8 @@ export class GameplayScene extends Phaser.Scene {
   private lastSecs = 0;
   private lastBasketX = GAME_WIDTH / 2;
   private combo = 0;
+  private comboText!: Phaser.GameObjects.Text;
+  private lastMultiplier = 1;
 
   constructor() {
     super(SceneKey.Gameplay);
@@ -46,6 +48,7 @@ export class GameplayScene extends Phaser.Scene {
     this.lastSecs = RULES.durationSec;
     this.lastBasketX = GAME_WIDTH / 2;
     this.combo = 0;
+    this.lastMultiplier = 1;
 
     fadeIn(this);
     audio.playMusic('bgm-game');
@@ -122,6 +125,13 @@ export class GameplayScene extends Phaser.Scene {
       bump(this, this.scoreText, 1.28, 120);
     }
     this.meter.setValue(this.session.meterPct);
+
+    const multiplier = this.session.multiplier;
+    if (multiplier !== this.lastMultiplier) {
+      this.lastMultiplier = multiplier;
+      this.comboText.setText(`x${multiplier}`).setVisible(multiplier > 1);
+      if (multiplier > 1) bump(this, this.comboText, 1.5, 180);
+    }
   }
 
   /** Stopwatch + timer on the left, score on the right. */
@@ -142,8 +152,14 @@ export class GameplayScene extends Phaser.Scene {
       .text(1000, 146, '0', textStyle({ size: 90, align: 'right', glow: 'rgba(255,170,60,0.8)' }))
       .setOrigin(1, 0.5);
 
+    this.comboText = this.add
+      .text(1000, 230, 'x2', textStyle({ size: 64, align: 'right', color: COLORS.goldLight }))
+      .setOrigin(1, 0.5)
+      .setVisible(false);
+
     // Keep the HUD above falling objects.
-    for (const item of [stopwatch, this.timerText, scoreLabel, this.scoreText]) item.setDepth(10);
+    for (const item of [stopwatch, this.timerText, scoreLabel, this.scoreText, this.comboText])
+      item.setDepth(10);
   }
 
   /** "Drag left/right" hint under the basket, shown only at the start of a round. */
@@ -203,7 +219,10 @@ export class GameplayScene extends Phaser.Scene {
           this.onCaught(obj);
           continue;
         }
-        if (kind === 'capsule') this.tweens.add({ targets: obj, alpha: 0.35, duration: 120 });
+        if (kind === 'capsule') {
+          this.session.missCapsule();
+          this.tweens.add({ targets: obj, alpha: 0.35, duration: 120 });
+        }
       }
       // Anything that got past vanishes just below the basket instead of sliding over the meter.
       if (obj.y > BASKET_Y + 140) obj.destroy();
@@ -220,7 +239,7 @@ export class GameplayScene extends Phaser.Scene {
   /** Reward / penalty cue at the moment of the catch. */
   private feedback(kind: FallingKind, x: number, y: number): void {
     bump(this, this.basket, 1.06, 90);
-    const points = RULES.points[kind];
+    const points = this.session.lastPoints;
     const label = `${points > 0 ? '+' : ''}${points}`;
     this.combo = kind === 'capsule' ? this.combo + 1 : 0;
 

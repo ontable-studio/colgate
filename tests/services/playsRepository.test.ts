@@ -35,6 +35,15 @@ describe('PlaysRepository', () => {
     expect(top.map((p) => p.id)).toEqual([b.id, a.id]);
   });
 
+  it('breaks a tie by faster finish, then by earlier play', async () => {
+    const slow = play({ score: 90, durationSec: 30, timestamp: '2026-10-28T09:00:00.000Z' });
+    const fast = play({ score: 90, durationSec: 18, timestamp: '2026-10-28T10:00:00.000Z' });
+    const fastEarlier = play({ score: 90, durationSec: 18, timestamp: '2026-10-28T08:00:00.000Z' });
+    for (const p of [slow, fast, fastEarlier]) await repo.add(p);
+    const top = await repo.topScores(3);
+    expect(top.map((p) => p.id)).toEqual([fastEarlier.id, fast.id, slow.id]);
+  });
+
   it('tracks pending plays and marks them synced', async () => {
     const a = play();
     const b = play();

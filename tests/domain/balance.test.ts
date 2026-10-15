@@ -90,7 +90,7 @@ describe('balance of the current rules', () => {
     // Medians of neighbouring levels are separated by more than the noise within a level.
     expect(stats.expert.p10Score).toBeGreaterThan(stats.good.meanScore);
     expect(stats.good.p10Score).toBeGreaterThan(stats.casual.meanScore);
-    expect(stats.expert.p90Score - stats.expert.p10Score).toBeGreaterThanOrEqual(25);
+    expect(stats.expert.p90Score - stats.expert.p10Score).toBeGreaterThanOrEqual(150); // combo makes the top end vary
   });
 
   it('is clearly fairer than the first version for ordinary players', () => {

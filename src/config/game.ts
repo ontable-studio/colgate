@@ -27,6 +27,9 @@ export interface GameRules {
   readonly meter: Readonly<Record<FallingKind, number>>;
   /** Filling the meter early ends the round and pays this many points per second left. */
   readonly timeBonusPerSec: number;
+  /** Capsules caught in a row multiply their points: the highest tier whose `streak` is reached
+   *  applies. A stain, a decoy or a missed capsule breaks the streak. Sorted by `streak`. */
+  readonly combo: readonly { readonly streak: number; readonly multiplier: number }[];
   readonly spawn: {
     /** Difficulty curve: starts gentle, ends brisk. Must be sorted by `at`. */
     readonly stages: readonly Stage[];
@@ -75,6 +78,12 @@ export const RULES: GameRules = {
   points: { capsule: 10, stain: -10, decoy: -5 },
   meter: { capsule: 6, stain: -5, decoy: -3 },
   timeBonusPerSec: 8,
+  combo: [
+    { streak: 3, multiplier: 2 },
+    { streak: 6, multiplier: 3 },
+    { streak: 10, multiplier: 4 },
+    { streak: 15, multiplier: 5 },
+  ],
   spawn: {
     stages: [
       { at: 0, intervalMs: 900, fallSpeed: 480, hazardShare: 0.2 },

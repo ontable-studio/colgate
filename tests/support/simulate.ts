@@ -91,6 +91,7 @@ export function simulateRound(
         ? rollsOk < chances.catchRate
         : rollsOk < (kind === 'stain' ? chances.stainHit : chances.decoyHit);
     if (happens) session.catch(kind);
+    else if (kind === 'capsule') session.missCapsule();
   }
   if (!session.isOver) session.tick(totalMs - clock);
 

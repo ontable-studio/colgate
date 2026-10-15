@@ -8,11 +8,16 @@ export class PlaysRepository {
     await this.db.put('plays', play);
   }
 
-  /** Highest scores first; ties go to the earlier play. */
+  /** Highest scores first; a tie goes to the faster finish, then the earlier play. */
   async topScores(limit: number): Promise<PlayRecord[]> {
     const all = await this.db.getAll('plays');
     return all
-      .sort((a, b) => b.score - a.score || a.timestamp.localeCompare(b.timestamp))
+      .sort(
+        (a, b) =>
+          b.score - a.score ||
+          a.durationSec - b.durationSec ||
+          a.timestamp.localeCompare(b.timestamp),
+      )
       .slice(0, limit);
   }
 
