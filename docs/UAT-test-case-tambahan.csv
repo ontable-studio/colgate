@@ -1,0 +1,35 @@
+﻿ID Test Case,Modul / Halaman,Nama Fitur / Skenario,Prasyarat (Pre-condition),Langkah Pengujian (Test Steps),Hasil yang Diharapkan (Expected Result),Prioritas,Status,Hasil Aktual,Catatan / Bug Notes
+TC-06b,Gameplay,Gerak keranjang di layar sentuh (regresi TC-06),"Permainan berjalan, buka di HP/layar sentuh","1. Tap sekali di sisi kanan layar, lalu sisi kiri
+2. Geser (drag) jari dari kiri ke kanan","Keranjang MELUNCUR ke titik sentuh (menyeberang layar sekitar 0,6-0,8 detik), tidak berpindah mendadak. Drag tetap diikuti mulus.",High,,,,
+TC-21,Gameplay,Combo multiplier,Permainan berjalan,"1. Tangkap 3, 6, 10 kapsul emas berturut-turut tanpa meleset
+2. Lihat angka +N dan badge di bawah SCORE","Kapsul ke-3 bernilai +20 (badge x2), ke-6 +30 (x3), ke-10 +40 (x4), ke-15 +50 (x5). Badge x2 dst. muncul di bawah SCORE.",High,,,,
+TC-22,Gameplay,Combo putus,Combo sudah x2 atau lebih,"1. Biarkan satu kapsul emas lewat tanpa tertangkap
+2. Ulangi dengan menangkap noda
+3. Ulangi dengan menangkap decoy",Badge hilang dan kapsul berikutnya kembali +10. Penalti tidak dikalikan combo (tetap -10 / -5). Brightness Meter tidak dipengaruhi combo.,High,,,,
+TC-23,Gameplay,Meter penuh sebelum waktu habis,Permainan berjalan,1. Tangkap kapsul sampai Brightness Meter 100% (sebelum 00:00),"Ronde berakhir lebih awal, lanjut ke halaman Unlock. Skor akhir memuat bonus waktu (8 poin per detik sisa, dibulatkan ke bawah).",High,,,,
+TC-24,Gameplay,Keadilan tangkapan,Permainan berjalan,"1. Biarkan kapsul menyentuh tepi keranjang
+2. Biarkan noda lewat tipis di samping keranjang",Kapsul yang menyentuh tepi tetap dihitung. Noda yang hanya lewat di samping tidak mengenai (tidak ada penalti yang terasa tidak adil).,Medium,,,,
+TC-25,Gameplay,Tiga objek awal aman,Ronde baru,1. Amati 3 objek pertama di setiap ronde (ulangi 5 ronde),"Tiga objek pertama selalu kapsul emas, tidak pernah noda/decoy.",Low,,,,
+TC-26,Leaderboard,Pemecah seri skor,Ada dua pemain dengan skor sama,"1. Mainkan dua ronde dengan skor sama (atau uji dengan data uji), selesai dengan waktu berbeda","Skor sama: yang selesai lebih cepat di atas; jika waktu sama, yang main lebih dulu di atas.",Medium,,,,
+TC-27,Navigasi,Tombol HOME,Berada di How To Play atau Leaderboard,1. Tekan tombol HOME di kiri atas,Kembali ke Halaman Utama. Skor di Leaderboard tetap tersimpan. Tombol tidak menutupi logo.,Medium,,,,
+TC-28,Input Inisial,Inisial yang diblokir,Berada di Halaman Input Inisial,1. Isi inisial yang tidak pantas (daftar blokir) lalu SAVE,"Muncul pesan ""TRY OTHER LETTERS"", data tidak tersimpan sampai huruf diganti.",Medium,,,,
+TC-29,Input Inisial,Idle di Input Inisial,Di halaman Input Inisial dengan sebagian huruf terisi,1. Jangan sentuh layar 30 detik,"Skor tersimpan otomatis dengan huruf yang sudah diketik (atau ""---"" jika kosong), lalu kembali ke awal.",High,,,,
+TC-30,Booth,Idle tidak memotong ronde,Permainan berjalan,1. Jangan sentuh layar selama 30+ detik di tengah ronde,Ronde tetap berjalan sampai selesai dan hasilnya tersimpan. Tidak terlempar ke Halaman Utama.,High,,,,
+TC-31,Booth,Auto-reset di Result/How To Play,Berada di Leaderboard,1. Diamkan 30 detik,Kembali otomatis ke Halaman Utama.,Medium,,,,
+TC-32,Data,Data bertahan setelah reload,Sudah ada beberapa skor,"1. Reload halaman atau tutup lalu buka browser
+2. Mainkan satu ronde lagi",Top 10 masih memuat skor sebelumnya. Tidak ada skor hilang atau ganda.,High,,,,
+TC-33,Data,Offline lalu sinkron ke Google Sheet,Endpoint Sheet sudah dikonfigurasi,"1. Matikan internet, mainkan 3 ronde
+2. Nyalakan internet, tunggu sampai 1 menit
+3. Cek Sheet","Game tetap berjalan offline. Setelah online, 3 baris muncul di Sheet tanpa duplikat (id unik). Tidak ada ronde hilang.",High,,,,
+TC-34,Data,Kirim ganda / klik cepat,Online,"1. Klik SAVE berulang cepat
+2. Cek jumlah baris di Sheet dan Leaderboard",Satu ronde = satu baris (di Sheet dan Leaderboard).,High,,,,
+TC-35,Admin,Menu admin,Berada di Halaman Utama,"1. Buka menu admin lewat area tersembunyi
+2. Ubah volume/mute, lihat jumlah data pending, ekspor CSV",Kontrol suara berfungsi dan tersimpan setelah reload. Jumlah data pending sesuai. CSV terunduh dan terbuka benar.,Medium,,,,
+TC-36,Audio,Kunci audio browser,"Buka game baru, belum menyentuh layar","1. Perhatikan suara sebelum sentuhan pertama
+2. Sentuh layar","Sebelum sentuhan pertama bisa hening (kebijakan browser). Setelah sentuhan pertama BGM/SFX berbunyi, tidak ada error di console.",Medium,,,,
+TC-37,Non-Fungsional,Layar target TV portrait,TV 43/55 inci portrait (atau jendela 1080x1920 / 2160x3840),"1. Buka game di browser TV
+2. Jalankan satu ronde penuh dan semua halaman",Tidak ada elemen terpotong atau bertabrakan. Tombol mudah disentuh jari. Semua teks terbaca dari jarak 1-2 meter.,High,,,,
+TC-38,Non-Fungsional,Performa terukur,"Chrome/browser TV, buka FPS counter atau DevTools",1. Mainkan ronde penuh dan catat FPS terendah dan rata-rata,"Rata-rata mendekati 60 fps (catat angka). Jika turun, mode hemat daya aktif otomatis tanpa freeze.",High,,,,
+TC-39,Non-Fungsional,Soak test,"Perangkat target, game dibiarkan di Halaman Utama",1. Biarkan dan mainkan berkala selama 3-4 jam,"Tidak ada crash, memori tidak terus naik, game pulih otomatis jika error. Catat jam mulai/selesai dan jumlah ronde.",High,,,,
+TC-40,Non-Fungsional,Pembaruan versi aman,Versi baru sudah dideploy,"1. Biarkan booth di Halaman Utama sampai pembaruan terdeteksi
+2. Mainkan ronde saat pembaruan menunggu",Pembaruan hanya diterapkan saat di Halaman Utama. Tidak pernah memotong ronde.,Medium,,,,
