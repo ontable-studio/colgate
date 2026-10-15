@@ -57,6 +57,9 @@ export interface GameRules {
     /** Hazards only count when they are this share of their radius INSIDE the opening (negative
      *  = near misses pass by), so a hit never feels unfair. */
     readonly hazardForgiveness: number;
+    /** Fastest the basket slides toward the finger (px/s). Keeps a tap from teleporting it; must
+     *  not be below `spawn.lateralReach`, the speed every object is guaranteed reachable at. */
+    readonly basketSpeed: number;
   };
 }
 
@@ -103,5 +106,6 @@ export const RULES: GameRules = {
     basketHalfWidth: 141,
     capsuleForgiveness: 0.5,
     hazardForgiveness: -0.25,
+    basketSpeed: 1400,
   },
 };

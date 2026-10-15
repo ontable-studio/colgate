@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { audio } from '@/audio';
 import { GAME_WIDTH, OBJECT_SIZE, RULES, type FallingKind } from '@/config/game';
+import { stepToward } from '@/domain/basketMotion';
 import { comboDetune } from '@/domain/audioSettings';
 import { crossedLine, isCaught } from '@/domain/catching';
 import { GameSession } from '@/domain/session';
@@ -32,6 +33,7 @@ export class GameplayScene extends Phaser.Scene {
   private lastScore = 0;
   private lastSecs = 0;
   private lastBasketX = GAME_WIDTH / 2;
+  private targetX = GAME_WIDTH / 2;
   private combo = 0;
   private comboText!: Phaser.GameObjects.Text;
   private lastMultiplier = 1;
@@ -47,6 +49,7 @@ export class GameplayScene extends Phaser.Scene {
     this.lastScore = 0;
     this.lastSecs = RULES.durationSec;
     this.lastBasketX = GAME_WIDTH / 2;
+    this.targetX = GAME_WIDTH / 2;
     this.combo = 0;
     this.lastMultiplier = 1;
 
@@ -73,7 +76,7 @@ export class GameplayScene extends Phaser.Scene {
       .setOrigin(0.5);
 
     const follow = (pointer: Phaser.Input.Pointer): void => {
-      this.basket.x = Phaser.Math.Clamp(pointer.x, BASKET_WIDTH / 2, GAME_WIDTH - BASKET_WIDTH / 2);
+      this.targetX = Phaser.Math.Clamp(pointer.x, BASKET_WIDTH / 2, GAME_WIDTH - BASKET_WIDTH / 2);
       this.hideHint();
     };
     this.input.on('pointermove', follow);
@@ -83,6 +86,13 @@ export class GameplayScene extends Phaser.Scene {
 
   override update(_time: number, delta: number): void {
     this.session.tick(delta);
+    // Capped step so one long frame after a hiccup cannot make the basket jump.
+    this.basket.x = stepToward(
+      this.basket.x,
+      this.targetX,
+      RULES.catching.basketSpeed,
+      Math.min(delta, 50),
+    );
 
     const elapsedMs = RULES.durationSec * 1000 - this.session.remainingMs;
     for (const event of this.spawner.due(elapsedMs)) this.spawn(event, elapsedMs);
