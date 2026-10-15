@@ -1,4 +1,4 @@
-"""Favicon, PWA icons and the social share image, built from the game's own assets.
+"""Favicon and PWA icons (Colgate wordmark on red) and the social share image, built from the game's own assets.
 
     python tools/generate-icons/generate_icons.py
 """
@@ -38,12 +38,12 @@ def glow(size: int, color=(255, 200, 80)) -> Image.Image:
 
 
 def icon(size: int, scale: float, rounded: bool) -> Image.Image:
-    """Red tile with the Vitamin C capsule. `scale` is the capsule size relative to the tile."""
+    """Red tile with the white Colgate wordmark. `scale` is the wordmark width relative to the tile."""
     base = gradient((size, size))
-    cap = asset("capsule.webp")
-    side = round(size * scale)
-    base.alpha_composite(glow(round(side * 1.5)), (size // 2 - round(side * 0.75), size // 2 - round(side * 0.75)))
-    base.alpha_composite(cap.resize((side, side), Image.LANCZOS), ((size - side) // 2, (size - side) // 2))
+    logo = asset("logo-colgate.webp")
+    w = round(size * scale)
+    h = round(w * logo.height / logo.width)
+    base.alpha_composite(logo.resize((w, h), Image.LANCZOS), ((size - w) // 2, (size - h) // 2))
     if rounded:
         mask = Image.new("L", (size, size), 0)
         ImageDraw.Draw(mask).rounded_rectangle((0, 0, size - 1, size - 1), radius=round(size * 0.22), fill=255)
@@ -88,13 +88,13 @@ def share_image() -> Image.Image:
 
 def main() -> None:
     os.makedirs(ICONS, exist_ok=True)
-    icon(512, 0.66, True).save(os.path.join(ICONS, "icon-512.png"))
-    icon(192, 0.66, True).save(os.path.join(ICONS, "icon-192.png"))
+    icon(512, 0.84, True).save(os.path.join(ICONS, "icon-512.png"))
+    icon(192, 0.84, True).save(os.path.join(ICONS, "icon-192.png"))
     # Maskable: full-bleed background, artwork inside the 80% safe zone.
-    icon(512, 0.5, False).save(os.path.join(ICONS, "icon-maskable-512.png"))
-    icon(180, 0.66, False).convert("RGB").save(os.path.join(ICONS, "apple-touch-icon.png"))
-    icon(64, 0.8, True).resize((32, 32), Image.LANCZOS).save(os.path.join(ICONS, "favicon-32.png"))
-    icon(256, 0.8, True).save(os.path.join(ROOT, "public", "favicon.ico"), sizes=[(16, 16), (32, 32), (48, 48)])
+    icon(512, 0.62, False).save(os.path.join(ICONS, "icon-maskable-512.png"))
+    icon(180, 0.84, False).convert("RGB").save(os.path.join(ICONS, "apple-touch-icon.png"))
+    icon(64, 0.9, True).resize((32, 32), Image.LANCZOS).save(os.path.join(ICONS, "favicon-32.png"))
+    icon(256, 0.9, True).save(os.path.join(ROOT, "public", "favicon.ico"), sizes=[(16, 16), (32, 32), (48, 48)])
     share_image().save(os.path.join(ICONS, "og-image.png"), optimize=True)
     print("done")
 
