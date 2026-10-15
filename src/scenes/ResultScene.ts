@@ -102,7 +102,7 @@ export class ResultScene extends Phaser.Scene {
     this.add
       .text(
         LEFT_X,
-        350,
+        345,
         'YOUR SCORE',
         textStyle({ size: 38, letterSpacing: 6, color: COLORS.cream }),
       )
@@ -110,12 +110,24 @@ export class ResultScene extends Phaser.Scene {
     const score = this.add
       .text(
         LEFT_X,
-        452,
+        432,
         '0',
         textStyle({ size: 130, color: COLORS.goldLight, glow: 'rgba(255,170,60,0.9)' }),
       )
       .setOrigin(0.5);
     countUp(this, score, this.result.score, 1000, 250);
+    // Finishing early pays a bonus; say so, so the number never looks mysterious.
+    if (this.result.timeBonus > 0) {
+      const bonus = this.add
+        .text(
+          LEFT_X,
+          513,
+          `INCLUDES TIME BONUS +${this.result.timeBonus}`,
+          textStyle({ size: 28, letterSpacing: 2, color: COLORS.goldSoft }),
+        )
+        .setOrigin(0.5);
+      popIn(this, bonus, 1200, 0.8);
+    }
     this.playCountTicks();
     this.time.delayedCall(1300, () => {
       bump(this, score, 1.12, 140);

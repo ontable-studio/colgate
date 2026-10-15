@@ -1,7 +1,10 @@
 import type { FallingKind, GameRules } from '@/config/game';
 
 export interface SessionResult {
+  /** Final score, including any time bonus. */
   readonly score: number;
+  /** Points added for finishing early (0 when time ran out). */
+  readonly timeBonus: number;
   readonly meterPct: number;
   readonly catches: number;
   readonly hits: number;
@@ -48,9 +51,17 @@ export class GameSession {
     else this._hits += 1;
   }
 
+  /** Points for the seconds left when the meter filled up; nothing if time ran out first. */
+  get timeBonus(): number {
+    if (this._meterPct < 100) return 0;
+    return Math.floor(this._remainingMs / 1000) * this.rules.timeBonusPerSec;
+  }
+
   result(): SessionResult {
+    const timeBonus = this.timeBonus;
     return {
-      score: this._score,
+      score: this._score + timeBonus,
+      timeBonus,
       meterPct: this._meterPct,
       catches: this._catches,
       hits: this._hits,

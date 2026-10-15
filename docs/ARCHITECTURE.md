@@ -70,6 +70,17 @@ All audio is synthesised by `tools/generate-audio/generate_audio.py` (no samples
 - **Autoplay:** browsers only allow sound after the first touch. Effects before that are dropped, and music starts on the first tap (PLAY NOW). For attract music with nobody touching the screen, launch the booth browser with `--autoplay-policy=no-user-gesture-required`.
 - **Changing the sound:** edit the generator (tempo, chords, patterns and levels are plain constants at the top of each function) and re-run it; the random seed is fixed, so output is identical between runs.
 
+## Game balance and fairness
+
+Plain random spawning and box collisions felt unfair, so the round is built from small pure pieces in `domain/` (all unit tested):
+
+- `difficulty.ts` blends a few keyframes (`RULES.spawn.stages`) so the pace rises smoothly: gentle start, brisk finish.
+- `spawner.ts` schedules what falls and where. The opening is all capsules, hazards never come more than twice in a row, a hazard is due after four capsules in a row, and each object lands only where a player can reach it from the previous one in the time between them.
+- `catching.ts` decides, the frame an object's centre crosses the rim line, whether it counts: capsules are forgiving (a rim touch scores), hazards strict (only a clear drop into the bowl hits). Physics only moves the objects.
+- `session.ts` adds a time bonus when the meter fills early, which also spreads the leaderboard (without it every winner tops out near 200).
+
+`tests/domain/balance.test.ts` simulates players from novice to expert over hundreds of rounds and fails if the rules become brutal, trivial or unable to tell good players apart. The player model (`tests/support/simulate.ts`) is an assumption: calibrate it with real play-tests. To see the numbers, run `BALANCE_REPORT=1 pnpm exec vitest run tests/domain/balance.test.ts --reporter=verbose`; to explore other values, `SWEEP=1 pnpm exec vitest run tests/domain/balance.sweep.test.ts --reporter=verbose`.
+
 ## Resilience (unattended booth)
 
 - **Crash guard** (`app/watchdog.ts`): an uncaught error or rejected promise reloads the page back to Attract. A rate limit (`domain/reloadGuard.ts`, 3 reloads per minute) stops a bug that fails on every boot from looping; after the limit it shows "Something went wrong" and retries once the window has passed, so an unattended booth recovers by itself. WebGL context loss and a failed boot use the same path.

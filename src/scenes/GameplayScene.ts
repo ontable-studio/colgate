@@ -1,9 +1,10 @@
 import Phaser from 'phaser';
 import { audio } from '@/audio';
-import { GAME_WIDTH, RULES, type FallingKind } from '@/config/game';
-import { pickKind } from '@/domain/spawn';
+import { GAME_WIDTH, OBJECT_SIZE, RULES, type FallingKind } from '@/config/game';
 import { comboDetune } from '@/domain/audioSettings';
+import { crossedLine, isCaught } from '@/domain/catching';
 import { GameSession } from '@/domain/session';
+import { Spawner, type SpawnEvent } from '@/domain/spawner';
 import { addArt } from '@/ui/art/canvas';
 import { DECOY_TEXTURES } from '@/ui/art/objects';
 import { addBackground, addGlow } from '@/ui/effects';
@@ -12,8 +13,6 @@ import { bump, fadeIn, floatText, popIn, shards, sparkBurst } from '@/ui/motion'
 import { COLORS, textStyle } from '@/ui/theme';
 import { SceneKey } from './keys';
 
-/** On-screen size (px) of each falling object; textures differ in resolution. */
-const OBJECT_SIZE: Readonly<Record<FallingKind, number>> = { capsule: 150, decoy: 150, stain: 175 };
 const BASKET_WIDTH = 300;
 const BASKET_HEIGHT = 194;
 const BASKET_Y = 1470;
@@ -22,14 +21,14 @@ const TIMER_WARNING_SECS = 5;
 
 export class GameplayScene extends Phaser.Scene {
   private session!: GameSession;
-  private basket!: Phaser.Physics.Arcade.Image;
+  private basket!: Phaser.GameObjects.Image;
+  private spawner!: Spawner;
   private falling!: Phaser.Physics.Arcade.Group;
   private timerText!: Phaser.GameObjects.Text;
   private scoreText!: Phaser.GameObjects.Text;
   private meter!: Meter;
   private hint: Phaser.GameObjects.GameObject[] = [];
   private hintHidden = false;
-  private spawnAcc = 0;
   private lastScore = 0;
   private lastSecs = 0;
   private lastBasketX = GAME_WIDTH / 2;
@@ -41,7 +40,7 @@ export class GameplayScene extends Phaser.Scene {
 
   create(): void {
     this.session = new GameSession(RULES);
-    this.spawnAcc = 0;
+    this.spawner = new Spawner(RULES);
     this.hintHidden = false;
     this.lastScore = 0;
     this.lastSecs = RULES.durationSec;
@@ -54,13 +53,11 @@ export class GameplayScene extends Phaser.Scene {
     this.addHud();
     this.addHint();
 
-    this.basket = this.physics.add.image(GAME_WIDTH / 2, BASKET_Y, 'basket').setImmovable(true);
+    this.basket = this.add.image(GAME_WIDTH / 2, BASKET_Y, 'basket');
     this.basket.setDisplaySize(BASKET_WIDTH, BASKET_HEIGHT);
     popIn(this, this.basket, 100, 0.6);
+    // Physics only moves the objects; whether one counts is decided by geometry (domain/catching.ts).
     this.falling = this.physics.add.group();
-    this.physics.add.overlap(this.basket, this.falling, (_basket, obj) => {
-      this.onCaught(obj as Phaser.Physics.Arcade.Image);
-    });
 
     this.meter = createMeter(this, GAME_WIDTH / 2, 1745);
     this.add
@@ -84,17 +81,9 @@ export class GameplayScene extends Phaser.Scene {
   override update(_time: number, delta: number): void {
     this.session.tick(delta);
 
-    this.spawnAcc += delta;
-    while (this.spawnAcc >= RULES.spawn.intervalMs) {
-      this.spawnAcc -= RULES.spawn.intervalMs;
-      this.spawn();
-    }
-
-    for (const child of this.falling.getChildren()) {
-      const obj = child as Phaser.Physics.Arcade.Image;
-      // Missed objects vanish just below the basket instead of sliding over the meter.
-      if (obj.y > BASKET_Y + 140) obj.destroy();
-    }
+    const elapsedMs = RULES.durationSec * 1000 - this.session.remainingMs;
+    for (const event of this.spawner.due(elapsedMs)) this.spawn(event, elapsedMs);
+    this.resolveLandings();
 
     this.animateBasket();
     this.updateHud();
@@ -178,20 +167,47 @@ export class GameplayScene extends Phaser.Scene {
     this.tweens.add({ targets: this.hint, alpha: 0, duration: 500 });
   }
 
-  private spawn(): void {
-    const kind = pickKind(RULES.spawn.weights);
+  private spawn(event: SpawnEvent, elapsedMs: number): void {
+    const { kind } = event;
     const size = OBJECT_SIZE[kind];
-    const x = Phaser.Math.Between(90, GAME_WIDTH - 90);
+    // If a frame arrived late, start the object where it would already be so spacing stays even.
+    const y = -size + (event.speed * (elapsedMs - event.atMs)) / 1000;
     // Decoys come in several looks (bubble, pills) but all count as the same kind.
     const texture: string =
       kind === 'decoy' ? Phaser.Utils.Array.GetRandom([...DECOY_TEXTURES]) : kind;
-    const obj = this.falling.create(x, -size, texture) as Phaser.Physics.Arcade.Image;
+    const obj = this.falling.create(event.x, y, texture) as Phaser.Physics.Arcade.Image;
     obj.setDisplaySize(size, size);
     obj.setData('kind', kind);
-    obj.setVelocityY(RULES.spawn.fallSpeed);
+    obj.setData('previousY', y);
+    obj.setVelocityY(event.speed);
     // Everything tumbles a little as it falls; capsules and stains (which have a face) turn slowly.
     const spin = kind === 'decoy' ? 170 : 70;
     obj.setAngularVelocity(Phaser.Math.Between(-spin, spin));
+  }
+
+  /**
+   * The moment an object's centre reaches the rim of the basket it either counts or it does not.
+   * Capsules are forgiving (a rim touch scores), hazards strict (only a clear drop into the bowl
+   * is a hit). A missed capsule dims so the player can see it did not count.
+   */
+  private resolveLandings(): void {
+    for (const child of this.falling.getChildren()) {
+      const obj = child as Phaser.Physics.Arcade.Image;
+      const kind = obj.getData('kind') as FallingKind;
+      const previousY = obj.getData('previousY') as number;
+      obj.setData('previousY', obj.y);
+
+      if (crossedLine(previousY, obj.y, RULES.catching.lineY)) {
+        const radius = OBJECT_SIZE[kind] / 2;
+        if (isCaught(kind, obj.x, this.basket.x, radius, RULES.catching)) {
+          this.onCaught(obj);
+          continue;
+        }
+        if (kind === 'capsule') this.tweens.add({ targets: obj, alpha: 0.35, duration: 120 });
+      }
+      // Anything that got past vanishes just below the basket instead of sliding over the meter.
+      if (obj.y > BASKET_Y + 140) obj.destroy();
+    }
   }
 
   private onCaught(obj: Phaser.Physics.Arcade.Image): void {

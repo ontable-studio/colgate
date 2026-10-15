@@ -46,3 +46,31 @@ describe('GameSession', () => {
     expect(s.result().durationSec).toBe(10);
   });
 });
+
+describe('time bonus', () => {
+  it('pays per second left when the meter fills before time runs out', () => {
+    const s = new GameSession({ ...rules, timeBonusPerSec: 8 });
+    s.tick(3000); // 7 s left
+    for (let i = 0; i < 4; i++) s.catch('capsule');
+    const result = s.result();
+    expect(s.meterPct).toBe(100);
+    expect(result.timeBonus).toBe(7 * 8);
+    expect(result.score).toBe(s.score + 56);
+  });
+
+  it('only counts whole seconds', () => {
+    const s = new GameSession({ ...rules, timeBonusPerSec: 10 });
+    s.tick(3500); // 6.5 s left
+    for (let i = 0; i < 4; i++) s.catch('capsule');
+    expect(s.result().timeBonus).toBe(60);
+  });
+
+  it('pays nothing when time ran out first', () => {
+    const s = new GameSession({ ...rules, timeBonusPerSec: 8 });
+    s.catch('capsule');
+    s.tick(60_000);
+    const result = s.result();
+    expect(result.timeBonus).toBe(0);
+    expect(result.score).toBe(s.score);
+  });
+});

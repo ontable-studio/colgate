@@ -59,12 +59,18 @@ Catatan: Unity WebGL tidak dipakai (berat untuk browser TV).
 
 ## 5. Aturan game (asumsi sementara, semua di satu file config)
 
-- Timer tetap 40 detik; berakhir lebih awal jika meter 100%
-- Kapsul Vitamin C: +10 poin, meter naik
-- Noda: -10 poin, meter turun
-- Kapsul pengecoh: -5 poin
+Semua angka ada di `src/config/game.ts` dan masih asumsi sampai klien mengonfirmasi. Keseimbangannya divalidasi dengan simulasi (`tests/domain/balance.test.ts`).
+
+- Timer tetap 40 detik; ronde berakhir lebih awal jika meter 100%, dan sisa detiknya dibayar **bonus waktu** (+8 poin per detik) supaya yang cepat menang skor lebih tinggi (tanpa bonus, semua yang menang mentok di ±200).
+- Kapsul Vitamin C: +10 poin, meter +6. Noda: -10 poin, meter -5. Pengecoh: -5 poin, meter -3.
+- **Kesulitan naik bertahap**: awal santai (jeda 900 ms, jatuh 480 px/s, 20% hazard), akhir lebih cepat (jeda 560 ms, 700 px/s, 45% hazard).
+- **Penjadwal yang adil** (bukan lemparan dadu murni): tiga objek pertama selalu kapsul, hazard tidak pernah lebih dari 2 beruntun, hazard wajib muncul setelah 4 kapsul beruntun, dan posisi objek berikutnya selalu terjangkau dari objek sebelumnya.
+- **Zona tangkap**: kapsul dihitung walau hanya menyentuh bibir keranjang (pemaaf), hazard hanya dihitung jika benar-benar masuk mangkuk (selisih tipis dianggap lolos). Kapsul yang meleset meredup supaya terlihat tidak dihitung.
+- Perkiraan hasil untuk pemain simulasi (bukan data nyata): pemula 1% menang (rata-rata meter 45%), casual 36%, rata-rata 92%, bagus dan ahli 100% (ahli selesai ±23 detik). Aturan awal: 0%, 3%, 22%, 70%, 97% dengan skor mentok di ±200.
 - Animasi akhir: gigi Day 1 → Day 7 (wipe), lalu skor
 - Tanpa reward fisik dan tanpa audio kecuali ada suara bebas royalti
+
+**Perlu play-test nyata:** model pemain di simulasi adalah asumsi. Setelah dites dengan orang sungguhan, sesuaikan model di `tests/support/simulate.ts` dan angka di config.
 
 ## 6. Aset
 
