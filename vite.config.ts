@@ -1,9 +1,22 @@
 import { readFileSync } from 'node:fs';
 import { fileURLToPath, URL } from 'node:url';
+import type { Plugin } from 'vite';
 import { defineConfig } from 'vitest/config';
 import { VitePWA } from 'vite-plugin-pwa';
 
 const { version } = JSON.parse(readFileSync('./package.json', 'utf8')) as { version: string };
+
+/** Fills the page URL into the SEO tags (canonical, Open Graph) from VITE_SITE_URL, e.g. https://game.example.com */
+function siteUrl(): Plugin {
+  let site = '';
+  return {
+    name: 'site-url',
+    configResolved(config) {
+      site = (config.env['VITE_SITE_URL'] as string | undefined)?.replace(/\/+$/, '') ?? '';
+    },
+    transformIndexHtml: (html) => html.replaceAll('__SITE_URL__', site),
+  };
+}
 
 export default defineConfig({
   define: { __GAME_VERSION__: JSON.stringify(version) },
@@ -20,6 +33,7 @@ export default defineConfig({
     },
   },
   plugins: [
+    siteUrl(),
     VitePWA({
       // 'prompt' = a new version waits until the app (src/app/updates.ts) says the booth is idle.
       registerType: 'prompt',
@@ -27,7 +41,8 @@ export default defineConfig({
       manifest: {
         name: 'Colgate Optic White Vitamin C - Catch the Brightness',
         short_name: 'Catch the Brightness',
-        description: 'Booth touchscreen game',
+        description:
+          'Catch the Vitamin C capsules, dodge the stains and unlock your brightest smile.',
         display: 'fullscreen',
         orientation: 'portrait',
         // TODO(brand): confirm exact Colgate red with Oji
@@ -36,6 +51,12 @@ export default defineConfig({
         icons: [
           { src: 'icons/icon-192.png', sizes: '192x192', type: 'image/png' },
           { src: 'icons/icon-512.png', sizes: '512x512', type: 'image/png' },
+          {
+            src: 'icons/icon-maskable-512.png',
+            sizes: '512x512',
+            type: 'image/png',
+            purpose: 'maskable',
+          },
         ],
       },
       workbox: {
