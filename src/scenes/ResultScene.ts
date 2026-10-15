@@ -182,25 +182,28 @@ export class ResultScene extends Phaser.Scene {
   /** Small before/after card: the stained tooth (Day 1) turns clean (Day 7) a moment after it appears. */
   private addDayCompare(): void {
     createPanel(this, LEFT_X, 650, 560, 215, 34, 'gold');
-    this.add.image(190, 638, 'tooth1').setDisplaySize(100, 127);
-    const clean = this.add.image(360, 638, 'tooth4').setDisplaySize(103, 127).setAlpha(0);
+    this.add.image(LEFT_X - 150, 636, 'tooth1').setDisplaySize(110, 140);
+    const clean = this.add
+      .image(LEFT_X + 150, 636, 'tooth4')
+      .setDisplaySize(113, 140)
+      .setAlpha(0);
     this.tweens.add({ targets: clean, alpha: 1, delay: 700, duration: 900 });
 
     const label = (x: number, text: string) =>
       this.add
         .text(x, 722, text, textStyle({ size: 28, letterSpacing: 3, color: COLORS.goldLight }))
         .setOrigin(0.5);
-    label(190, 'DAY 1');
-    label(360, 'DAY 7');
+    label(LEFT_X - 150, 'DAY 1');
+    label(LEFT_X + 150, 'DAY 7');
     const arrow = this.add
       .text(
-        275,
-        638,
+        LEFT_X,
+        636,
         '>',
         textStyle({ size: 56, color: COLORS.goldSoft, glow: 'rgba(255,170,60,0.8)' }),
       )
       .setOrigin(0.5);
-    this.tweens.add({ targets: arrow, x: 288, yoyo: true, repeat: -1, duration: 600 });
+    this.tweens.add({ targets: arrow, x: LEFT_X + 14, yoyo: true, repeat: -1, duration: 600 });
   }
 
   /** The product on the right with a warm glow and a few capsules, clear of every card. */

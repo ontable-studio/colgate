@@ -14,15 +14,26 @@ export function makeLogoTab(scene: Phaser.Scene): void {
     ctx.shadowOffsetY = 6;
     ctx.fillStyle = fill;
     ctx.beginPath();
-    ctx.arc(280, -20, 228, 0, Math.PI);
+    ctx.arc(280, -20, 205, 0, Math.PI);
     ctx.closePath();
     ctx.fill();
     ctx.restore();
 
     const logo = scene.textures.get('logo-colgate').getSourceImage() as CanvasImageSource;
-    const w = 330;
+    const w = 280;
     const h = (w * 167) / 781;
-    ctx.drawImage(logo, 280 - w / 2, 96, w, h);
+    const top = 46;
+    ctx.drawImage(logo, 280 - w / 2, top, w, h);
+
+    // The brand's smile swoosh under the wordmark, thick in the middle and thin at both ends.
+    const y = top + h + 12;
+    ctx.fillStyle = '#FFFFFF';
+    ctx.beginPath();
+    ctx.moveTo(280 - 96, y - 4);
+    ctx.quadraticCurveTo(280 + 6, y + 36, 280 + 104, y - 14);
+    ctx.quadraticCurveTo(280 + 6, y + 18, 280 - 96, y - 4);
+    ctx.closePath();
+    ctx.fill();
   });
 }
 

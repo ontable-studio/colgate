@@ -28,14 +28,18 @@ function drawReplay(ctx: CanvasRenderingContext2D, color: string): void {
   ctx.beginPath();
   ctx.arc(100, 104, 62, Math.PI * 0.15, Math.PI * 1.45);
   ctx.stroke();
-  // Arrow head at the end of the arc.
+  // Arrow head at the end of the arc: a triangle pointing along the direction of travel.
   const a = Math.PI * 1.45;
   const ex = 100 + Math.cos(a) * 62;
   const ey = 104 + Math.sin(a) * 62;
+  const tx = -Math.sin(a); // clockwise tangent
+  const ty = Math.cos(a);
+  const nx = Math.cos(a); // outward normal
+  const ny = Math.sin(a);
   ctx.beginPath();
-  ctx.moveTo(ex - 34, ey + 4);
-  ctx.lineTo(ex + 30, ey - 6);
-  ctx.lineTo(ex + 4, ey + 40);
+  ctx.moveTo(ex + nx * 34, ey + ny * 34);
+  ctx.lineTo(ex - nx * 34, ey - ny * 34);
+  ctx.lineTo(ex + tx * 44, ey + ty * 44);
   ctx.closePath();
   ctx.fill();
 }
