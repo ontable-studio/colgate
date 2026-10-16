@@ -17,9 +17,10 @@ const ADMIN_HOLD_MS = 2000;
  *   1660-1830 PLAY NOW
  */
 const RING_Y = 745;
-const RING_SIZE = 620;
-const HERO_Y = 1340;
-const TUBE_HEIGHT = 620;
+const RING_SIZE = 780;
+const HERO_Y = 1260;
+const TUBE_HEIGHT = 780;
+const TUBE_WIDTH = 279;
 /** How far the platform's back edge sits above the tube's foot. */
 const STAGE_FOOT_OFFSET = 110;
 
@@ -35,6 +36,7 @@ export class AttractScene extends Phaser.Scene {
     audio.playMusic('bgm-attract');
     addBackground(this);
     addSparkles(this, 14, { x: 60, y: 440, width: 960, height: 1200 });
+    this.addRing(cx);
     this.addHero();
     addHeader(this);
     this.addTitle(cx);
@@ -78,13 +80,16 @@ export class AttractScene extends Phaser.Scene {
     this.tweens.add({ targets: cta, scale: 1.04, yoyo: true, repeat: -1, duration: 800 });
   }
 
-  /** Gold ring (slowly turning) with the game title popping in inside it. */
-  private addTitle(cx: number): void {
+  /** Gold ring, slowly turning. Drawn before the hero so the tube stands in front of it. */
+  private addRing(cx: number): void {
     const ring = addArt(this, cx, RING_Y, 'ring').setDisplaySize(RING_SIZE, RING_SIZE);
     this.tweens.add({ targets: ring, angle: 360, duration: 40_000, repeat: -1 });
+  }
 
+  /** The game title popping in inside the ring. */
+  private addTitle(cx: number): void {
     const title = addArt(this, cx, RING_Y, 'title-game').setAngle(-4);
-    title.setScale(title.scale * 0.82);
+    title.setScale(title.scale * 0.95);
     popIn(this, title, 150, 0.5);
     this.time.delayedCall(150, () => audio.playSfx('sfx-pop'));
     this.time.delayedCall(900, () => {
@@ -120,10 +125,10 @@ export class AttractScene extends Phaser.Scene {
       .on('pointerout', cancel);
   }
 
-  /** Hero: tube on the left, the glowing "C" of Vitamin C on the right, capsules floating around. */
+  /** Hero: the tube centred on its platform in front of the ring, capsules floating around. */
   private addHero(): void {
-    const tubeX = 390;
-    const cX = 735;
+    const tubeX = GAME_WIDTH / 2;
+    const cX = tubeX;
     // Glossy platform the tube stands on (its feet sit just below the platform's back edge).
     const tubeFootY = HERO_Y + TUBE_HEIGHT / 2;
     addArt(this, GAME_WIDTH / 2, tubeFootY - STAGE_FOOT_OFFSET, 'stage').setOrigin(0.5, 0);
@@ -134,26 +139,15 @@ export class AttractScene extends Phaser.Scene {
       .setAlpha(0.5);
     this.tweens.add({ targets: flare, angle: 360, duration: 26_000, repeat: -1 });
 
-    // Big "C" with orbiting light trails.
-    addGlow(this, cX, HERO_Y - 5, 700, 0.6);
-    const orbit = addArt(this, cX, HERO_Y - 5, 'c-orbit').setDisplaySize(600, 600);
-    this.tweens.add({ targets: orbit, angle: 360, duration: 18_000, repeat: -1 });
-    const letter = addArt(this, cX, HERO_Y - 5, 'big-c').setDisplaySize(380, 380);
-    this.tweens.add({
-      targets: letter,
-      scale: letter.scale * 1.05,
-      yoyo: true,
-      repeat: -1,
-      duration: 1700,
-      ease: 'Sine.easeInOut',
-    });
+    // Warm glow behind the tube.
+    addGlow(this, cX, HERO_Y, 760, 0.6);
 
     // The Vitamin C dropper from the key visual, tip pointing down into the ring.
     const dropperGlow = addGlow(this, 935, 560, 440, 0.45);
     const dropper = this.add.image(935, 560, 'dropper').setDisplaySize(250, 267).setAngle(4);
     float(this, [dropper, dropperGlow], 14, 2600, 300);
 
-    const tube = this.add.image(tubeX, HERO_Y, 'tube').setDisplaySize(222, TUBE_HEIGHT);
+    const tube = this.add.image(tubeX, HERO_Y, 'tube').setDisplaySize(TUBE_WIDTH, TUBE_HEIGHT);
     float(this, tube, 12, 2400);
 
     const capsules = [
@@ -162,7 +156,7 @@ export class AttractScene extends Phaser.Scene {
       { x: 100, y: 1230, size: 110, delay: 1000 },
       { x: 990, y: 1010, size: 120, delay: 1500 },
       { x: 920, y: 1585, size: 100, delay: 700 },
-      { x: 610, y: 1600, size: 90, delay: 300 },
+      { x: 170, y: 1560, size: 90, delay: 300 },
     ];
     for (const c of capsules) {
       const glow = addGlow(this, c.x, c.y, c.size * 2.4, 0.65);
