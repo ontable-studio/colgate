@@ -24,6 +24,8 @@ const OVERLAP = 26;
 const FIRST_AT_MS = 380;
 const STEP_MS = 230;
 const BASELINE_Y = 1240;
+/** The platform's back edge sits above the teeth's feet, so they stand on its surface. */
+const STAGE_TOP_Y = BASELINE_Y - 110;
 
 /** Short celebration between gameplay and the initials screen. */
 export class UnlockScene extends Phaser.Scene {
@@ -50,6 +52,8 @@ export class UnlockScene extends Phaser.Scene {
     addHeader(this, false);
     popIn(this, addArt(this, cx, 470, 'title-unlock'), 120, 0.6);
 
+    addArt(this, cx, STAGE_TOP_Y, 'stage').setOrigin(0.5, 0);
+
     const total = TEETH.reduce((sum, t) => sum + t.width, 0) - OVERLAP * (TEETH.length - 1);
     let left = cx - total / 2;
     let last = { x: cx, y: BASELINE_Y };
@@ -62,6 +66,13 @@ export class UnlockScene extends Phaser.Scene {
       const delay = FIRST_AT_MS + i * STEP_MS;
       const image = this.add.image(x, y, tooth.texture).setDisplaySize(tooth.width, height);
       popIn(this, image, delay, 0.5);
+      // Faint mirror image on the glossy floor.
+      const reflection = this.add
+        .image(x, BASELINE_Y + height / 2 + 4, tooth.texture)
+        .setDisplaySize(tooth.width, height)
+        .setFlipY(true)
+        .setAlpha(0);
+      this.tweens.add({ targets: reflection, alpha: 0.13, delay: delay + 150, duration: 400 });
       this.time.delayedCall(delay, () => audio.playSfx('sfx-pop', { detune: i * 140 }));
       float(this, image, 6, 1500 + i * 120, delay + 300);
       if (i === TEETH.length - 1) {
@@ -71,7 +82,7 @@ export class UnlockScene extends Phaser.Scene {
           .setDisplaySize(tooth.width, height)
           .setBlendMode(Phaser.BlendModes.ADD)
           .setAlpha(0);
-        this.tweens.add({ targets: glow, alpha: 0.28, delay: delay + 250, duration: 500 });
+        this.tweens.add({ targets: glow, alpha: 0.14, delay: delay + 250, duration: 500 });
         float(this, glow, 6, 1500 + i * 120, delay + 300);
         last = { x, y };
       }
@@ -79,7 +90,6 @@ export class UnlockScene extends Phaser.Scene {
 
     const lastDelay = FIRST_AT_MS + (TEETH.length - 1) * STEP_MS;
     const halo = addGlow(this, last.x, last.y, 900, 0);
-    halo.setDepth(-1);
     this.tweens.add({ targets: halo, alpha: 0.95, delay: lastDelay, duration: 600, yoyo: true });
     this.time.delayedCall(lastDelay + 150, () => sparkBurst(this, last.x, last.y, 18, 360));
     // Two glints that keep twinkling on the clean tooth.
