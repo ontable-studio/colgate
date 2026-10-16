@@ -114,8 +114,8 @@ def main() -> None:
     save(fit(trim(read_cmyk_alpha(find(args.src, "VitC_Dropper_Main_FLAT.tif"))), height=900), args.out, "dropper")
     save(fit(trim(read_cmyk_alpha(find(args.src, "flare CMYK.tif"))), width=640), args.out, "flare")
 
-    # Teeth: stage 1 (stained) and stage 4 (clean) for the Day 1 -> Day 7 reveal.
-    for stage in (1, 4):
+    # Teeth: stage 1 (stained) to stage 4 (clean) for the Day 1 -> Day 7 row.
+    for stage in (1, 2, 3, 4):
         tooth = remove_white_bg(Image.open(find(args.src, f"Tooth {stage}.tif")))
         save(fit(trim(tooth), height=900), args.out, f"tooth{stage}")
 

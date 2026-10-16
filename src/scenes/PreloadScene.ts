@@ -11,6 +11,8 @@ const IMAGES = [
   'dropper',
   'flare',
   'tooth1',
+  'tooth2',
+  'tooth3',
   'tooth4',
   'logo-colgate',
   'logo-wordmark',

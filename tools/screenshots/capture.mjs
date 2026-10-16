@@ -11,11 +11,19 @@ const chrome = process.env.CHROME ?? 'C:/Program Files/Google/Chrome/Application
 const port = 9333;
 mkdirSync(out, { recursive: true });
 
-const proc = spawn(chrome, [
-  '--headless=new', `--remote-debugging-port=${port}`, '--disable-gpu', '--hide-scrollbars',
-  '--autoplay-policy=no-user-gesture-required', `--user-data-dir=${process.env.TEMP ?? '/tmp'}/colgate-shots-${Date.now()}`,
-  'about:blank',
-], { stdio: 'ignore' });
+const proc = spawn(
+  chrome,
+  [
+    '--headless=new',
+    `--remote-debugging-port=${port}`,
+    '--disable-gpu',
+    '--hide-scrollbars',
+    '--autoplay-policy=no-user-gesture-required',
+    `--user-data-dir=${process.env.TEMP ?? '/tmp'}/colgate-shots-${Date.now()}`,
+    'about:blank',
+  ],
+  { stdio: 'ignore' },
+);
 
 let target;
 for (let i = 0; i < 40 && !target; i++) {
@@ -23,7 +31,9 @@ for (let i = 0; i < 40 && !target; i++) {
   try {
     const list = await (await fetch(`http://127.0.0.1:${port}/json`)).json();
     target = list.find((t) => t.type === 'page');
-  } catch { /* not up yet */ }
+  } catch {
+    /* not up yet */
+  }
 }
 const ws = new WebSocket(target.webSocketDebuggerUrl);
 await new Promise((r) => (ws.onopen = r));
@@ -34,10 +44,19 @@ ws.onmessage = (m) => {
   if (msg.id && pending.has(msg.id)) pending.get(msg.id)(msg.result ?? msg.error);
 };
 const send = (method, params = {}) =>
-  new Promise((r) => { const n = ++id; pending.set(n, r); ws.send(JSON.stringify({ id: n, method, params })); });
+  new Promise((r) => {
+    const n = ++id;
+    pending.set(n, r);
+    ws.send(JSON.stringify({ id: n, method, params }));
+  });
 const run = (expression) => send('Runtime.evaluate', { expression, awaitPromise: true });
 
-await send('Emulation.setDeviceMetricsOverride', { width: 1080, height: 1920, deviceScaleFactor: 1, mobile: false });
+await send('Emulation.setDeviceMetricsOverride', {
+  width: 1080,
+  height: 1920,
+  deviceScaleFactor: 1,
+  mobile: false,
+});
 await send('Page.navigate', { url });
 for (let i = 0; i < 60; i++) {
   await sleep(500);
@@ -59,10 +78,14 @@ const shots = [
 ];
 const keys = ['Attract', 'HowToPlay', 'Gameplay', 'Unlock', 'Initials', 'Result', 'Admin'];
 for (const [name, scene, data, wait] of shots) {
-  await run(`${JSON.stringify(keys)}.forEach(k => __game.scene.stop(k)); __game.scene.start(${JSON.stringify(scene)}, ${JSON.stringify(data)}); 1`);
+  await run(
+    `${JSON.stringify(keys)}.forEach(k => __game.scene.stop(k)); __game.scene.start(${JSON.stringify(scene)}, ${JSON.stringify(data)}); 1`,
+  );
   if (scene === 'Gameplay') {
     // Sweep the basket a little so the shot shows a round in progress.
-    await run("(async()=>{const g=__game.scene.getScene('Gameplay'); for (let i=0;i<20;i++){ g.targetX = 300 + (i%2)*480; await new Promise(r=>setTimeout(r,300)); } })()");
+    await run(
+      "(async()=>{const g=__game.scene.getScene('Gameplay'); for (let i=0;i<20;i++){ g.targetX = 300 + (i%2)*480; await new Promise(r=>setTimeout(r,300)); } })()",
+    );
   } else {
     // Wiggle the mouse now and then so the idle timeout does not send us back to the start screen.
     for (let waited = 0; waited < wait; waited += 500) {

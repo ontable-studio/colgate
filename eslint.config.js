@@ -21,8 +21,8 @@ export default defineConfig(
     },
   },
   {
-    files: ['**/*.js'],
-    languageOptions: { globals: globals.node },
+    files: ['**/*.js', '**/*.mjs'],
+    languageOptions: { globals: { ...globals.node, fetch: 'readonly', WebSocket: 'readonly' } },
   },
   prettier,
 );

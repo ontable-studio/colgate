@@ -142,12 +142,17 @@ export class AttractScene extends Phaser.Scene {
       ease: 'Sine.easeInOut',
     });
 
+    // The Vitamin C dropper from the key visual, tip pointing down into the ring.
+    const dropperGlow = addGlow(this, 935, 560, 440, 0.45);
+    const dropper = this.add.image(935, 560, 'dropper').setDisplaySize(250, 267).setAngle(4);
+    float(this, [dropper, dropperGlow], 14, 2600, 300);
+
     const tube = this.add.image(tubeX, HERO_Y, 'tube').setDisplaySize(222, 620);
     float(this, tube, 12, 2400);
 
     const capsules = [
       { x: 115, y: 610, size: 130, delay: 0 },
-      { x: 985, y: 600, size: 110, delay: 500 },
+      { x: 990, y: 890, size: 110, delay: 500 },
       { x: 100, y: 1230, size: 110, delay: 1000 },
       { x: 990, y: 1010, size: 120, delay: 1500 },
       { x: 920, y: 1585, size: 100, delay: 700 },

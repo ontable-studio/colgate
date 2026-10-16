@@ -27,23 +27,48 @@ export function makeLogoTab(scene: Phaser.Scene): void {
   });
 }
 
-/** "OPTIC WHITE+ / VITAMIN C" lockup, set in the brand font (640x190). */
+/** Four-point sparkle, like the one after "OPTIC WHITE" in the key visual. */
+function drawSparkle(ctx: CanvasRenderingContext2D, x: number, y: number, r: number): void {
+  ctx.beginPath();
+  ctx.moveTo(x, y - r);
+  ctx.quadraticCurveTo(x + r * 0.12, y - r * 0.12, x + r, y);
+  ctx.quadraticCurveTo(x + r * 0.12, y + r * 0.12, x, y + r);
+  ctx.quadraticCurveTo(x - r * 0.12, y + r * 0.12, x - r, y);
+  ctx.quadraticCurveTo(x - r * 0.12, y - r * 0.12, x, y - r);
+  ctx.fill();
+}
+
+/**
+ * "OPTIC WHITE* / VITAMIN C" lockup (640x190), as in the key visual: thin white line with a
+ * sparkle, gold "VITAMIN" with a larger gold "C" that sits a little lower.
+ */
 export function makeLockup(scene: Phaser.Scene): void {
   drawTexture(scene, 'lockup', 640, 190, (ctx, w) => {
     ctx.textBaseline = 'alphabetic';
+    ctx.fillStyle = '#FFFFFF';
 
     ctx.font = canvasFont('light', 46);
-    ctx.fillStyle = '#FFFFFF';
     const line1 = trackedWidth(ctx, 'OPTIC WHITE', 7);
     const startX = (w - line1) / 2;
     trackedText(ctx, 'OPTIC WHITE', startX, 56, 7);
-    ctx.font = canvasFont('light', 26);
-    ctx.fillText('+', startX + line1 + 6, 34);
+    drawSparkle(ctx, startX + line1 + 14, 22, 15);
+    ctx.font = canvasFont('light', 10);
+    ctx.fillText('.', startX + line1 - 4, 56);
 
-    ctx.font = canvasFont('light', 84);
+    // "VITAMIN" is thin and wide-set; the closing "C" is half as big again and centred on it.
     ctx.fillStyle = '#FFC93C';
-    const line2 = trackedWidth(ctx, 'VITAMIN C', 13);
-    trackedText(ctx, 'VITAMIN C', (w - line2) / 2, 148, 13);
+    ctx.font = canvasFont('light', 74);
+    const vitamin = trackedWidth(ctx, 'VITAMIN', 14);
+    ctx.font = canvasFont('light', 116);
+    const letterC = trackedWidth(ctx, 'C', 0);
+    const gap = 6;
+    const left = (w - (vitamin + gap + letterC)) / 2;
+    const baseline = 142;
+    ctx.font = canvasFont('light', 74);
+    trackedText(ctx, 'VITAMIN', left, baseline, 14);
+    ctx.font = canvasFont('light', 116);
+    const capHeight = 74 * 0.7;
+    ctx.fillText('C', left + vitamin + gap, baseline - capHeight / 2 + 116 * 0.35);
   });
 }
 
