@@ -150,27 +150,37 @@ export class AttractScene extends Phaser.Scene {
     const tube = this.add.image(tubeX, HERO_Y, 'tube').setDisplaySize(TUBE_WIDTH, TUBE_HEIGHT);
     float(this, tube, 12, 2400);
 
+    // Vitamin C molecules of different sizes, scattered so they fill the space around the ring and
+    // tube without covering the title, tube, dropper or button. Smaller ones float less.
     const capsules = [
-      { x: 115, y: 610, size: 130, delay: 0 },
-      { x: 990, y: 890, size: 110, delay: 500 },
-      { x: 100, y: 1230, size: 110, delay: 1000 },
-      { x: 990, y: 1010, size: 120, delay: 1500 },
-      { x: 920, y: 1585, size: 100, delay: 700 },
-      { x: 170, y: 1560, size: 90, delay: 300 },
+      { x: 110, y: 300, size: 70, delay: 200 },
+      { x: 990, y: 330, size: 85, delay: 900 },
+      { x: 85, y: 560, size: 135, delay: 0 },
+      { x: 130, y: 830, size: 75, delay: 1300 },
+      { x: 1000, y: 800, size: 110, delay: 500 },
+      { x: 70, y: 1040, size: 105, delay: 700 },
+      { x: 955, y: 1050, size: 70, delay: 1600 },
+      { x: 185, y: 1260, size: 140, delay: 1000 },
+      { x: 985, y: 1150, size: 95, delay: 300 },
+      { x: 880, y: 1360, size: 60, delay: 1100 },
+      { x: 960, y: 1440, size: 130, delay: 1500 },
+      { x: 80, y: 1510, size: 85, delay: 600 },
+      { x: 270, y: 1590, size: 58, delay: 1800 },
+      { x: 900, y: 1595, size: 78, delay: 400 },
     ];
     for (const c of capsules) {
       const glow = addGlow(this, c.x, c.y, c.size * 2.4, 0.65);
       const img = this.add.image(c.x, c.y, 'capsule').setDisplaySize(c.size, c.size);
       this.tweens.add({
         targets: [img, glow],
-        y: c.y - 36,
+        y: c.y - (18 + c.size * 0.25),
         yoyo: true,
         repeat: -1,
-        duration: 1900,
+        duration: 1500 + c.size * 6,
         delay: c.delay,
         ease: 'Sine.easeInOut',
       });
-      this.tweens.add({ targets: img, angle: 360, duration: 16_000, repeat: -1 });
+      this.tweens.add({ targets: img, angle: 360, duration: 12_000 + c.size * 40, repeat: -1 });
     }
   }
 }
