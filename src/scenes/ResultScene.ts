@@ -20,11 +20,11 @@ import { SceneKey } from './keys';
  * Vertical layout (1080x1920); the left and right columns of the first block never overlap:
  *   285-535   score card (left)      285-755  tube (right)
  *   542-757   Day 1 > Day 7 card     792-868  Brightness Meter, labels at 905
- *   970-1570  Top 10 card            1635     tagline        1695-1835  PLAY AGAIN
+ *   970-1530  Top 10 card   1556 tagline   1578-1674 sticker reward   1695-1835  PLAY AGAIN
  */
 const BOARD_SIZE = 10;
 const BOARD_TOP = 1050;
-const ROW_STEP = 46;
+const ROW_STEP = 42;
 const LEFT_X = 330;
 
 export class ResultScene extends Phaser.Scene {
@@ -56,7 +56,7 @@ export class ResultScene extends Phaser.Scene {
     this.addMeter(cx);
 
     // Leaderboard card (filled in once the play is saved)
-    createPanel(this, cx, 1270, 920, 600);
+    createPanel(this, cx, 1250, 920, 560);
     this.add
       .text(
         cx,
@@ -70,12 +70,13 @@ export class ResultScene extends Phaser.Scene {
     const tagline = this.add
       .text(
         cx,
-        1635,
+        1556,
         'BRIGHTER SMILES, BRIGHTER DAYS',
-        textStyle({ size: 38, color: COLORS.goldSoft, glow: 'rgba(255,150,40,0.7)' }),
+        textStyle({ size: 30, color: COLORS.goldSoft, glow: 'rgba(255,150,40,0.7)' }),
       )
       .setOrigin(0.5);
     popIn(this, tagline, 1000, 0.85);
+    this.addStickerReward(cx);
 
     const again = createButton(
       this,
@@ -95,6 +96,42 @@ export class ResultScene extends Phaser.Scene {
     popIn(this, again, 1100);
     this.time.delayedCall(1700, () => {
       this.tweens.add({ targets: again, scale: 1.04, yoyo: true, repeat: -1, duration: 800 });
+    });
+  }
+
+  /** Every player who finishes a round gets one sticker, whatever the score. */
+  private addStickerReward(cx: number): void {
+    const banner = this.add.container(0, 0);
+    const panel = createPanel(this, cx, 1626, 920, 96, 40, 'gold');
+    const glow = addGlow(this, 190, 1626, 220, 0.6);
+    const badge = this.add.image(190, 1626, 'capsule').setDisplaySize(78, 78);
+    const title = this.add
+      .text(
+        cx + 70,
+        1608,
+        'YOU WIN 1 FREE STICKER!',
+        textStyle({ size: 40, color: COLORS.goldLight, glow: 'rgba(255,170,60,0.8)' }),
+      )
+      .setOrigin(0.5);
+    const hint = this.add
+      .text(
+        cx + 70,
+        1649,
+        'SHOW THIS SCREEN TO OUR STAFF',
+        textStyle({ size: 24, letterSpacing: 3, color: COLORS.cream }),
+      )
+      .setOrigin(0.5);
+    banner.add([panel, glow, badge, title, hint]);
+    banner.setAlpha(0);
+    this.tweens.add({ targets: banner, alpha: 1, delay: 1050, duration: 450 });
+    this.tweens.add({ targets: badge, angle: 360, duration: 9000, repeat: -1 });
+    this.tweens.add({
+      targets: [badge, glow],
+      scale: '*=1.12',
+      yoyo: true,
+      repeat: -1,
+      duration: 700,
+      ease: 'Sine.easeInOut',
     });
   }
 

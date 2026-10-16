@@ -63,6 +63,7 @@ Semua angka ada di `src/config/game.ts` dan masih asumsi sampai klien mengonfirm
 
 - Timer 15 detik; ronde berakhir lebih awal jika meter 100%, dan sisa detiknya dibayar **bonus waktu** (+25 poin per detik) supaya yang cepat menang skor lebih tinggi.
 - **Combo**: kapsul berturut-turut menaikkan pengali poin (2 → ×2, 4 → ×3, 6 → ×4, 8 → ×5). Noda, decoy, atau kapsul yang terlewat memutus combo. Combo hanya memengaruhi skor, bukan meter, jadi syarat menang tidak berubah. Seri di leaderboard dipecah: skor sama → yang selesai lebih cepat, lalu yang main lebih dulu.
+- **Reward (konfirmasi klien):** semua pemain yang menyelesaikan permainan mendapat 1 sticker, berapa pun skornya. Layar akhir menampilkan "YOU WIN 1 FREE STICKER!" dan meminta pemain menunjukkan layar ke staf; layar admin menampilkan jumlah sticker (1 per permainan).
 - Kapsul Vitamin C: +10 poin, meter +14 (±8 kapsul untuk penuh). Noda: -10 poin, meter -8. Pengecoh: -5 poin, meter -5.
 - **Kesulitan naik bertahap**: awal santai (jeda 900 ms, jatuh 480 px/s, 20% hazard), akhir lebih cepat (jeda 560 ms, 700 px/s, 45% hazard).
 - **Penjadwal yang adil** (bukan lemparan dadu murni): tiga objek pertama selalu kapsul, hazard tidak pernah lebih dari 2 beruntun, hazard wajib muncul setelah 4 kapsul beruntun, dan posisi objek berikutnya selalu terjangkau dari objek sebelumnya.

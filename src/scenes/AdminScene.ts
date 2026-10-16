@@ -96,6 +96,7 @@ export class AdminScene extends Phaser.Scene {
       ['ONLINE', navigator.onLine ? 'yes' : 'no'],
       ['SYNC', sync ? 'on' : 'off (no endpoint)'],
       ['PLAYS', String(total)],
+      ['STICKERS', `${total} (1 per play)`],
       ['PENDING', String(pending)],
       ['LAST SYNC', status?.lastSyncAt ? status.lastSyncAt.slice(0, 19).replace('T', ' ') : '-'],
       ['LAST ERROR', status?.lastError ? status.lastError.slice(0, 30) : '-'],
