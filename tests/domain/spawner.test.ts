@@ -91,8 +91,8 @@ describe('Spawner schedule', () => {
 
   it('starts with the safe opening and has a sensible number of objects', () => {
     expect(events.slice(0, SPAWN.safeOpeningSpawns).every((e) => e.kind === 'capsule')).toBe(true);
-    expect(events.length).toBeGreaterThan(45);
-    expect(events.length).toBeLessThan(65);
+    expect(events.length).toBeGreaterThan(25);
+    expect(events.length).toBeLessThan(45);
   });
 
   it('spaces objects by the stage interval and speeds up over time', () => {

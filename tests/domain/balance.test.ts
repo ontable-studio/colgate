@@ -15,6 +15,7 @@ import { simulateTier, type ScheduleFn, type TierStats } from '../support/simula
 /** The first version of the rules (plain dice rolls, flat pace), kept to measure the improvement. */
 const LEGACY: GameRules = {
   ...RULES,
+  durationSec: 40,
   meter: { capsule: 5, stain: -5, decoy: -3 },
   timeBonusPerSec: 0,
 };
@@ -81,16 +82,16 @@ describe('balance of the current rules', () => {
   });
 
   it('keeps the round long enough to enjoy, even for an expert', () => {
-    expect(stats.expert.medianFinishSec).toBeGreaterThanOrEqual(20);
-    expect(stats.expert.medianFinishSec).toBeLessThanOrEqual(28);
-    expect(stats.good.medianFinishSec).toBeLessThanOrEqual(RULES.durationSec - 5);
+    expect(stats.expert.medianFinishSec).toBeGreaterThanOrEqual(RULES.durationSec * 0.4);
+    expect(stats.expert.medianFinishSec).toBeLessThanOrEqual(RULES.durationSec * 0.75);
+    expect(stats.good.medianFinishSec).toBeLessThanOrEqual(RULES.durationSec - 2);
   });
 
   it('spreads scores so the leaderboard is not full of ties', () => {
     // Medians of neighbouring levels are separated by more than the noise within a level.
     expect(stats.expert.p10Score).toBeGreaterThan(stats.good.meanScore);
     expect(stats.good.p10Score).toBeGreaterThan(stats.casual.meanScore);
-    expect(stats.expert.p90Score - stats.expert.p10Score).toBeGreaterThanOrEqual(150); // combo makes the top end vary
+    expect(stats.expert.p90Score - stats.expert.p10Score).toBeGreaterThanOrEqual(80); // combo and time bonus make the top end vary
   });
 
   it('is clearly fairer than the first version for ordinary players', () => {

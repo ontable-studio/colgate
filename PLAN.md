@@ -11,7 +11,7 @@ Rencana kerja Ontable Studio (Irsal = Developer, Oji = Artist). Dokumen hidup: u
 
 **Masuk:**
 
-- Satu game: Catch the Brightness (touch, portrait, 30-45 detik per pemain)
+- Satu game: Catch the Brightness (touch, portrait; brief awal 30-45 detik, sekarang 15 detik atas permintaan tim)
 - Layar: Attract, How to Play, Gameplay, Unlock, Akhir (skor, meter, inisial, top 10, Play Again)
 - Booth-proofing: attract mode, auto-reset idle, leaderboard lokal
 - Simpan hasil lokal, sinkron ke Google Sheet saat ada internet
@@ -61,13 +61,13 @@ Catatan: Unity WebGL tidak dipakai (berat untuk browser TV).
 
 Semua angka ada di `src/config/game.ts` dan masih asumsi sampai klien mengonfirmasi. Keseimbangannya divalidasi dengan simulasi (`tests/domain/balance.test.ts`).
 
-- Timer tetap 40 detik; ronde berakhir lebih awal jika meter 100%, dan sisa detiknya dibayar **bonus waktu** (+8 poin per detik) supaya yang cepat menang skor lebih tinggi (tanpa bonus, semua yang menang mentok di ±200).
-- **Combo**: kapsul berturut-turut menaikkan pengali poin (3 → ×2, 6 → ×3, 10 → ×4, 15 → ×5). Noda, decoy, atau kapsul yang terlewat memutus combo. Combo hanya memengaruhi skor, bukan meter, jadi syarat menang tidak berubah. Seri di leaderboard dipecah: skor sama → yang selesai lebih cepat, lalu yang main lebih dulu.
-- Kapsul Vitamin C: +10 poin, meter +6. Noda: -10 poin, meter -5. Pengecoh: -5 poin, meter -3.
+- Timer 15 detik; ronde berakhir lebih awal jika meter 100%, dan sisa detiknya dibayar **bonus waktu** (+25 poin per detik) supaya yang cepat menang skor lebih tinggi.
+- **Combo**: kapsul berturut-turut menaikkan pengali poin (2 → ×2, 4 → ×3, 6 → ×4, 8 → ×5). Noda, decoy, atau kapsul yang terlewat memutus combo. Combo hanya memengaruhi skor, bukan meter, jadi syarat menang tidak berubah. Seri di leaderboard dipecah: skor sama → yang selesai lebih cepat, lalu yang main lebih dulu.
+- Kapsul Vitamin C: +10 poin, meter +14 (±8 kapsul untuk penuh). Noda: -10 poin, meter -8. Pengecoh: -5 poin, meter -5.
 - **Kesulitan naik bertahap**: awal santai (jeda 900 ms, jatuh 480 px/s, 20% hazard), akhir lebih cepat (jeda 560 ms, 700 px/s, 45% hazard).
 - **Penjadwal yang adil** (bukan lemparan dadu murni): tiga objek pertama selalu kapsul, hazard tidak pernah lebih dari 2 beruntun, hazard wajib muncul setelah 4 kapsul beruntun, dan posisi objek berikutnya selalu terjangkau dari objek sebelumnya.
 - **Zona tangkap**: kapsul dihitung walau hanya menyentuh bibir keranjang (pemaaf), hazard hanya dihitung jika benar-benar masuk mangkuk (selisih tipis dianggap lolos). Kapsul yang meleset meredup supaya terlihat tidak dihitung.
-- Perkiraan hasil untuk pemain simulasi (bukan data nyata): pemula 1% menang (rata-rata meter 45%), casual 36%, rata-rata 92%, bagus dan ahli 100% (ahli selesai ±23 detik). Aturan awal: 0%, 3%, 22%, 70%, 97% dengan skor mentok di ±200.
+- Perkiraan hasil untuk pemain simulasi (bukan data nyata, ronde 15 detik): pemula 4% menang (rata-rata meter 40%), casual 49%, rata-rata 90%, bagus dan ahli 100% (ahli selesai ±8 detik, skor ±285-415).
 - Animasi akhir: gigi Day 1 → Day 7 (wipe), lalu skor
 - Tanpa reward fisik dan tanpa audio kecuali ada suara bebas royalti
 

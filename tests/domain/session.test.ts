@@ -5,6 +5,12 @@ import { GameSession } from '@/domain/session';
 const rules: GameRules = {
   ...RULES,
   durationSec: 10,
+  combo: [
+    { streak: 3, multiplier: 2 },
+    { streak: 6, multiplier: 3 },
+    { streak: 10, multiplier: 4 },
+    { streak: 15, multiplier: 5 },
+  ],
   points: { capsule: 10, stain: -10, decoy: -5 },
   meter: { capsule: 25, stain: -10, decoy: -5 },
 };
