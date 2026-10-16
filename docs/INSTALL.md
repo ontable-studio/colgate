@@ -22,11 +22,31 @@ Untuk tim yang memasang dan menjaga game di lokasi (24-25 Oktober instalasi, eve
 
 ### Jika memakai PC/mini PC dengan Chrome
 
-Jalankan Chrome dalam mode kiosk. Opsi `--autoplay-policy` membuat musik layar menunggu bisa berbunyi tanpa sentuhan.
+Mode kiosk membuat Chrome tampil penuh layar seperti aplikasi: tanpa bilah alamat, tanpa tab, dan pengunjung tidak bisa keluar sendiri. Cukup disiapkan sekali dengan membuat pintasan (shortcut):
 
-```bash
-chrome --kiosk --noerrdialogs --disable-pinch --overscroll-history-navigation=0 --autoplay-policy=no-user-gesture-required https://URL-GAME-ANDA
-```
+1. Klik kanan di Desktop → **New** → **Shortcut**.
+2. Pada kolom lokasi, tempel baris berikut (satu baris utuh), lalu ganti `https://URL-GAME-ANDA` dengan alamat game yang sebenarnya:
+
+   ```
+   "C:\Program Files\Google\Chrome\Application\chrome.exe" --kiosk --noerrdialogs --disable-pinch --overscroll-history-navigation=0 --autoplay-policy=no-user-gesture-required https://URL-GAME-ANDA
+   ```
+
+3. Beri nama, misalnya `Catch the Brightness`, lalu klik **Finish**.
+4. Klik dua kali pintasan itu untuk membuka game. Agar terbuka otomatis saat PC menyala, salin pintasan ke folder Startup (tekan `Win + R`, ketik `shell:startup`, lalu Enter).
+5. Untuk keluar dari mode kiosk (misalnya untuk perawatan), tekan `Alt + F4` dengan keyboard.
+
+Arti tiap bagian baris tadi:
+
+| Bagian                                       | Fungsinya                                                                      |
+| -------------------------------------------- | ------------------------------------------------------------------------------ |
+| `--kiosk`                                    | Tampil penuh layar tanpa bilah alamat dan tombol browser                       |
+| `--noerrdialogs`                             | Menyembunyikan kotak pesan galat Chrome supaya tidak menutupi game             |
+| `--disable-pinch`                            | Mematikan cubit-untuk-zoom, jadi layar tidak bisa terperbesar tanpa sengaja    |
+| `--overscroll-history-navigation=0`          | Mencegah geseran dari tepi layar membuat halaman kembali (back)                |
+| `--autoplay-policy=no-user-gesture-required` | Mengizinkan musik layar awal berbunyi sendiri, tanpa menunggu sentuhan pertama |
+| `https://URL-GAME-ANDA`                      | Alamat game yang dibuka otomatis                                               |
+
+Kalau Chrome terpasang di lokasi lain, sesuaikan bagian `C:\Program Files\...\chrome.exe`.
 
 ## 3. Uji akhir di lokasi (sekitar 15 menit)
 
@@ -61,14 +81,14 @@ Setiap hari sebelum pulang: pastikan `PENDING 0` (tekan SYNC NOW kalau perlu), l
 
 ## 6. Jika ada masalah
 
-| Gejala                                | Yang dilakukan                                                                                                                                           |
-| ------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Layar putih atau game beku            | Tunggu sebentar; game me-reload sendiri. Kalau muncul "Something went wrong...", tunggu ±70 detik (mencoba lagi otomatis) atau muat ulang halaman manual |
-| Tidak ada suara                       | Sentuh layar sekali (browser mengunci suara sebelum sentuhan). Cek volume TV dan menu admin (SOUND: ON). Mode PC: pakai opsi `--autoplay-policy` di atas |
-| Animasi patah-patah                   | Buka URL dengan tambahan `?quality=low`, atau biarkan game mendeteksinya sendiri (baris `QUALITY` di admin)                                              |
-| `PENDING` tidak turun                 | Cek internet. Baca `LAST ERROR`. SYNC NOW. Data aman di perangkat dan terkirim begitu jaringan kembali                                                   |
-| Sentuhan tidak merespon               | Bersihkan layar, cek kabel USB sentuh, kalibrasi ulang. Pindah ke perangkat cadangan bila perlu                                                          |
-| Inisial ditolak ("TRY OTHER LETTERS") | Normal: kombinasi huruf tertentu diblokir demi menjaga brand                                                                                             |
+| Gejala                                | Yang dilakukan                                                                                                                                                  |
+| ------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Layar putih atau game beku            | Tunggu sebentar; game me-reload sendiri. Kalau muncul "Something went wrong...", tunggu sekitar 70 detik (mencoba lagi otomatis) atau muat ulang halaman manual |
+| Tidak ada suara                       | Sentuh layar sekali (browser mengunci suara sebelum sentuhan). Cek volume TV dan menu admin (SOUND: ON). Mode PC: pakai opsi `--autoplay-policy` di atas        |
+| Animasi patah-patah                   | Buka URL dengan tambahan `?quality=low`, atau biarkan game mendeteksinya sendiri (baris `QUALITY` di admin)                                                     |
+| `PENDING` tidak turun                 | Cek internet. Baca `LAST ERROR`. SYNC NOW. Data aman di perangkat dan terkirim begitu jaringan kembali                                                          |
+| Sentuhan tidak merespon               | Bersihkan layar, cek kabel USB sentuh, kalibrasi ulang. Pindah ke perangkat cadangan bila perlu                                                                 |
+| Inisial ditolak ("TRY OTHER LETTERS") | Normal: kombinasi huruf tertentu diblokir demi menjaga brand                                                                                                    |
 
 ## 7. Memperbarui game saat event berjalan
 
