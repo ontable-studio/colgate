@@ -19,6 +19,9 @@ const ADMIN_HOLD_MS = 2000;
 const RING_Y = 745;
 const RING_SIZE = 620;
 const HERO_Y = 1340;
+const TUBE_HEIGHT = 620;
+/** How far the platform's back edge sits above the tube's foot. */
+const STAGE_FOOT_OFFSET = 110;
 
 /** Looping idle screen that invites people to play. Everything else returns here when idle. */
 export class AttractScene extends Phaser.Scene {
@@ -121,6 +124,9 @@ export class AttractScene extends Phaser.Scene {
   private addHero(): void {
     const tubeX = 390;
     const cX = 735;
+    // Glossy platform the tube stands on (its feet sit just below the platform's back edge).
+    const tubeFootY = HERO_Y + TUBE_HEIGHT / 2;
+    addArt(this, GAME_WIDTH / 2, tubeFootY - STAGE_FOOT_OFFSET, 'stage').setOrigin(0.5, 0);
     const flare = this.add
       .image(GAME_WIDTH / 2, HERO_Y, 'flare')
       .setDisplaySize(1100, 1100)
@@ -147,7 +153,7 @@ export class AttractScene extends Phaser.Scene {
     const dropper = this.add.image(935, 560, 'dropper').setDisplaySize(250, 267).setAngle(4);
     float(this, [dropper, dropperGlow], 14, 2600, 300);
 
-    const tube = this.add.image(tubeX, HERO_Y, 'tube').setDisplaySize(222, 620);
+    const tube = this.add.image(tubeX, HERO_Y, 'tube').setDisplaySize(222, TUBE_HEIGHT);
     float(this, tube, 12, 2400);
 
     const capsules = [
