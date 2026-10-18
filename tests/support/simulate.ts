@@ -1,4 +1,4 @@
-import { OBJECT_SIZE, type FallingKind, type GameRules } from '@/config/game';
+import { type FallingKind, type GameRules } from '@/config/game';
 import { GameSession } from '@/domain/session';
 import { Spawner, type SpawnEvent } from '@/domain/spawner';
 
@@ -50,7 +50,7 @@ export const realSchedule: ScheduleFn = (rules, rand) => {
   const spawner = new Spawner(rules, rand);
   const events: SpawnEvent[] = [];
   const totalMs = rules.durationSec * 1000;
-  for (let t = 0; t <= totalMs; t += 25) events.push(...spawner.due(t));
+  for (let t = -2000; t <= totalMs; t += 25) events.push(...spawner.due(t));
   return events;
 };
 
@@ -66,11 +66,7 @@ export function simulateRound(
   const events = schedule(rules, rand);
 
   const landings = events
-    .map((event) => ({
-      event,
-      landMs:
-        event.atMs + ((rules.catching.lineY + OBJECT_SIZE[event.kind] / 2) / event.speed) * 1000,
-    }))
+    .map((event) => ({ event, landMs: event.landMs }))
     .filter((landing) => landing.landMs <= totalMs)
     .sort((a, b) => a.landMs - b.landMs);
 

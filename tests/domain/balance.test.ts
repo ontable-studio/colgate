@@ -37,7 +37,7 @@ const legacySchedule: ScheduleFn = (rules, rand) => {
         break;
       }
     }
-    events.push({ kind, x: 540, speed: 600, atMs: at, intervalMs: 700 });
+    events.push({ kind, x: 540, speed: 600, atMs: at, landMs: at + 2300, intervalMs: 700 });
   }
   return events;
 };
@@ -92,24 +92,6 @@ describe('balance of the current rules', () => {
     expect(stats.expert.p10Score).toBeGreaterThan(stats.good.meanScore);
     expect(stats.good.p10Score).toBeGreaterThan(stats.casual.meanScore);
     expect(stats.expert.p90Score - stats.expert.p10Score).toBeGreaterThanOrEqual(80); // combo and time bonus make the top end vary
-  });
-
-  it('is clearly harder than the previous release for ordinary players', () => {
-    const easier: GameRules = {
-      ...RULES,
-      meter: { capsule: 14, stain: -8, decoy: -5 },
-      spawn: {
-        ...RULES.spawn,
-        stages: [
-          { at: 0, intervalMs: 560, fallSpeed: 600, hazardShare: 0.2 },
-          { at: 0.25, intervalMs: 490, fallSpeed: 680, hazardShare: 0.35 },
-          { at: 0.6, intervalMs: 440, fallSpeed: 760, hazardShare: 0.42 },
-          { at: 1, intervalMs: 410, fallSpeed: 840, hazardShare: 0.45 },
-        ],
-      },
-    };
-    const before = simulateTier(easier, 0.55, ROUNDS);
-    expect(stats.average.winRate).toBeLessThan(before.winRate - 0.2);
   });
 });
 

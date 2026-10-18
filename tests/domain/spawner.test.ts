@@ -99,20 +99,38 @@ describe('Spawner schedule', () => {
   });
 
   it('starts with the safe opening and has a sensible number of objects', () => {
-    expect(events.slice(0, SPAWN.safeOpeningSpawns).every((e) => e.kind === 'capsule')).toBe(true);
+    expect(
+      [...events]
+        .sort((a, b) => a.landMs - b.landMs)
+        .slice(0, SPAWN.safeOpeningSpawns)
+        .every((e) => e.kind === 'capsule'),
+    ).toBe(true);
     expect(events.length).toBeGreaterThan(25);
     expect(events.length).toBeLessThan(45);
   });
 
+  it('lets every object land inside the round and the last one in the final second', () => {
+    const totalMs = RULES.durationSec * 1000;
+    const landings = events.map((e) => e.landMs).sort((a, b) => a - b);
+    expect(landings.every((t) => t <= totalMs)).toBe(true);
+    expect(totalMs - (landings[landings.length - 1] ?? 0)).toBeLessThan(1000);
+  });
+
+  it('starts the first object already in the air so play begins at once', () => {
+    expect(Math.min(...events.map((e) => e.atMs))).toBeLessThan(0);
+    expect(Math.min(...events.map((e) => e.landMs))).toBeLessThanOrEqual(1500);
+  });
+
   it('spaces objects by the stage interval and speeds up over time', () => {
-    for (let i = 1; i < events.length; i++) {
-      const previous = events[i - 1];
-      const current = events[i];
+    const byLanding = [...events].sort((a, b) => a.landMs - b.landMs);
+    for (let i = 1; i < byLanding.length; i++) {
+      const previous = byLanding[i - 1];
+      const current = byLanding[i];
       if (!previous || !current) throw new Error('missing event');
-      expect(current.atMs - previous.atMs).toBeCloseTo(previous.intervalMs);
+      expect(current.landMs - previous.landMs).toBeCloseTo(previous.intervalMs);
     }
-    const first = events[0];
-    const last = events[events.length - 1];
+    const first = byLanding[0];
+    const last = byLanding[byLanding.length - 1];
     expect(last?.speed ?? 0).toBeGreaterThan(first?.speed ?? Infinity);
   });
 
