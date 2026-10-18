@@ -61,7 +61,7 @@ Catatan: Unity WebGL tidak dipakai (berat untuk browser TV).
 
 Semua angka ada di `src/config/game.ts` dan masih asumsi sampai klien mengonfirmasi. Keseimbangannya divalidasi dengan simulasi (`tests/domain/balance.test.ts`).
 
-- Timer 15 detik; ronde berakhir lebih awal jika meter 100%, dan sisa detiknya dibayar **bonus waktu** (+25 poin per detik) supaya yang cepat menang skor lebih tinggi.
+- Timer 15 detik; ronde berakhir lebih awal jika meter 95%, dan sisa detiknya dibayar **bonus waktu** (+25 poin per detik) supaya yang cepat menang skor lebih tinggi.
 - **Combo**: kapsul berturut-turut menaikkan pengali poin (2 → ×2, 4 → ×3, 6 → ×4, 8 → ×5). Noda, decoy, atau kapsul yang terlewat memutus combo. Combo hanya memengaruhi skor, bukan meter, jadi syarat menang tidak berubah. Seri di leaderboard dipecah: skor sama → yang selesai lebih cepat, lalu yang main lebih dulu.
 - **Reward (konfirmasi klien):** semua pemain yang menyelesaikan permainan mendapat 1 sticker, berapa pun skornya. Layar akhir menampilkan "YOU WIN 1 FREE STICKER!" dan meminta pemain menunjukkan layar ke staf; layar admin menampilkan jumlah sticker (1 per permainan).
 - Kapsul Vitamin C: +10 poin, meter +14 (±8 kapsul untuk penuh). Noda: -10 poin, meter -8. Pengecoh: -5 poin, meter -5.

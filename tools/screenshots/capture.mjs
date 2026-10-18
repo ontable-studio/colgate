@@ -64,7 +64,7 @@ for (let i = 0; i < 60; i++) {
   if (r.result?.value === true) break;
 }
 
-const result = { score: 584, timeBonus: 144, meterPct: 100, catches: 22, hits: 1, durationSec: 22 };
+const result = { score: 584, timeBonus: 144, meterPct: 95, catches: 22, hits: 1, durationSec: 22 };
 const lose = { score: 120, timeBonus: 0, meterPct: 62, catches: 12, hits: 4, durationSec: 40 };
 const shots = [
   ['01-attract', 'Attract', {}, 2500],

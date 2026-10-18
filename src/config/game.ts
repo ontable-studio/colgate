@@ -23,7 +23,9 @@ export interface GameRules {
   readonly durationSec: number;
   /** Score change per kind (score never goes below 0). */
   readonly points: Readonly<Record<FallingKind, number>>;
-  /** Brightness meter change (percentage points) per kind. Meter is clamped to 0..100. */
+  /** The meter counts up to this value, shown as the percentage (95 = the paste's "95% high purity"). */
+  readonly meterFull: number;
+  /** Brightness meter change (percentage points) per kind. Meter is clamped to 0..`meterFull`. */
   readonly meter: Readonly<Record<FallingKind, number>>;
   /** Filling the meter early ends the round and pays this many points per second left. */
   readonly timeBonusPerSec: number;
@@ -78,6 +80,7 @@ export const OBJECT_SIZE: Readonly<Record<FallingKind, number>> = {
  */
 export const RULES: GameRules = {
   durationSec: 15,
+  meterFull: 95,
   points: { capsule: 10, stain: -10, decoy: -5 },
   meter: { capsule: 11, stain: -9, decoy: -5 },
   timeBonusPerSec: 25,

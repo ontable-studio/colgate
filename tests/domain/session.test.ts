@@ -36,7 +36,7 @@ describe('GameSession', () => {
   it('ends early when the meter is full and ignores further catches', () => {
     const s = new GameSession(rules);
     for (let i = 0; i < 4; i++) s.catch('capsule');
-    expect(s.meterPct).toBe(100);
+    expect(s.meterPct).toBe(rules.meterFull);
     expect(s.isOver).toBe(true);
     s.catch('capsule');
     expect(s.score).toBe(60); // 10 + 10 + 20 + 20: the third and fourth catch pay double
@@ -59,7 +59,7 @@ describe('time bonus', () => {
     s.tick(3000); // 7 s left
     for (let i = 0; i < 4; i++) s.catch('capsule');
     const result = s.result();
-    expect(s.meterPct).toBe(100);
+    expect(s.meterPct).toBe(rules.meterFull);
     expect(result.timeBonus).toBe(7 * 8);
     expect(result.score).toBe(s.score + 56);
   });

@@ -97,7 +97,7 @@ export function simulateRound(
 
   const result = session.result();
   return {
-    win: result.meterPct >= 100,
+    win: result.meterPct >= rules.meterFull,
     finishSec: (totalMs - session.remainingMs) / 1000,
     score: result.score,
     meterPct: result.meterPct,

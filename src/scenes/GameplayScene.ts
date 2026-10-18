@@ -103,7 +103,7 @@ export class GameplayScene extends Phaser.Scene {
 
     if (this.session.isOver) {
       audio.stopMusic(500);
-      if (this.session.meterPct < 100) audio.playSfx('sfx-timeup', { volume: 0.8 });
+      if (this.session.meterPct < RULES.meterFull) audio.playSfx('sfx-timeup', { volume: 0.8 });
       this.scene.start(SceneKey.Unlock, { result: this.session.result() });
     }
   }

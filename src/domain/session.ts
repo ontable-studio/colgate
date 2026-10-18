@@ -52,7 +52,7 @@ export class GameSession {
     return this._remainingMs;
   }
   get isOver(): boolean {
-    return this._remainingMs <= 0 || this._meterPct >= 100;
+    return this._remainingMs <= 0 || this._meterPct >= this.rules.meterFull;
   }
 
   tick(deltaMs: number): void {
@@ -68,7 +68,10 @@ export class GameSession {
     const points = this.rules.points[kind] * (kind === 'capsule' ? this.multiplier : 1);
     this._lastPoints = points;
     this._score = Math.max(0, this._score + points);
-    this._meterPct = Math.min(100, Math.max(0, this._meterPct + this.rules.meter[kind]));
+    this._meterPct = Math.min(
+      this.rules.meterFull,
+      Math.max(0, this._meterPct + this.rules.meter[kind]),
+    );
     if (kind === 'capsule') this._catches += 1;
     else this._hits += 1;
   }
@@ -81,7 +84,7 @@ export class GameSession {
   /** Points for the seconds left when the meter filled up; nothing if time ran out first.
    *  Counts the seconds the timer on screen shows (rounded up), so 00:20 pays for 20 s. */
   get timeBonus(): number {
-    if (this._meterPct < 100) return 0;
+    if (this._meterPct < this.rules.meterFull) return 0;
     return Math.ceil(this._remainingMs / 1000) * this.rules.timeBonusPerSec;
   }
 

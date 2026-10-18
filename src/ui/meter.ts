@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { RULES } from '@/config/game';
 import { addArt } from './art/canvas';
 import { bump } from './motion';
 
@@ -8,7 +9,7 @@ const FILL_WIDTH = 748;
 const FILL_HEIGHT = 44;
 
 export interface Meter {
-  /** 0..100 */
+  /** 0..RULES.meterFull (the bar is full at the top of that range) */
   setValue: (percent: number) => void;
   /** Little bounce of the capsule badge (call when the meter gains). */
   pulse: () => void;
@@ -30,7 +31,7 @@ export function createMeter(scene: Phaser.Scene, centerX: number, y: number): Me
   const badge = scene.add.image(left + 16, y, 'capsule').setDisplaySize(104, 104);
 
   const setValue = (percent: number): void => {
-    const ratio = Phaser.Math.Clamp(percent, 0, 100) / 100;
+    const ratio = Phaser.Math.Clamp(percent, 0, RULES.meterFull) / RULES.meterFull;
     fill.setVisible(ratio > 0);
     fill.setCrop(0, 0, Math.max(1, Math.round(sourceWidth * ratio)), sourceHeight);
   };
