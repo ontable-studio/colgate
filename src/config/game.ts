@@ -39,9 +39,6 @@ export interface GameRules {
     readonly stainShareOfHazards: number;
     /** The first few objects are always capsules so nobody starts with a penalty. */
     readonly safeOpeningSpawns: number;
-    /** Chance (0..1) that the next object is the same sort as the last (capsule after capsule,
-     *  hazard after hazard), which makes objects come in waves. */
-    readonly repeatChance: number;
     /** Never more than this many hazards back to back. */
     readonly maxHazardsInRow: number;
     /** After this many capsules in a row a hazard is due, so the rhythm stays interesting. */
@@ -85,7 +82,7 @@ export const RULES: GameRules = {
   durationSec: 15,
   meterFull: 95,
   points: { capsule: 10, stain: -10, decoy: -5 },
-  meter: { capsule: 11, stain: -9, decoy: -5 },
+  meter: { capsule: 13, stain: -9, decoy: -5 },
   timeBonusPerSec: 25,
   combo: [
     { streak: 2, multiplier: 2 },
@@ -101,10 +98,9 @@ export const RULES: GameRules = {
       { at: 1, intervalMs: 340, fallSpeed: 980, hazardShare: 0.55 },
     ],
     stainShareOfHazards: 0.6,
-    safeOpeningSpawns: 3,
-    repeatChance: 0.1,
-    maxHazardsInRow: 2,
-    maxCapsulesInRow: 3,
+    safeOpeningSpawns: 1,
+    maxHazardsInRow: 1,
+    maxCapsulesInRow: 1,
     lateralReach: 1000,
     marginX: 100,
   },

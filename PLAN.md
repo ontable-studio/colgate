@@ -66,7 +66,7 @@ Semua angka ada di `src/config/game.ts` dan masih asumsi sampai klien mengonfirm
 - **Reward (konfirmasi klien):** semua pemain yang menyelesaikan permainan mendapat 1 sticker, berapa pun skornya. Layar akhir menampilkan "YOU WIN 1 FREE STICKER!" dan meminta pemain menunjukkan layar ke staf; layar admin menampilkan jumlah sticker (1 per permainan).
 - Kapsul Vitamin C: +10 poin, meter +14 (±8 kapsul untuk penuh). Noda: -10 poin, meter -8. Pengecoh: -5 poin, meter -5.
 - **Kesulitan naik bertahap**: awal santai (jeda 900 ms, jatuh 480 px/s, 20% hazard), akhir lebih cepat (jeda 560 ms, 700 px/s, 45% hazard).
-- **Penjadwal yang adil** (bukan lemparan dadu murni): tiga objek pertama selalu kapsul, hazard tidak pernah lebih dari 2 beruntun, hazard wajib muncul setelah 4 kapsul beruntun, dan posisi objek berikutnya selalu terjangkau dari objek sebelumnya.
+- **Penjadwal yang adil** (bukan lemparan dadu murni): objek pertama selalu kapsul, lalu kapsul dan hazard (noda/decoy) selalu bergantian, tidak pernah dua sejenis beruntun, dan posisi objek berikutnya selalu terjangkau dari objek sebelumnya.
 - **Zona tangkap**: kapsul dihitung walau hanya menyentuh bibir keranjang (pemaaf), hazard hanya dihitung jika benar-benar masuk mangkuk (selisih tipis dianggap lolos). Kapsul yang meleset meredup supaya terlihat tidak dihitung.
 - Perkiraan hasil untuk pemain simulasi (bukan data nyata, ronde 15 detik): pemula 4% menang (rata-rata meter 40%), casual 49%, rata-rata 90%, bagus dan ahli 100% (ahli selesai ±8 detik, skor ±285-415).
 - Animasi akhir: gigi Day 1 → Day 7 (wipe), lalu skor
