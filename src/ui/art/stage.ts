@@ -81,20 +81,20 @@ export function makeStage(scene: Phaser.Scene): void {
     fade.addColorStop(1, 'rgba(0,0,0,1)');
     ctx.fillStyle = fade;
     ctx.fillRect(0, h * 0.7, w, h * 0.3);
-    // Feather the back edge too, so the light of the video behind the teeth melts into the
-    // platform instead of meeting a hard line.
-    const back = ctx.createLinearGradient(0, RIDGE_Y, 0, SIDE_Y + 40);
-    back.addColorStop(0, 'rgba(0,0,0,1)');
-    back.addColorStop(1, 'rgba(0,0,0,0)');
-    ctx.fillStyle = back;
-    ctx.fillRect(0, 0, w, SIDE_Y + 40);
-    const side = ctx.createLinearGradient(0, 0, w, 0);
-    side.addColorStop(0, 'rgba(0,0,0,0.85)');
-    side.addColorStop(0.12, 'rgba(0,0,0,0)');
-    side.addColorStop(0.88, 'rgba(0,0,0,0)');
-    side.addColorStop(1, 'rgba(0,0,0,0.85)');
-    ctx.fillStyle = side;
-    ctx.fillRect(0, 0, w, h);
+    // Feather only the very edge of the back (about 26 px), following its slope, so the light of
+    // the video behind the teeth melts into the platform without making the platform see-through.
+    const edgeY = (x: number): number =>
+      x < mid
+        ? SIDE_Y + ((RIDGE_Y - SIDE_Y) * x) / mid
+        : RIDGE_Y + ((SIDE_Y + 8 - RIDGE_Y) * (x - mid)) / mid;
+    for (let x = 0; x < w; x += 4) {
+      const y = edgeY(x);
+      const feather = ctx.createLinearGradient(0, y, 0, y + 26);
+      feather.addColorStop(0, 'rgba(0,0,0,0.9)');
+      feather.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.fillStyle = feather;
+      ctx.fillRect(x, y - 2, 4, 28);
+    }
     ctx.globalCompositeOperation = 'source-over';
   });
 }
