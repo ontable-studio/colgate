@@ -62,14 +62,14 @@ export class InitialsScene extends Phaser.Scene implements IdleAware {
       .text(cx, 590, 'ENTER YOUR INITIALS', textStyle({ size: 46, weight: 'light' }))
       .setOrigin(0.5);
 
-    const boxSize = 200;
-    const gap = 50;
+    const boxSize = 150;
+    const gap = 26;
     const left = cx - ((MAX_INITIALS - 1) * (boxSize + gap)) / 2;
     for (let i = 0; i < MAX_INITIALS; i++) {
       const x = left + i * (boxSize + gap);
-      createPanel(this, x, 745, boxSize, boxSize, 36);
+      createPanel(this, x, 745, boxSize, boxSize, 30);
       this.slots.push(
-        this.add.text(x, 745, '', textStyle({ size: 132, color: COLORS.goldLight })).setOrigin(0.5),
+        this.add.text(x, 745, '', textStyle({ size: 100, color: COLORS.goldLight })).setOrigin(0.5),
       );
     }
     this.refresh();

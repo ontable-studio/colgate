@@ -88,7 +88,7 @@ Plain random spawning and box collisions felt unfair, so the round is built from
 - **Frame watchdog:** if the render loop stops advancing for 15 s while the page is visible, the page reloads.
 - **Safe updates** (`app/updates.ts`, `domain/updateController.ts`): the service worker uses `registerType: 'prompt'`, so a new build waits instead of replacing the running one. The page asks for updates every 10 minutes (a kiosk never navigates) and activates a waiting build only while the attract screen is showing, never mid-round. Verified end to end: held during How to Play, applied after the idle reset to Attract.
 - **Light mode** (`config/quality.ts`, `domain/lowPower.ts`): if the frame rate stays below 38 fps for five checks in a row, sparkles and confetti are cut to a third for the rest of the session. `?quality=low` forces it (useful to test on a weak TV); the admin screen shows the current quality.
-- **Initials filter** (`domain/initials.ts`): a short block list of offensive three-letter combinations. SAVE refuses them ("TRY OTHER LETTERS"); the idle timeout never loses a play and stores it as `---` instead.
+- **Initials filter** (`domain/initials.ts`): a short block list of offensive three-letter combinations, also matched inside the 5-letter initials. SAVE refuses them ("TRY OTHER LETTERS"); the idle timeout never loses a play and stores it as `---` instead.
 
 The operator checklist lives in [INSTALL.md](INSTALL.md).
 

@@ -1,4 +1,4 @@
-export const MAX_INITIALS = 3;
+export const MAX_INITIALS = 5;
 
 /** Stored when the player skips (or walks away from) the initials screen. */
 export const EMPTY_INITIALS = '---';
@@ -21,8 +21,8 @@ export function finalizeInitials(current: string): string {
 }
 
 /**
- * Three-letter combinations that must never appear on a brand's public leaderboard.
- * Add to this list freely; matching is exact and case-insensitive.
+ * Three-letter combinations that must never appear on a brand's public leaderboard, alone or
+ * inside longer initials. Add to this list freely; matching is case-insensitive.
  */
 export const BLOCKED_INITIALS: ReadonlySet<string> = new Set([
   // English
@@ -107,6 +107,10 @@ export const BLOCKED_INITIALS: ReadonlySet<string> = new Set([
   'FKU',
 ]);
 
+/** Is the text, or any three letters in a row inside it, on the list? Longer initials must not hide a word. */
 export function isBlockedInitials(initials: string): boolean {
-  return BLOCKED_INITIALS.has(initials.toUpperCase());
+  const text = initials.toUpperCase();
+  for (let i = 0; i + 3 <= text.length; i++)
+    if (BLOCKED_INITIALS.has(text.slice(i, i + 3))) return true;
+  return false;
 }

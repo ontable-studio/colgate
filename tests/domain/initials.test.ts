@@ -12,9 +12,10 @@ import {
 describe('initials', () => {
   it('appends letters up to the limit', () => {
     let s = '';
-    for (const ch of 'ABCD') s = appendInitial(s, ch);
-    expect(s).toBe('ABC');
+    for (const ch of 'ABCDEFG') s = appendInitial(s, ch);
+    expect(s).toBe('ABCDE');
     expect(s).toHaveLength(MAX_INITIALS);
+    expect(MAX_INITIALS).toBe(5);
   });
 
   it('ignores anything that is not a single A-Z letter', () => {
@@ -45,7 +46,12 @@ describe('blocked initials', () => {
     expect(isBlockedInitials('EWE')).toBe(true);
     expect(isBlockedInitials('ewe')).toBe(true);
   });
+  it('finds a blocked word hidden inside longer initials', () => {
+    expect(isBlockedInitials('XEWEX')).toBe(true);
+    expect(isBlockedInitials('EWE')).toBe(true);
+  });
   it('lets ordinary names through', () => {
-    for (const name of ['SAM', 'JAN', 'RAM', 'DEA']) expect(isBlockedInitials(name)).toBe(false);
+    for (const name of ['SAM', 'JAN', 'RAM', 'DEA', 'BUDI', 'RAMAD'])
+      expect(isBlockedInitials(name)).toBe(false);
   });
 });

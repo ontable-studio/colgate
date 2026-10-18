@@ -19,6 +19,8 @@ const BASKET_HEIGHT = 194;
 const BASKET_Y = 1470;
 const HINT_VISIBLE_MS = 4500;
 const TIMER_WARNING_SECS = 5;
+/** Get-ready countdown before the clock starts; the basket can already be moved. */
+const COUNTDOWN_MS = 3000;
 
 export class GameplayScene extends Phaser.Scene {
   private session!: GameSession;
@@ -37,6 +39,9 @@ export class GameplayScene extends Phaser.Scene {
   private combo = 0;
   private comboText!: Phaser.GameObjects.Text;
   private lastMultiplier = 1;
+  private countdownLeftMs = COUNTDOWN_MS;
+  private countdownShown = 0;
+  private countdownText!: Phaser.GameObjects.Text;
 
   constructor() {
     super(SceneKey.Gameplay);
@@ -52,6 +57,8 @@ export class GameplayScene extends Phaser.Scene {
     this.targetX = GAME_WIDTH / 2;
     this.combo = 0;
     this.lastMultiplier = 1;
+    this.countdownLeftMs = COUNTDOWN_MS;
+    this.countdownShown = 0;
 
     fadeIn(this);
     audio.playMusic('bgm-game');
@@ -82,10 +89,19 @@ export class GameplayScene extends Phaser.Scene {
     this.input.on('pointermove', follow);
     this.input.on('pointerdown', follow);
     this.time.delayedCall(HINT_VISIBLE_MS, () => this.hideHint());
+
+    this.countdownText = this.add
+      .text(
+        GAME_WIDTH / 2,
+        800,
+        '',
+        textStyle({ size: 360, color: COLORS.goldLight, glow: 'rgba(255,170,60,0.9)' }),
+      )
+      .setOrigin(0.5)
+      .setDepth(50);
   }
 
   override update(_time: number, delta: number): void {
-    this.session.tick(delta);
     // Capped step so one long frame after a hiccup cannot make the basket jump.
     this.basket.x = stepToward(
       this.basket.x,
@@ -93,6 +109,12 @@ export class GameplayScene extends Phaser.Scene {
       RULES.catching.basketSpeed,
       Math.min(delta, 50),
     );
+
+    if (this.countdownLeftMs > 0) {
+      this.runCountdown(delta);
+      return;
+    }
+    this.session.tick(delta);
 
     const elapsedMs = RULES.durationSec * 1000 - this.session.remainingMs;
     for (const event of this.spawner.due(elapsedMs)) this.spawn(event, elapsedMs);
@@ -105,6 +127,25 @@ export class GameplayScene extends Phaser.Scene {
       audio.stopMusic(500);
       audio.playSfx('sfx-timeup', { volume: 0.8 });
       this.scene.start(SceneKey.Unlock, { result: this.session.result() });
+    }
+  }
+
+  /** 3, 2, 1 before the round: nothing falls and the clock stands still. */
+  private runCountdown(delta: number): void {
+    this.countdownLeftMs -= delta;
+    this.animateBasket();
+    this.updateHud();
+    const shown = Math.max(1, Math.ceil(this.countdownLeftMs / 1000));
+    if (this.countdownLeftMs <= 0) {
+      this.countdownText.destroy();
+      audio.playSfx('sfx-ui-start', { volume: 0.8 });
+      return;
+    }
+    if (shown !== this.countdownShown) {
+      this.countdownShown = shown;
+      this.countdownText.setText(String(shown)).setAlpha(1);
+      bump(this, this.countdownText, 1.35, 220);
+      audio.playSfx('sfx-tick', { detune: (3 - shown) * 150 });
     }
   }
 
