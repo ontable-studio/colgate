@@ -12,26 +12,7 @@ const SIDE_Y = 104;
  * ridge and a dotted gold line along the back edge. Draw order matters: surface, shading, gloss,
  * dotted edge.
  */
-export const VEIL_HEIGHT = 700;
-
-/**
- * Soft dark-red band that sits between the video and the teeth: it calms the video's vertical
- * light streaks right behind the teeth, so the platform and teeth do not look striped.
- */
-function makeVeil(scene: Phaser.Scene): void {
-  drawTexture(scene, 'stage-veil', STAGE_WIDTH, VEIL_HEIGHT, (ctx, w, h) => {
-    const g = ctx.createLinearGradient(0, 0, 0, h);
-    g.addColorStop(0, 'rgba(78,4,10,0)');
-    g.addColorStop(0.3, 'rgba(78,4,10,0.72)');
-    g.addColorStop(0.7, 'rgba(78,4,10,0.72)');
-    g.addColorStop(1, 'rgba(78,4,10,0)');
-    ctx.fillStyle = g;
-    ctx.fillRect(0, 0, w, h);
-  });
-}
-
 export function makeStage(scene: Phaser.Scene): void {
-  makeVeil(scene);
   drawTexture(scene, 'stage', STAGE_WIDTH, STAGE_HEIGHT, (ctx, w, h) => {
     const mid = w / 2;
     const surface = (from: number, to: number, fromY: number, toY: number): Path2D => {
@@ -65,8 +46,18 @@ export function makeStage(scene: Phaser.Scene): void {
     const sheen = ctx.createRadialGradient(mid, 120, 10, mid, 120, 520);
     sheen.addColorStop(0, 'rgba(255,170,150,0.28)');
     sheen.addColorStop(1, 'rgba(255,170,150,0)');
+    // Clipped to the platform: unclipped, the sheen lit a wedge above the sloping back edge that
+    // ended in a hard line (a light cut off by an invisible clip).
+    ctx.save();
+    ctx.clip(left);
     ctx.fillStyle = sheen;
-    ctx.fillRect(0, RIDGE_Y, w, h - RIDGE_Y);
+    ctx.fillRect(0, 0, w, h);
+    ctx.restore();
+    ctx.save();
+    ctx.clip(right);
+    ctx.fillStyle = sheen;
+    ctx.fillRect(0, 0, w, h);
+    ctx.restore();
 
     // Dotted gold line a little below the back edge, with a faint glow.
     ctx.save();
@@ -83,15 +74,6 @@ export function makeStage(scene: Phaser.Scene): void {
     ctx.stroke();
     ctx.restore();
 
-    // Thin highlight right on the edge.
-    ctx.strokeStyle = 'rgba(255,225,200,0.55)';
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.moveTo(0, SIDE_Y);
-    ctx.lineTo(mid, RIDGE_Y);
-    ctx.lineTo(w, SIDE_Y + 8);
-    ctx.stroke();
-
     // Fade the front away so the platform melts into the background instead of ending in a line.
     ctx.globalCompositeOperation = 'destination-out';
     const fade = ctx.createLinearGradient(0, h * 0.7, 0, h);
@@ -99,6 +81,13 @@ export function makeStage(scene: Phaser.Scene): void {
     fade.addColorStop(1, 'rgba(0,0,0,1)');
     ctx.fillStyle = fade;
     ctx.fillRect(0, h * 0.7, w, h * 0.3);
+    // Feather the back edge too, so the light of the video behind the teeth melts into the
+    // platform instead of meeting a hard line.
+    const back = ctx.createLinearGradient(0, RIDGE_Y, 0, SIDE_Y + 40);
+    back.addColorStop(0, 'rgba(0,0,0,1)');
+    back.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = back;
+    ctx.fillRect(0, 0, w, SIDE_Y + 40);
     const side = ctx.createLinearGradient(0, 0, w, 0);
     side.addColorStop(0, 'rgba(0,0,0,0.85)');
     side.addColorStop(0.12, 'rgba(0,0,0,0)');
