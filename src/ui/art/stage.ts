@@ -9,8 +9,8 @@ const SIDE_Y = 104;
 
 /**
  * Glossy red platform the teeth stand on, like the key visual: two planes meeting in a shallow
- * ridge, a dotted gold line along the back edge, and a bright seam where the planes meet.
- * Draw order matters: surface, shading, gloss, dotted edge, seam.
+ * ridge and a dotted gold line along the back edge. Draw order matters: surface, shading, gloss,
+ * dotted edge.
  */
 export function makeStage(scene: Phaser.Scene): void {
   drawTexture(scene, 'stage', STAGE_WIDTH, STAGE_HEIGHT, (ctx, w, h) => {
@@ -24,13 +24,15 @@ export function makeStage(scene: Phaser.Scene): void {
       path.closePath();
       return path;
     };
+    // One continuous surface (no seam, no second tone): any straight vertical line or step in
+    // brightness reads as a cut-off light.
     const left = surface(0, mid, SIDE_Y, RIDGE_Y);
     const right = surface(mid, w, RIDGE_Y, SIDE_Y + 8);
 
     // Surfaces: brighter by the back edge, falling to deep red at the front.
     for (const [path, light] of [
-      [left, '#B8272C'],
-      [right, '#B0242A'],
+      [left, '#B42629'],
+      [right, '#B42629'],
     ] as const) {
       const fill = ctx.createLinearGradient(0, RIDGE_Y, 0, h);
       fill.addColorStop(0, light);
@@ -70,13 +72,6 @@ export function makeStage(scene: Phaser.Scene): void {
     ctx.lineTo(mid, RIDGE_Y);
     ctx.lineTo(w, SIDE_Y + 8);
     ctx.stroke();
-
-    // Seam where the two planes meet, fading out toward the front.
-    const seam = ctx.createLinearGradient(0, RIDGE_Y, 0, h * 0.75);
-    seam.addColorStop(0, 'rgba(255,230,220,0.3)');
-    seam.addColorStop(1, 'rgba(255,230,220,0)');
-    ctx.fillStyle = seam;
-    ctx.fillRect(mid - 1.5, RIDGE_Y, 3, h * 0.75 - RIDGE_Y);
 
     // Fade the front away so the platform melts into the background instead of ending in a line.
     ctx.globalCompositeOperation = 'destination-out';
