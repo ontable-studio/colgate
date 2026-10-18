@@ -72,6 +72,7 @@ export function simulateRound(
 
   const session = new GameSession(rules);
   let clock = 0;
+  let filledAt: number | undefined;
   for (const { event, landMs } of landings) {
     session.tick(landMs - clock);
     clock = landMs;
@@ -86,15 +87,17 @@ export function simulateRound(
       kind === 'capsule'
         ? rollsOk < chances.catchRate
         : rollsOk < (kind === 'stain' ? chances.stainHit : chances.decoyHit);
-    if (happens) session.catch(kind);
-    else if (kind === 'capsule') session.missCapsule();
+    if (happens) {
+      session.catch(kind);
+      if (filledAt === undefined && session.filled) filledAt = landMs;
+    } else if (kind === 'capsule') session.missCapsule();
   }
   if (!session.isOver) session.tick(totalMs - clock);
 
   const result = session.result();
   return {
-    win: result.meterPct >= rules.meterFull,
-    finishSec: (totalMs - session.remainingMs) / 1000,
+    win: session.filled,
+    finishSec: (filledAt ?? totalMs) / 1000,
     score: result.score,
     meterPct: result.meterPct,
   };

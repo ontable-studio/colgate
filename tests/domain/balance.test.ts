@@ -17,7 +17,6 @@ const LEGACY: GameRules = {
   ...RULES,
   durationSec: 40,
   meter: { capsule: 5, stain: -5, decoy: -3 },
-  timeBonusPerSec: 0,
 };
 
 const legacySchedule: ScheduleFn = (rules, rand) => {

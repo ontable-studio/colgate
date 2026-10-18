@@ -1,10 +1,8 @@
 import type { FallingKind, GameRules } from '@/config/game';
 
 export interface SessionResult {
-  /** Final score, including any time bonus. */
+  /** Final score. */
   readonly score: number;
-  /** Points added for finishing early (0 when time ran out). */
-  readonly timeBonus: number;
   readonly meterPct: number;
   readonly catches: number;
   readonly hits: number;
@@ -18,6 +16,7 @@ export class GameSession {
   private _catches = 0;
   private _hits = 0;
   private _streak = 0;
+  private _filled = false;
   private _lastPoints = 0;
   private _remainingMs: number;
   private readonly totalMs: number;
@@ -32,6 +31,10 @@ export class GameSession {
   }
   get meterPct(): number {
     return this._meterPct;
+  }
+  /** True once the meter has been full at any moment of the round (a later stain may lower it). */
+  get filled(): boolean {
+    return this._filled;
   }
   /** Capsules caught in a row. */
   get streak(): number {
@@ -52,7 +55,7 @@ export class GameSession {
     return this._remainingMs;
   }
   get isOver(): boolean {
-    return this._remainingMs <= 0 || this._meterPct >= this.rules.meterFull;
+    return this._remainingMs <= 0;
   }
 
   tick(deltaMs: number): void {
@@ -72,6 +75,7 @@ export class GameSession {
       this.rules.meterFull,
       Math.max(0, this._meterPct + this.rules.meter[kind]),
     );
+    if (this._meterPct >= this.rules.meterFull) this._filled = true;
     if (kind === 'capsule') this._catches += 1;
     else this._hits += 1;
   }
@@ -81,18 +85,9 @@ export class GameSession {
     if (!this.isOver) this._streak = 0;
   }
 
-  /** Points for the seconds left when the meter filled up; nothing if time ran out first.
-   *  Counts the seconds the timer on screen shows (rounded up), so 00:20 pays for 20 s. */
-  get timeBonus(): number {
-    if (this._meterPct < this.rules.meterFull) return 0;
-    return Math.ceil(this._remainingMs / 1000) * this.rules.timeBonusPerSec;
-  }
-
   result(): SessionResult {
-    const timeBonus = this.timeBonus;
     return {
-      score: this._score + timeBonus,
-      timeBonus,
+      score: this._score,
       meterPct: this._meterPct,
       catches: this._catches,
       hits: this._hits,

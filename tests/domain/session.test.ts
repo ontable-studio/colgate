@@ -33,13 +33,23 @@ describe('GameSession', () => {
     expect(s.result().hits).toBe(2);
   });
 
-  it('ends early when the meter is full and ignores further catches', () => {
+  it('keeps playing after the meter is full, and the meter never passes its maximum', () => {
     const s = new GameSession(rules);
     for (let i = 0; i < 4; i++) s.catch('capsule');
     expect(s.meterPct).toBe(rules.meterFull);
-    expect(s.isOver).toBe(true);
+    expect(s.filled).toBe(true);
+    expect(s.isOver).toBe(false);
     s.catch('capsule');
-    expect(s.score).toBe(60); // 10 + 10 + 20 + 20: the third and fourth catch pay double
+    expect(s.meterPct).toBe(rules.meterFull);
+    expect(s.score).toBe(80); // 10 + 10 + 20 + 20 + 20: from the third catch on every one pays double
+  });
+
+  it('remembers that the meter was full even if a stain lowers it again', () => {
+    const s = new GameSession(rules);
+    for (let i = 0; i < 4; i++) s.catch('capsule');
+    s.catch('stain');
+    expect(s.meterPct).toBeLessThan(rules.meterFull);
+    expect(s.filled).toBe(true);
   });
 
   it('ends when time runs out and reports elapsed seconds', () => {
@@ -50,34 +60,6 @@ describe('GameSession', () => {
     expect(s.isOver).toBe(true);
     expect(s.remainingMs).toBe(0);
     expect(s.result().durationSec).toBe(10);
-  });
-});
-
-describe('time bonus', () => {
-  it('pays per second left when the meter fills before time runs out', () => {
-    const s = new GameSession({ ...rules, timeBonusPerSec: 8 });
-    s.tick(3000); // 7 s left
-    for (let i = 0; i < 4; i++) s.catch('capsule');
-    const result = s.result();
-    expect(s.meterPct).toBe(rules.meterFull);
-    expect(result.timeBonus).toBe(7 * 8);
-    expect(result.score).toBe(s.score + 56);
-  });
-
-  it('pays for the seconds the on-screen timer shows (rounded up)', () => {
-    const s = new GameSession({ ...rules, timeBonusPerSec: 10 });
-    s.tick(3500); // 6.5 s left, the timer reads 00:07
-    for (let i = 0; i < 4; i++) s.catch('capsule');
-    expect(s.result().timeBonus).toBe(70);
-  });
-
-  it('pays nothing when time ran out first', () => {
-    const s = new GameSession({ ...rules, timeBonusPerSec: 8 });
-    s.catch('capsule');
-    s.tick(60_000);
-    const result = s.result();
-    expect(result.timeBonus).toBe(0);
-    expect(result.score).toBe(s.score);
   });
 });
 

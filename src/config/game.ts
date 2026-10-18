@@ -27,8 +27,6 @@ export interface GameRules {
   readonly meterFull: number;
   /** Brightness meter change (percentage points) per kind. Meter is clamped to 0..`meterFull`. */
   readonly meter: Readonly<Record<FallingKind, number>>;
-  /** Filling the meter early ends the round and pays this many points per second left. */
-  readonly timeBonusPerSec: number;
   /** Capsules caught in a row multiply their points: the highest tier whose `streak` is reached
    *  applies. A stain, a decoy or a missed capsule breaks the streak. Sorted by `streak`. */
   readonly combo: readonly { readonly streak: number; readonly multiplier: number }[];
@@ -83,7 +81,6 @@ export const RULES: GameRules = {
   meterFull: 95,
   points: { capsule: 10, stain: -10, decoy: -5 },
   meter: { capsule: 10, stain: -9, decoy: -5 },
-  timeBonusPerSec: 25,
   combo: [
     { streak: 2, multiplier: 2 },
     { streak: 4, multiplier: 3 },
