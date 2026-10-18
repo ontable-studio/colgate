@@ -59,7 +59,7 @@ describe('pickNextKind', () => {
   });
 
   it('repeats the previous sort when the streak roll hits, so objects come in waves', () => {
-    const wave = { ...SPAWN, repeatChance: 1 };
+    const wave = { ...SPAWN, repeatChance: 1, maxCapsulesInRow: 9 };
     const opening = ['capsule', 'capsule', 'capsule'] as const;
     expect(pickNextKind([...opening], 1, wave, () => 0.5)).toBe('capsule');
     expect(pickNextKind([...opening, 'stain'], 0, wave, () => 0.5)).not.toBe('capsule');
