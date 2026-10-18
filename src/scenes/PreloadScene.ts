@@ -12,6 +12,7 @@ const IMAGES = [
   'decoy',
   'basket',
   'btn-gold',
+  'ico-drag',
   'tube',
   'dropper',
   'flare',

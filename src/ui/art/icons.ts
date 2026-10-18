@@ -1,5 +1,5 @@
 import type Phaser from 'phaser';
-import { drawTexture, roundRect } from './canvas';
+import { drawTexture } from './canvas';
 
 /** Small vector icons drawn on canvas (200x200 unless noted). */
 function drawPlay(ctx: CanvasRenderingContext2D, disc: string, triangle: string): void {
@@ -104,78 +104,6 @@ export function makeIcons(scene: Phaser.Scene): void {
     ctx.moveTo(100, 116);
     ctx.lineTo(126, 132);
     ctx.stroke();
-  });
-
-  // Double-headed arrow with a small diamond in the middle (360x100).
-  drawTexture(scene, 'ico-arrows', 360, 100, (ctx, w, h) => {
-    const fill = ctx.createLinearGradient(0, 0, w, 0);
-    fill.addColorStop(0, '#FFD88A');
-    fill.addColorStop(0.5, '#FFF4D6');
-    fill.addColorStop(1, '#FFD88A');
-    ctx.save();
-    ctx.shadowColor = 'rgba(255,170,70,0.9)';
-    ctx.shadowBlur = 14;
-    ctx.fillStyle = fill;
-    ctx.strokeStyle = fill;
-    ctx.lineWidth = 8;
-    ctx.lineCap = 'round';
-    const y = h / 2;
-    ctx.beginPath();
-    ctx.moveTo(48, y);
-    ctx.lineTo(w - 48, y);
-    ctx.stroke();
-    for (const dir of [-1, 1]) {
-      const tip = dir < 0 ? 14 : w - 14;
-      ctx.beginPath();
-      ctx.moveTo(tip, y);
-      ctx.lineTo(tip - dir * 38, y - 26);
-      ctx.lineTo(tip - dir * 38, y + 26);
-      ctx.closePath();
-      ctx.fill();
-    }
-    ctx.beginPath();
-    ctx.moveTo(w / 2, y - 16);
-    ctx.lineTo(w / 2 + 12, y);
-    ctx.lineTo(w / 2, y + 16);
-    ctx.lineTo(w / 2 - 12, y);
-    ctx.closePath();
-    ctx.fill();
-    ctx.restore();
-  });
-
-  // Touch hint: white hand on a red tile with a ripple.
-  drawTexture(scene, 'ico-hand', 200, 200, (ctx) => {
-    ctx.fillStyle = '#E4141E';
-    roundRect(ctx, 14, 40, 172, 142, 16);
-    ctx.fill();
-
-    ctx.save();
-    ctx.shadowColor = 'rgba(255,240,220,0.9)';
-    ctx.shadowBlur = 16;
-    ctx.lineWidth = 7;
-    ctx.strokeStyle = 'rgba(255,240,225,0.8)';
-    ctx.beginPath();
-    ctx.arc(98, 62, 30, 0, Math.PI * 2);
-    ctx.stroke();
-    ctx.restore();
-
-    ctx.fillStyle = '#FFFFFF';
-    ctx.shadowColor = 'rgba(0,0,0,0.25)';
-    ctx.shadowBlur = 6;
-    roundRect(ctx, 86, 46, 27, 92, 13.5); // index finger
-    ctx.fill();
-    roundRect(ctx, 62, 100, 100, 74, 28); // palm
-    ctx.fill();
-    roundRect(ctx, 108, 98, 24, 50, 12); // middle
-    ctx.fill();
-    roundRect(ctx, 130, 106, 24, 46, 12); // ring
-    ctx.fill();
-    ctx.save();
-    ctx.translate(58, 128);
-    ctx.rotate(-0.5);
-    roundRect(ctx, -12, -6, 24, 52, 12); // thumb
-    ctx.fill();
-    ctx.restore();
   });
 
   drawTexture(scene, 'ico-x', 200, 200, (ctx) => {

@@ -84,26 +84,19 @@ export class HowToPlayScene extends Phaser.Scene {
 
   private rowDrag(y: number): Phaser.GameObjects.Container {
     const panel = createPanel(this, GAME_WIDTH / 2, y, PANEL_WIDTH, PANEL_HEIGHT, 36, 'gold');
-    const hand = this.add.image(215, y, 'ico-hand').setDisplaySize(170, 170);
-    const arrows = addArt(this, 405, y, 'ico-arrows').setDisplaySize(200, 56);
+    const icon = this.add.image(310, y, 'ico-drag').setDisplaySize(236, 209);
     const text = this.label(TEXT_X, y, 'DRAG LEFT\nOR RIGHT', TEXT_WIDTH);
 
+    // The whole icon sways side to side, like the finger it shows.
     this.tweens.add({
-      targets: hand,
-      scale: hand.scale * 0.93,
+      targets: icon,
+      x: { from: 285, to: 335 },
       yoyo: true,
       repeat: -1,
-      duration: 650,
-    });
-    this.tweens.add({
-      targets: arrows,
-      x: 425,
-      yoyo: true,
-      repeat: -1,
-      duration: 700,
+      duration: 800,
       ease: 'Sine.easeInOut',
     });
-    return this.row([panel, hand, arrows, text]);
+    return this.row([panel, icon, text]);
   }
 
   private rowCatch(y: number): Phaser.GameObjects.Container {

@@ -222,12 +222,11 @@ export class GameplayScene extends Phaser.Scene {
 
   /** "Drag left/right" hint under the basket, shown only at the start of a round. */
   private addHint(): void {
-    const arrows = addArt(this, GAME_WIDTH / 2, 1632, 'ico-arrows').setDisplaySize(520, 145);
-    const hand = this.add.image(GAME_WIDTH / 2, 1636, 'ico-hand').setDisplaySize(110, 110);
-    this.hint = [arrows, hand];
+    const icon = this.add.image(GAME_WIDTH / 2, 1625, 'ico-drag').setDisplaySize(240, 213);
+    this.hint = [icon];
     this.tweens.add({
-      targets: hand,
-      x: { from: GAME_WIDTH / 2 - 130, to: GAME_WIDTH / 2 + 130 },
+      targets: icon,
+      x: { from: GAME_WIDTH / 2 - 150, to: GAME_WIDTH / 2 + 150 },
       yoyo: true,
       repeat: -1,
       duration: 900,
