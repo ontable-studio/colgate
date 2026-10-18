@@ -12,7 +12,26 @@ const SIDE_Y = 104;
  * ridge and a dotted gold line along the back edge. Draw order matters: surface, shading, gloss,
  * dotted edge.
  */
+export const VEIL_HEIGHT = 700;
+
+/**
+ * Soft dark-red band that sits between the video and the teeth: it calms the video's vertical
+ * light streaks right behind the teeth, so the platform and teeth do not look striped.
+ */
+function makeVeil(scene: Phaser.Scene): void {
+  drawTexture(scene, 'stage-veil', STAGE_WIDTH, VEIL_HEIGHT, (ctx, w, h) => {
+    const g = ctx.createLinearGradient(0, 0, 0, h);
+    g.addColorStop(0, 'rgba(78,4,10,0)');
+    g.addColorStop(0.3, 'rgba(78,4,10,0.72)');
+    g.addColorStop(0.7, 'rgba(78,4,10,0.72)');
+    g.addColorStop(1, 'rgba(78,4,10,0)');
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, w, h);
+  });
+}
+
 export function makeStage(scene: Phaser.Scene): void {
+  makeVeil(scene);
   drawTexture(scene, 'stage', STAGE_WIDTH, STAGE_HEIGHT, (ctx, w, h) => {
     const mid = w / 2;
     const surface = (from: number, to: number, fromY: number, toY: number): Path2D => {

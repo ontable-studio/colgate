@@ -52,6 +52,8 @@ export class UnlockScene extends Phaser.Scene {
     addHeader(this, false);
     popIn(this, addArt(this, cx, 470, 'title-unlock'), 120, 0.6);
 
+    // Calms the video's vertical streaks behind the teeth, then the platform on top of it.
+    this.add.image(cx, BASELINE_Y - 90, 'stage-veil');
     addArt(this, cx, STAGE_TOP_Y, 'stage').setOrigin(0.5, 0);
 
     const total = TEETH.reduce((sum, t) => sum + t.width, 0) - OVERLAP * (TEETH.length - 1);
