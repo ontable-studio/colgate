@@ -35,6 +35,13 @@ const FONT_STYLE: Record<Weight, string> = {
   boldItalic: 'italic bold',
 };
 
+/**
+ * Phaser draws a text on a canvas exactly as big as the letters, so a glow (canvas shadow) is cut
+ * off at that rectangle and shows as a lit box. This margin gives the glow room to fade out. It
+ * widens the text object on every side, so right/left aligned glowing text must be nudged by it.
+ */
+export const GLOW_PAD = 36;
+
 export interface TextOptions {
   size: number;
   weight?: Weight;
@@ -63,7 +70,12 @@ export function textStyle({
     fontStyle: FONT_STYLE[weight],
     color,
     align,
-    ...(glow ? { shadow: { offsetX: 0, offsetY: 0, color: glow, blur: 22, fill: true } } : {}),
+    ...(glow
+      ? {
+          shadow: { offsetX: 0, offsetY: 0, color: glow, blur: 22, fill: true },
+          padding: { x: GLOW_PAD, y: GLOW_PAD },
+        }
+      : {}),
     ...(letterSpacing !== undefined ? { letterSpacing } : {}),
     ...(wrapWidth !== undefined ? { wordWrap: { width: wrapWidth } } : {}),
     ...(lineSpacing !== undefined ? { lineSpacing } : {}),

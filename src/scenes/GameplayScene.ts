@@ -10,7 +10,7 @@ import { addArt } from '@/ui/art/canvas';
 import { addBackground, addGlow } from '@/ui/effects';
 import { createMeter, type Meter } from '@/ui/meter';
 import { bump, fadeIn, floatText, popIn, shards, sparkBurst } from '@/ui/motion';
-import { COLORS, textStyle } from '@/ui/theme';
+import { COLORS, GLOW_PAD, textStyle } from '@/ui/theme';
 import { SceneKey } from './keys';
 
 /** Sized for a 43" portrait TV: big enough to read from a metre or two, small enough not to crowd. */
@@ -202,7 +202,12 @@ export class GameplayScene extends Phaser.Scene {
       )
       .setOrigin(1, 0.5);
     this.scoreText = this.add
-      .text(1000, 146, '0', textStyle({ size: 90, align: 'right', glow: 'rgba(255,170,60,0.8)' }))
+      .text(
+        1000 + GLOW_PAD,
+        146,
+        '0',
+        textStyle({ size: 90, align: 'right', glow: 'rgba(255,170,60,0.8)' }),
+      )
       .setOrigin(1, 0.5);
 
     this.comboText = this.add
