@@ -106,6 +106,7 @@ class LoopingClip {
     this.handoff = false;
     const [first, second] = videos;
     second.pause();
+    second.currentTime = 0; // decoded and waiting on its first frame
     second.style.opacity = '0';
     first.style.transition = 'none';
     first.style.opacity = '1';
@@ -113,6 +114,35 @@ class LoopingClip {
     void first.play().catch(() => undefined);
     cancelAnimationFrame(this.frame);
     this.frame = requestAnimationFrame(this.tick);
+  }
+
+  /**
+   * Start `next` from its first frame and fade it in over `current`. The fade only starts once
+   * the first frame is really on screen, otherwise a stale frame (the clip's last one) would
+   * flash in and then jump, which looks like a blink every loop.
+   */
+  private crossfade(current: HTMLVideoElement, next: HTMLVideoElement): void {
+    next.style.zIndex = '1';
+    current.style.zIndex = '0';
+    let started = false;
+    const fadeIn = (): void => {
+      if (started) return;
+      started = true;
+      next.style.transition = `opacity ${LOOP_FADE_MS}ms linear`;
+      next.style.opacity = '1';
+      window.setTimeout(() => {
+        current.pause();
+        current.style.transition = 'none';
+        current.style.opacity = '0';
+        current.currentTime = 0; // ready for the next turn, so no seek is needed then
+        this.active = 1 - this.active;
+        this.handoff = false;
+      }, LOOP_FADE_MS + 60);
+    };
+    if (next.currentTime > 0.05) next.currentTime = 0; // only if something moved it
+    void next.play().catch(fadeIn);
+    if ('requestVideoFrameCallback' in next) next.requestVideoFrameCallback(fadeIn);
+    window.setTimeout(fadeIn, 300); // never wait longer than this for the first frame
   }
 
   private readonly tick = (): void => {
@@ -123,19 +153,7 @@ class LoopingClip {
     const left = current.duration - current.currentTime;
     if (!this.handoff && Number.isFinite(left) && left * 1000 <= LOOP_FADE_MS) {
       this.handoff = true;
-      next.currentTime = 0;
-      next.style.transition = `opacity ${LOOP_FADE_MS}ms linear`;
-      next.style.zIndex = '1';
-      current.style.zIndex = '0';
-      next.style.opacity = '1';
-      void next.play().catch(() => undefined);
-      window.setTimeout(() => {
-        current.pause();
-        current.style.transition = 'none';
-        current.style.opacity = '0';
-        this.active = 1 - this.active;
-        this.handoff = false;
-      }, LOOP_FADE_MS + 60);
+      this.crossfade(current, next);
     }
     // A video that stalled or was paused by the browser must not leave a frozen background.
     if (!this.handoff && current.paused && !current.ended)

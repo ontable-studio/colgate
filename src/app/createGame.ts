@@ -7,6 +7,21 @@ import { videoBackdrop } from '@/ui/videoBackground';
 import { IdleWatcher } from '@/services/idle/idleWatcher';
 import { reloadIfAllowed } from './watchdog';
 
+/**
+ * Phaser's additive blend is `src + dst * dstAlpha`. With the canvas now transparent (the video
+ * shows through), every translucent pixel already drawn has dstAlpha < 1, so each glow's whole
+ * rectangle, even its fully transparent corners, darkened what lay under it: black blocks around
+ * the glowing molecules. Plain `src + dst` leaves untouched pixels untouched.
+ */
+function fixAdditiveBlend(game: Phaser.Game): void {
+  const renderer = game.renderer;
+  if (!(renderer instanceof Phaser.Renderer.WebGL.WebGLRenderer)) return;
+  const gl = renderer.gl;
+  const modes = renderer.blendModes as { func: number[] }[];
+  const additive = modes[Phaser.BlendModes.ADD];
+  if (additive) additive.func = [gl.ONE, gl.ONE];
+}
+
 export function createGame(parent: string): Phaser.Game {
   const game = new Phaser.Game({
     type: Phaser.AUTO,
@@ -32,6 +47,7 @@ export function createGame(parent: string): Phaser.Game {
   // forever, so reload the page; the service worker serves it instantly even when offline.
   game.events.once(Phaser.Core.Events.READY, () => {
     videoBackdrop.attach(game.canvas);
+    fixAdditiveBlend(game);
     game.canvas.addEventListener('webglcontextlost', () => {
       reloadIfAllowed('WebGL context lost');
     });
