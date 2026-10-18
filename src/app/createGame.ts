@@ -28,6 +28,7 @@ export function createGame(parent: string): Phaser.Game {
     parent,
     // Transparent so the looping video behind the canvas (ui/videoBackground.ts) shows through.
     transparent: true,
+    render: { powerPreference: 'high-performance' },
     scale: {
       mode: Phaser.Scale.FIT,
       autoCenter: Phaser.Scale.CENTER_BOTH,

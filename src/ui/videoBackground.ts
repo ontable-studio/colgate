@@ -1,3 +1,5 @@
+import { quality } from '@/config/quality';
+
 /**
  * Looping video behind the (transparent) game canvas, in plain DOM elements: the browser decodes
  * and composites them without any per-frame cost for the game. Three clips (see VIDEOS).
@@ -36,9 +38,14 @@ function loadBlob(name: VideoName): Promise<string | null> {
   return blob;
 }
 
-/** Start fetching every clip (call once at boot; screens do not wait for it). */
+/**
+ * Start fetching every clip and prepare its <video> (call once at boot; screens do not wait for
+ * it). A prepared video already has its first frame decoded, so changing screens starts the next
+ * clip instantly instead of stalling the game while it spins up.
+ */
 export function preloadVideos(): void {
   for (const name of Object.keys(VIDEOS) as VideoName[]) void loadBlob(name);
+  videoBackdrop.prepare();
 }
 
 function createVideo(src: string): HTMLVideoElement {
@@ -101,11 +108,15 @@ class LoopingClip {
     const video = this.video;
     if (!video) return;
     video.currentTime = 0;
-    void video.play().catch(() => undefined);
-    // A video the browser paused (tab switch, power saving) must not leave a frozen background.
     window.clearInterval(this.watch);
+    // On a screen that cannot keep up, the still first frame costs nothing to show.
+    if (quality.isLow) return;
+    void video.play().catch(() => undefined);
     this.watch = window.setInterval(() => {
-      if (this.running && video.paused) void video.play().catch(() => undefined);
+      if (!this.running) return;
+      if (quality.isLow) video.pause();
+      // A video the browser paused (tab switch, power saving) must not leave a frozen background.
+      else if (video.paused) void video.play().catch(() => undefined);
     }, 1000);
   }
 }
@@ -149,6 +160,22 @@ class VideoBackdrop {
     if (this.pending) this.show(this.pending);
   }
 
+  /** Create every clip, hidden and paused, so the first frames are decoded before they are needed. */
+  prepare(): void {
+    if (!this.canvas) return;
+    for (const name of Object.keys(VIDEOS) as VideoName[]) this.clipFor(name);
+  }
+
+  private clipFor(name: VideoName): LoopingClip {
+    let clip = this.clips.get(name);
+    if (!clip) {
+      clip = new LoopingClip(name);
+      this.clips.set(name, clip);
+      this.stage.append(clip.element);
+    }
+    return clip;
+  }
+
   /** Show a clip behind the game; the same clip as before keeps playing without a restart. */
   show(name: VideoName | null): void {
     if (!this.canvas) {
@@ -169,11 +196,7 @@ class VideoBackdrop {
     }
     if (!name) return;
 
-    let clip = this.clips.get(name);
-    if (!clip) {
-      clip = new LoopingClip(name);
-      this.clips.set(name, clip);
-    }
+    const clip = this.clipFor(name);
     this.stage.append(clip.element); // the newest clip is always on top
     clip.start();
     clip.element.style.opacity = '1';
