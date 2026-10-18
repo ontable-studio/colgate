@@ -82,7 +82,7 @@ export const RULES: GameRules = {
   durationSec: 15,
   meterFull: 95,
   points: { capsule: 10, stain: -10, decoy: -5 },
-  meter: { capsule: 13, stain: -9, decoy: -5 },
+  meter: { capsule: 10, stain: -9, decoy: -5 },
   timeBonusPerSec: 25,
   combo: [
     { streak: 2, multiplier: 2 },

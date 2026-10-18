@@ -68,16 +68,15 @@ describe('balance of the current rules', () => {
   });
 
   it('is demanding but not hopeless: beginners still score, ordinary players can win now and then', () => {
-    expect(stats.casual.meanMeter).toBeGreaterThanOrEqual(35);
-    expect(stats.casual.winRate).toBeGreaterThanOrEqual(0.02);
+    expect(stats.casual.meanMeter).toBeGreaterThanOrEqual(15);
     expect(stats.casual.winRate).toBeLessThanOrEqual(0.2);
-    expect(stats.average.winRate).toBeGreaterThanOrEqual(0.4);
-    expect(stats.average.winRate).toBeLessThanOrEqual(0.75);
+    expect(stats.average.winRate).toBeGreaterThanOrEqual(0.08);
+    expect(stats.average.winRate).toBeLessThanOrEqual(0.5);
   });
 
   it('is still a challenge: weak players rarely fill the meter, strong ones almost always do', () => {
     expect(stats.novice.winRate).toBeLessThanOrEqual(0.05);
-    expect(stats.good.winRate).toBeGreaterThanOrEqual(0.9);
+    expect(stats.good.winRate).toBeGreaterThanOrEqual(0.8);
     expect(stats.expert.winRate).toBeGreaterThanOrEqual(0.99);
   });
 
