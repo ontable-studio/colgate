@@ -2,9 +2,8 @@
  * Looping video behind the (transparent) game canvas, in plain DOM elements: the browser decodes
  * and composites them without any per-frame cost for the game. Three clips (see VIDEOS).
  *
- * A clip's last frame never matches its first, so a plain `loop` shows a visible jump. Instead
- * every clip has two <video> elements: LOOP_FADE_MS before the active one ends, the second one
- * starts again from the beginning and fades in over it, so the end melts into the start.
+ * The clips are baked into seamless loops (tools/bake-video-loop: the end of each clip is
+ * cross-faded into its beginning), so the plain `loop` flag shows no jump or blink.
  * The files are fetched once into memory (blob URLs): no stutter from the network, no seeking
  * issues with the service worker, and they keep working offline.
  */
@@ -17,8 +16,6 @@ const VIDEOS: Readonly<Record<VideoName, string>> = {
   winning: 'assets/video/winning.mp4',
 };
 
-/** How long the end of a clip and its restart overlap. */
-const LOOP_FADE_MS = 1200;
 /** Cross-fade when the screen changes to another clip. */
 const SWITCH_FADE_MS = 450;
 /** Shown while a clip is not ready yet or fails to load: the brand red. */
@@ -64,14 +61,12 @@ function createVideo(src: string): HTMLVideoElement {
   return video;
 }
 
-/** One clip: two videos that take turns, with the overlap that hides the loop point. */
+/** One clip: a single video that repeats itself. */
 class LoopingClip {
   readonly element = document.createElement('div');
-  private videos: [HTMLVideoElement, HTMLVideoElement] | null = null;
-  private active = 0;
-  private handoff = false;
+  private video: HTMLVideoElement | null = null;
   private running = false;
-  private frame = 0;
+  private watch = 0;
 
   constructor(readonly name: VideoName) {
     Object.assign(this.element.style, {
@@ -82,84 +77,37 @@ class LoopingClip {
     });
     void loadBlob(name).then((src) => {
       if (!src) return;
-      this.videos = [createVideo(src), createVideo(src)];
-      this.element.append(...this.videos);
+      const video = createVideo(src);
+      video.loop = true;
+      video.style.opacity = '1';
+      this.video = video;
+      this.element.append(video);
       if (this.running) this.begin();
     });
   }
 
   start(): void {
     this.running = true;
-    if (this.videos) this.begin();
+    if (this.video) this.begin();
   }
 
   stop(): void {
     this.running = false;
-    cancelAnimationFrame(this.frame);
-    this.videos?.forEach((video) => video.pause());
+    window.clearInterval(this.watch);
+    this.video?.pause();
   }
 
   private begin(): void {
-    const videos = this.videos;
-    if (!videos) return;
-    this.active = 0;
-    this.handoff = false;
-    const [first, second] = videos;
-    second.pause();
-    second.currentTime = 0; // decoded and waiting on its first frame
-    second.style.opacity = '0';
-    first.style.transition = 'none';
-    first.style.opacity = '1';
-    first.currentTime = 0;
-    void first.play().catch(() => undefined);
-    cancelAnimationFrame(this.frame);
-    this.frame = requestAnimationFrame(this.tick);
+    const video = this.video;
+    if (!video) return;
+    video.currentTime = 0;
+    void video.play().catch(() => undefined);
+    // A video the browser paused (tab switch, power saving) must not leave a frozen background.
+    window.clearInterval(this.watch);
+    this.watch = window.setInterval(() => {
+      if (this.running && video.paused) void video.play().catch(() => undefined);
+    }, 1000);
   }
-
-  /**
-   * Start `next` from its first frame and fade it in over `current`. The fade only starts once
-   * the first frame is really on screen, otherwise a stale frame (the clip's last one) would
-   * flash in and then jump, which looks like a blink every loop.
-   */
-  private crossfade(current: HTMLVideoElement, next: HTMLVideoElement): void {
-    next.style.zIndex = '1';
-    current.style.zIndex = '0';
-    let started = false;
-    const fadeIn = (): void => {
-      if (started) return;
-      started = true;
-      next.style.transition = `opacity ${LOOP_FADE_MS}ms linear`;
-      next.style.opacity = '1';
-      window.setTimeout(() => {
-        current.pause();
-        current.style.transition = 'none';
-        current.style.opacity = '0';
-        current.currentTime = 0; // ready for the next turn, so no seek is needed then
-        this.active = 1 - this.active;
-        this.handoff = false;
-      }, LOOP_FADE_MS + 60);
-    };
-    if (next.currentTime > 0.05) next.currentTime = 0; // only if something moved it
-    void next.play().catch(fadeIn);
-    if ('requestVideoFrameCallback' in next) next.requestVideoFrameCallback(fadeIn);
-    window.setTimeout(fadeIn, 300); // never wait longer than this for the first frame
-  }
-
-  private readonly tick = (): void => {
-    if (!this.running || !this.videos) return;
-    const current = this.videos[this.active];
-    const next = this.videos[1 - this.active];
-    if (!current || !next) return;
-    const left = current.duration - current.currentTime;
-    if (!this.handoff && Number.isFinite(left) && left * 1000 <= LOOP_FADE_MS) {
-      this.handoff = true;
-      this.crossfade(current, next);
-    }
-    // A video that stalled or was paused by the browser must not leave a frozen background.
-    if (!this.handoff && current.paused && !current.ended)
-      void current.play().catch(() => undefined);
-    this.frame = requestAnimationFrame(this.tick);
-  };
 }
 
 /** The layer under the canvas. Always matches the on-screen rectangle of the canvas. */
