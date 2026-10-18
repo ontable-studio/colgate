@@ -17,7 +17,9 @@ export interface SpawnEvent {
  * Choose what falls next. Plain dice rolls produce unfair runs (five stains in a row, or a
  * minute with nothing to catch), so the roll is bent by a few rules:
  * the opening is all capsules, hazards never come more than `maxHazardsInRow` times in a row, and
- * a hazard is due after `maxCapsulesInRow` capsules. In between it is random.
+ * a hazard is due after `maxCapsulesInRow` capsules. In between it is random, but with
+ * `repeatChance` the previous sort simply repeats, so objects arrive in waves (a run of stains to
+ * weave through, a run of capsules to keep the combo going) instead of evenly mixed.
  */
 export function pickNextKind(
   history: readonly FallingKind[],
@@ -30,7 +32,11 @@ export function pickNextKind(
   const hazardsInRow = countTrailing(history, (k) => k !== 'capsule');
   if (hazardsInRow >= rules.maxHazardsInRow) return 'capsule';
   const capsulesInRow = countTrailing(history, (k) => k === 'capsule');
-  const wantsHazard = capsulesInRow >= rules.maxCapsulesInRow || rand() < hazardShare;
+  let wantsHazard: boolean;
+  if (capsulesInRow >= rules.maxCapsulesInRow) wantsHazard = true;
+  else if (rand() < rules.repeatChance)
+    wantsHazard = hazardsInRow > 0; // same sort again: a streak
+  else wantsHazard = rand() < hazardShare;
   if (!wantsHazard) return 'capsule';
 
   return rand() < rules.stainShareOfHazards ? 'stain' : 'decoy';

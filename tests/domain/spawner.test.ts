@@ -45,14 +45,24 @@ describe('stageAt', () => {
 describe('pickNextKind', () => {
   it('opens with capsules only', () => {
     const rand = () => 0; // would always roll a hazard
-    expect(pickNextKind([], 1, SPAWN, rand)).toBe('capsule');
-    expect(pickNextKind(['capsule', 'capsule'], 1, SPAWN, rand)).toBe('capsule');
-    expect(pickNextKind(['capsule', 'capsule', 'capsule'], 1, SPAWN, rand)).not.toBe('capsule');
+    const plain = { ...SPAWN, repeatChance: 0 };
+    expect(pickNextKind([], 1, plain, rand)).toBe('capsule');
+    expect(pickNextKind(['capsule', 'capsule'], 1, plain, rand)).toBe('capsule');
+    expect(pickNextKind(['capsule', 'capsule', 'capsule'], 1, plain, rand)).not.toBe('capsule');
   });
 
   it('never allows more hazards in a row than the limit', () => {
-    const history = ['capsule', 'capsule', 'capsule', 'stain', 'decoy'] as const;
-    expect(pickNextKind(history, 1, SPAWN, () => 0)).toBe('capsule');
+    const history = Array.from({ length: SPAWN.maxHazardsInRow }, () => 'stain' as const);
+    expect(pickNextKind(['capsule', 'capsule', 'capsule', ...history], 1, SPAWN, () => 0)).toBe(
+      'capsule',
+    );
+  });
+
+  it('repeats the previous sort when the streak roll hits, so objects come in waves', () => {
+    const wave = { ...SPAWN, repeatChance: 1 };
+    const opening = ['capsule', 'capsule', 'capsule'] as const;
+    expect(pickNextKind([...opening], 1, wave, () => 0.5)).toBe('capsule');
+    expect(pickNextKind([...opening, 'stain'], 0, wave, () => 0.5)).not.toBe('capsule');
   });
 
   it('forces a hazard after too many capsules in a row, even when the share says none', () => {
