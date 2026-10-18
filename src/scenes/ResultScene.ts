@@ -270,19 +270,10 @@ export class ResultScene extends Phaser.Scene {
       this.addBoardRow(y, i + 1, entry, entry.id === play.id, 350 + i * 70);
     });
 
-    // Outside the top 10: the player's own place goes at the very bottom, under a dotted divider.
+    // Outside the top 10: the player's own place goes at the very bottom, as its own line.
     if (mine) {
       const y = BOARD_TOP + BOARD_SIZE * ROW_STEP + ROW_STEP / 2 + 14;
       const delay = 350 + BOARD_SIZE * 70;
-      const divider = this.add
-        .text(
-          GAME_WIDTH / 2,
-          y - ROW_STEP / 2 - 2,
-          '. . . . . . . . . . . . . . . . . .',
-          textStyle({ size: 22, color: COLORS.goldSoft }),
-        )
-        .setOrigin(0.5);
-      slideIn(this, divider, 160, delay);
       this.addBoardRow(y, mine.rank, mine.play, true, delay);
     }
   }
