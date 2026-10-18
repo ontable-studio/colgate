@@ -64,11 +64,11 @@ describe('time bonus', () => {
     expect(result.score).toBe(s.score + 56);
   });
 
-  it('only counts whole seconds', () => {
+  it('pays for the seconds the on-screen timer shows (rounded up)', () => {
     const s = new GameSession({ ...rules, timeBonusPerSec: 10 });
-    s.tick(3500); // 6.5 s left
+    s.tick(3500); // 6.5 s left, the timer reads 00:07
     for (let i = 0; i < 4; i++) s.catch('capsule');
-    expect(s.result().timeBonus).toBe(60);
+    expect(s.result().timeBonus).toBe(70);
   });
 
   it('pays nothing when time ran out first', () => {

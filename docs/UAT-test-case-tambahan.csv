@@ -6,7 +6,7 @@ TC-21,Gameplay,Combo multiplier,Permainan berjalan,"1. Tangkap 3, 6, 10 kapsul e
 TC-22,Gameplay,Combo putus,Combo sudah x2 atau lebih,"1. Biarkan satu kapsul emas lewat tanpa tertangkap
 2. Ulangi dengan menangkap noda
 3. Ulangi dengan menangkap decoy",Badge hilang dan kapsul berikutnya kembali +10. Penalti tidak dikalikan combo (tetap -10 / -5). Brightness Meter tidak dipengaruhi combo.,High,,,,
-TC-23,Gameplay,Meter penuh sebelum waktu habis,Permainan berjalan,1. Tangkap kapsul sampai Brightness Meter 100% (sebelum 00:00),"Ronde berakhir lebih awal, lanjut ke halaman Unlock. Skor akhir memuat bonus waktu (8 poin per detik sisa, dibulatkan ke bawah).",High,,,,
+TC-23,Gameplay,Meter penuh sebelum waktu habis,Permainan berjalan,1. Tangkap kapsul sampai Brightness Meter 100% (sebelum 00:00),"Ronde berakhir lebih awal, lanjut ke halaman Unlock. Skor akhir memuat bonus waktu (25 poin per detik sisa sesuai angka timer di layar, dibulatkan ke atas).",High,,,,
 TC-24,Gameplay,Keadilan tangkapan,Permainan berjalan,"1. Biarkan kapsul menyentuh tepi keranjang
 2. Biarkan noda lewat tipis di samping keranjang",Kapsul yang menyentuh tepi tetap dihitung. Noda yang hanya lewat di samping tidak mengenai (tidak ada penalti yang terasa tidak adil).,Medium,,,,
 TC-25,Gameplay,Tiga objek awal aman,Ronde baru,1. Amati 3 objek pertama di setiap ronde (ulangi 5 ronde),"Tiga objek pertama selalu kapsul emas, tidak pernah noda/decoy.",Low,,,,

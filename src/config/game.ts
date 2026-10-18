@@ -79,7 +79,7 @@ export const OBJECT_SIZE: Readonly<Record<FallingKind, number>> = {
 export const RULES: GameRules = {
   durationSec: 15,
   points: { capsule: 10, stain: -10, decoy: -5 },
-  meter: { capsule: 14, stain: -8, decoy: -5 },
+  meter: { capsule: 11, stain: -9, decoy: -5 },
   timeBonusPerSec: 25,
   combo: [
     { streak: 2, multiplier: 2 },
@@ -89,10 +89,10 @@ export const RULES: GameRules = {
   ],
   spawn: {
     stages: [
-      { at: 0, intervalMs: 560, fallSpeed: 600, hazardShare: 0.2 },
-      { at: 0.25, intervalMs: 490, fallSpeed: 680, hazardShare: 0.35 },
-      { at: 0.6, intervalMs: 440, fallSpeed: 760, hazardShare: 0.42 },
-      { at: 1, intervalMs: 410, fallSpeed: 840, hazardShare: 0.45 },
+      { at: 0, intervalMs: 500, fallSpeed: 680, hazardShare: 0.3 },
+      { at: 0.25, intervalMs: 430, fallSpeed: 780, hazardShare: 0.42 },
+      { at: 0.6, intervalMs: 380, fallSpeed: 880, hazardShare: 0.5 },
+      { at: 1, intervalMs: 340, fallSpeed: 980, hazardShare: 0.55 },
     ],
     stainShareOfHazards: 0.6,
     safeOpeningSpawns: 3,

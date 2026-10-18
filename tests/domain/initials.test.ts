@@ -3,6 +3,7 @@ import {
   appendInitial,
   EMPTY_INITIALS,
   finalizeInitials,
+  isBlockedInitials,
   KEYBOARD_ROWS,
   MAX_INITIALS,
   removeLastInitial,
@@ -36,5 +37,15 @@ describe('initials', () => {
   it('keyboard contains every letter exactly once', () => {
     const letters = KEYBOARD_ROWS.join('');
     expect([...letters].sort().join('')).toBe('ABCDEFGHIJKLMNOPQRSTUVWXYZ');
+  });
+});
+
+describe('blocked initials', () => {
+  it('rejects slang reported in UAT (EWE) in any letter case', () => {
+    expect(isBlockedInitials('EWE')).toBe(true);
+    expect(isBlockedInitials('ewe')).toBe(true);
+  });
+  it('lets ordinary names through', () => {
+    for (const name of ['SAM', 'JAN', 'RAM', 'DEA']) expect(isBlockedInitials(name)).toBe(false);
   });
 });

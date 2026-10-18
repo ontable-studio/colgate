@@ -78,10 +78,11 @@ export class GameSession {
     if (!this.isOver) this._streak = 0;
   }
 
-  /** Points for the seconds left when the meter filled up; nothing if time ran out first. */
+  /** Points for the seconds left when the meter filled up; nothing if time ran out first.
+   *  Counts the seconds the timer on screen shows (rounded up), so 00:20 pays for 20 s. */
   get timeBonus(): number {
     if (this._meterPct < 100) return 0;
-    return Math.floor(this._remainingMs / 1000) * this.rules.timeBonusPerSec;
+    return Math.ceil(this._remainingMs / 1000) * this.rules.timeBonusPerSec;
   }
 
   result(): SessionResult {

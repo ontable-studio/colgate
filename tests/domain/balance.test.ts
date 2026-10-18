@@ -67,17 +67,17 @@ describe('balance of the current rules', () => {
     }
   });
 
-  it('is welcoming: beginners see real progress and ordinary players have a fair chance', () => {
-    expect(stats.novice.meanMeter).toBeGreaterThanOrEqual(38);
-    expect(stats.casual.winRate).toBeGreaterThanOrEqual(0.25);
-    expect(stats.casual.winRate).toBeLessThanOrEqual(0.55);
-    expect(stats.average.winRate).toBeGreaterThanOrEqual(0.75);
-    expect(stats.average.winRate).toBeLessThanOrEqual(0.97);
+  it('is demanding but not hopeless: beginners still score, ordinary players can win now and then', () => {
+    expect(stats.casual.meanMeter).toBeGreaterThanOrEqual(35);
+    expect(stats.casual.winRate).toBeGreaterThanOrEqual(0.02);
+    expect(stats.casual.winRate).toBeLessThanOrEqual(0.2);
+    expect(stats.average.winRate).toBeGreaterThanOrEqual(0.4);
+    expect(stats.average.winRate).toBeLessThanOrEqual(0.75);
   });
 
   it('is still a challenge: weak players rarely fill the meter, strong ones almost always do', () => {
-    expect(stats.novice.winRate).toBeLessThanOrEqual(0.1);
-    expect(stats.good.winRate).toBeGreaterThanOrEqual(0.95);
+    expect(stats.novice.winRate).toBeLessThanOrEqual(0.05);
+    expect(stats.good.winRate).toBeGreaterThanOrEqual(0.9);
     expect(stats.expert.winRate).toBeGreaterThanOrEqual(0.99);
   });
 
@@ -94,11 +94,22 @@ describe('balance of the current rules', () => {
     expect(stats.expert.p90Score - stats.expert.p10Score).toBeGreaterThanOrEqual(80); // combo and time bonus make the top end vary
   });
 
-  it('is clearly fairer than the first version for ordinary players', () => {
-    const oldCasual = simulateTier(LEGACY, 0.35, ROUNDS, legacySchedule);
-    const oldAverage = simulateTier(LEGACY, 0.55, ROUNDS, legacySchedule);
-    expect(stats.casual.winRate).toBeGreaterThan(oldCasual.winRate + 0.2);
-    expect(stats.average.winRate).toBeGreaterThan(oldAverage.winRate + 0.4);
+  it('is clearly harder than the previous release for ordinary players', () => {
+    const easier: GameRules = {
+      ...RULES,
+      meter: { capsule: 14, stain: -8, decoy: -5 },
+      spawn: {
+        ...RULES.spawn,
+        stages: [
+          { at: 0, intervalMs: 560, fallSpeed: 600, hazardShare: 0.2 },
+          { at: 0.25, intervalMs: 490, fallSpeed: 680, hazardShare: 0.35 },
+          { at: 0.6, intervalMs: 440, fallSpeed: 760, hazardShare: 0.42 },
+          { at: 1, intervalMs: 410, fallSpeed: 840, hazardShare: 0.45 },
+        ],
+      },
+    };
+    const before = simulateTier(easier, 0.55, ROUNDS);
+    expect(stats.average.winRate).toBeLessThan(before.winRate - 0.2);
   });
 });
 
