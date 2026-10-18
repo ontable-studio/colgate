@@ -31,6 +31,9 @@ export function createGame(parent: string): Phaser.Game {
     render: { powerPreference: 'high-performance' },
     scale: {
       mode: Phaser.Scale.FIT,
+      // Fullscreen the page container, not a wrapper Phaser would make around the canvas alone:
+      // the video behind the canvas lives in the container and would otherwise vanish.
+      fullscreenTarget: parent,
       autoCenter: Phaser.Scale.CENTER_BOTH,
       width: GAME_WIDTH,
       height: GAME_HEIGHT,
