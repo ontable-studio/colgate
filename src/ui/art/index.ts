@@ -4,12 +4,13 @@ import { makeBigC, makeGradientText, makeLockup, makeLogoTab, makeRing } from '.
 import { makeIcons } from './icons';
 import { makeObjects } from './objects';
 import { makeMeter } from './skins';
+import { makeStage } from './stage';
 
 /**
  * Draw every procedural texture once at boot. Needs 'logo-colgate' to be loaded already.
  * Texture keys: bg-main, bg-play, logo-tab, lockup, ring, big-c, c-orbit, title-game, title-how,
  * title-unlock, ico-*, spark, glow, confetti, meter-track,
- * meter-fill, (buttons/panels are cached on demand).
+ * meter-fill, stage (buttons/panels are cached on demand).
  */
 export function registerUiArt(scene: Phaser.Scene): void {
   makeBackgrounds(scene);
@@ -20,6 +21,7 @@ export function registerUiArt(scene: Phaser.Scene): void {
   makeLockup(scene);
   makeRing(scene);
   makeBigC(scene);
+  makeStage(scene);
 
   makeGradientText(
     scene,
