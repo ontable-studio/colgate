@@ -56,7 +56,7 @@ export class AttractScene extends Phaser.Scene {
       this,
       cx,
       1745,
-      'PLAY NOW',
+      'START',
       () => {
         // Fullscreen needs a user gesture, so request it from the first tap. Best effort.
         if (!this.scale.isFullscreen) {
@@ -80,10 +80,10 @@ export class AttractScene extends Phaser.Scene {
     this.tweens.add({ targets: cta, scale: 1.04, yoyo: true, repeat: -1, duration: 800 });
   }
 
-  /** Gold ring, slowly turning. Drawn before the hero so the tube stands in front of it. */
+  /** Gold "C" ring, floating gently (it does not turn). Drawn before the hero so the tube stands in front. */
   private addRing(cx: number): void {
     const ring = addArt(this, cx, RING_Y, 'ring').setDisplaySize(RING_SIZE, RING_SIZE);
-    this.tweens.add({ targets: ring, angle: 360, duration: 40_000, repeat: -1 });
+    float(this, ring, 14, 3000);
   }
 
   /** The game title popping in inside the ring. */
@@ -143,8 +143,8 @@ export class AttractScene extends Phaser.Scene {
     addGlow(this, cX, HERO_Y, 760, 0.6);
 
     // The Vitamin C dropper from the key visual, tip pointing down into the ring.
-    const dropperGlow = addGlow(this, 935, 560, 440, 0.45);
-    const dropper = this.add.image(935, 560, 'dropper').setDisplaySize(250, 267).setAngle(4);
+    const dropperGlow = addGlow(this, 885, 570, 600, 0.45);
+    const dropper = this.add.image(885, 570, 'dropper').setDisplaySize(360, 384).setAngle(4);
     float(this, [dropper, dropperGlow], 14, 2600, 300);
 
     const tube = this.add.image(tubeX, HERO_Y, 'tube').setDisplaySize(TUBE_WIDTH, TUBE_HEIGHT);

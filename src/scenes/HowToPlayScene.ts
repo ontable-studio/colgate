@@ -15,6 +15,9 @@ const PANEL_HEIGHT = 250;
 const ROW_Y = [770, 1050, 1330] as const;
 const BASKET_Y = 1566;
 const BUTTON_Y = 1760;
+/** Every card's text starts at this x, so the three lines read as one column. */
+const TEXT_X = 560;
+const TEXT_WIDTH = 420;
 
 export class HowToPlayScene extends Phaser.Scene {
   constructor() {
@@ -41,7 +44,7 @@ export class HowToPlayScene extends Phaser.Scene {
     });
 
     // The basket, gently swaying, shows what the player will be moving.
-    const basket = this.add.image(cx, BASKET_Y, 'basket').setDisplaySize(320, 194);
+    const basket = this.add.image(cx, BASKET_Y, 'basket').setDisplaySize(270, 164);
     popIn(this, basket, 760);
     this.time.delayedCall(760, () => audio.playSfx('sfx-pop'));
     this.time.delayedCall(1300, () => {
@@ -81,9 +84,9 @@ export class HowToPlayScene extends Phaser.Scene {
 
   private rowDrag(y: number): Phaser.GameObjects.Container {
     const panel = createPanel(this, GAME_WIDTH / 2, y, PANEL_WIDTH, PANEL_HEIGHT, 36, 'gold');
-    const hand = this.add.image(190, y, 'ico-hand').setDisplaySize(170, 170);
-    const arrows = addArt(this, 450, y, 'ico-arrows').setDisplaySize(250, 70);
-    const text = this.label(600, y, 'DRAG LEFT\nOR RIGHT', 300);
+    const hand = this.add.image(215, y, 'ico-hand').setDisplaySize(170, 170);
+    const arrows = addArt(this, 405, y, 'ico-arrows').setDisplaySize(200, 56);
+    const text = this.label(TEXT_X, y, 'DRAG LEFT\nOR RIGHT', TEXT_WIDTH);
 
     this.tweens.add({
       targets: hand,
@@ -94,7 +97,7 @@ export class HowToPlayScene extends Phaser.Scene {
     });
     this.tweens.add({
       targets: arrows,
-      x: 466,
+      x: 425,
       yoyo: true,
       repeat: -1,
       duration: 700,
@@ -105,9 +108,9 @@ export class HowToPlayScene extends Phaser.Scene {
 
   private rowCatch(y: number): Phaser.GameObjects.Container {
     const panel = createPanel(this, GAME_WIDTH / 2, y, PANEL_WIDTH, PANEL_HEIGHT, 36, 'gold');
-    const glow = addGlow(this, 190, y, 300, 0.7);
-    const capsule = this.add.image(190, y, 'capsule').setDisplaySize(170, 170);
-    const text = this.label(340, y, 'CATCH VITAMIN\nC MOLECULES', 540);
+    const glow = addGlow(this, 310, y, 300, 0.7);
+    const capsule = this.add.image(310, y, 'capsule').setDisplaySize(170, 170);
+    const text = this.label(TEXT_X, y, 'CATCH VITAMIN\nC MOLECULES', TEXT_WIDTH);
 
     this.tweens.add({
       targets: [capsule, glow],
@@ -122,10 +125,10 @@ export class HowToPlayScene extends Phaser.Scene {
 
   private rowAvoid(y: number): Phaser.GameObjects.Container {
     const panel = createPanel(this, GAME_WIDTH / 2, y, PANEL_WIDTH, PANEL_HEIGHT, 36, 'gold');
-    const stain = this.add.image(160, y, 'stain').setDisplaySize(150, 150);
-    const bubble = this.add.image(300, y, 'decoy').setDisplaySize(125, 125);
-    const cross = addArt(this, 420, y, 'ico-x').setDisplaySize(86, 86);
-    const text = this.label(520, y, 'AVOID GERMS\n& BUBBLES', 380);
+    const stain = this.add.image(185, y, 'stain').setDisplaySize(150, 150);
+    const bubble = this.add.image(325, y, 'decoy').setDisplaySize(125, 125);
+    const cross = addArt(this, 450, y, 'ico-x').setDisplaySize(86, 86);
+    const text = this.label(TEXT_X, y, 'AVOID GERMS\n& BUBBLES', TEXT_WIDTH);
 
     this.tweens.add({
       targets: stain,

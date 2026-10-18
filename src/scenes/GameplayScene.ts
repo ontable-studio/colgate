@@ -13,9 +13,10 @@ import { bump, fadeIn, floatText, popIn, shards, sparkBurst } from '@/ui/motion'
 import { COLORS, textStyle } from '@/ui/theme';
 import { SceneKey } from './keys';
 
-const BASKET_WIDTH = 320;
-const BASKET_HEIGHT = 194;
-const BASKET_Y = 1470;
+/** Sized for a 43" portrait TV: big enough to read from a metre or two, small enough not to crowd. */
+const BASKET_WIDTH = 270;
+const BASKET_HEIGHT = 164;
+const BASKET_Y = 1480;
 const HINT_VISIBLE_MS = 4500;
 const TIMER_WARNING_SECS = 5;
 /** Get-ready countdown before the clock starts; the basket can already be moved. */
@@ -67,11 +68,13 @@ export class GameplayScene extends Phaser.Scene {
 
     this.basket = this.add.image(GAME_WIDTH / 2, BASKET_Y, 'basket');
     this.basket.setDisplaySize(BASKET_WIDTH, BASKET_HEIGHT);
+    // In front of the falling objects: a caught molecule sinks behind the basket's front, into it.
+    this.basket.setDepth(5);
     popIn(this, this.basket, 100, 0.6);
     // Physics only moves the objects; whether one counts is decided by geometry (domain/catching.ts).
     this.falling = this.physics.add.group();
 
-    this.meter = createMeter(this, GAME_WIDTH / 2, 1745);
+    this.meter = createMeter(this, GAME_WIDTH / 2, 1745, { showPercent: true });
     this.add
       .text(
         GAME_WIDTH / 2,
@@ -281,7 +284,25 @@ export class GameplayScene extends Phaser.Scene {
     const kind = obj.getData('kind') as FallingKind;
     this.session.catch(kind);
     this.feedback(kind, obj.x, obj.y);
-    obj.destroy();
+    if (kind === 'capsule') this.dropIntoBasket(obj);
+    else obj.destroy();
+  }
+
+  /** A caught molecule keeps falling, shrinking, behind the front of the basket: it goes in. */
+  private dropIntoBasket(obj: Phaser.Physics.Arcade.Image): void {
+    this.falling.remove(obj);
+    obj.disableBody(false, false);
+    const offset = obj.x - this.basket.x;
+    this.tweens.add({
+      targets: obj,
+      y: BASKET_Y + 20,
+      scale: obj.scale * 0.65,
+      alpha: 0.15,
+      duration: 240,
+      ease: 'Cubic.easeIn',
+      onUpdate: () => obj.setX(this.basket.x + offset),
+      onComplete: () => obj.destroy(),
+    });
   }
 
   /** Reward / penalty cue at the moment of the catch. */

@@ -27,8 +27,7 @@ export function registerUiArt(scene: Phaser.Scene): void {
     scene,
     'title-game',
     [
-      { text: 'CATCH', size: 118 },
-      { text: 'THE', size: 84 },
+      { text: 'CATCH THE', size: 100 },
       { text: 'BRIGHTNESS', size: 126 },
     ],
     { weight: 'boldItalic', maxWidth: 660, gap: 0.02 },

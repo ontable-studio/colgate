@@ -10,7 +10,6 @@ import { createButton } from '@/ui/button';
 import { addBackground, addGlow, addHeader, addSparkles } from '@/ui/effects';
 import { createMeter } from '@/ui/meter';
 import { bump, countUp, fadeIn, float, popIn, slideIn } from '@/ui/motion';
-import { addHomeButton } from '@/ui/homeButton';
 import { createPanel } from '@/ui/panel';
 import { COLORS, textStyle } from '@/ui/theme';
 import type { ResultSceneData } from './data';
@@ -20,12 +19,17 @@ import { SceneKey } from './keys';
  * Vertical layout (1080x1920); the left and right columns of the first block never overlap:
  *   285-535   score card (left)      285-755  tube (right)
  *   542-757   Day 1 > Day 7 card     792-868  Brightness Meter, labels at 905
- *   970-1530  Top 10 card   1556 tagline   1578-1674 sticker reward   1695-1835  PLAY AGAIN
+ *   970-1530  Top 10 card   1610 tagline   1695-1840  HOME (icon, left) + PLAY AGAIN (right)
+ *
+ * Safe area: every card and button stays inside x 80-1000 (80 px from each side) and above
+ * y 1840; only the Colgate tab hangs from the top edge.
  */
+const MARGIN = 80;
 const BOARD_SIZE = 10;
 const BOARD_TOP = 1050;
 const ROW_STEP = 42;
-const LEFT_X = 330;
+const LEFT_X = 340;
+const CARD_WIDTH = 520;
 
 export class ResultScene extends Phaser.Scene {
   private result!: SessionResult;
@@ -47,7 +51,6 @@ export class ResultScene extends Phaser.Scene {
     addBackground(this, 'winning');
     addSparkles(this, 10, { x: 40, y: 260, width: 1000, height: 700 });
     addHeader(this, false);
-    addHomeButton(this);
 
     this.addScoreCard();
     this.addDayCompare();
@@ -69,22 +72,38 @@ export class ResultScene extends Phaser.Scene {
     const tagline = this.add
       .text(
         cx,
-        1556,
+        1612,
         'BRIGHTER SMILES, BRIGHTER DAYS',
         textStyle({ size: 30, color: COLORS.goldSoft, glow: 'rgba(255,150,40,0.7)' }),
       )
       .setOrigin(0.5);
     popIn(this, tagline, 1000, 0.85);
-    this.addStickerReward(cx);
 
+    this.addBottomButtons();
+  }
+
+  /** HOME (icon only) on the left and PLAY AGAIN on the right, side by side at the bottom. */
+  private addBottomButtons(): void {
+    const y = 1768;
+    const gap = 30;
+    const homeWidth = 150;
+    const home = createButton(
+      this,
+      MARGIN + homeWidth / 2,
+      y,
+      '',
+      () => this.scene.start(SceneKey.Attract),
+      { width: homeWidth, height: 140, icon: 'ico-home', sound: 'sfx-ui-tap' },
+    );
+    const againWidth = GAME_WIDTH - MARGIN * 2 - homeWidth - gap;
     const again = createButton(
       this,
-      cx,
-      1765,
+      MARGIN + homeWidth + gap + againWidth / 2,
+      y,
       'PLAY AGAIN',
       () => this.scene.start(SceneKey.Gameplay),
       {
-        width: 760,
+        width: againWidth,
         height: 140,
         fontSize: 58,
         icon: 'ico-replay-red',
@@ -92,55 +111,20 @@ export class ResultScene extends Phaser.Scene {
         sound: 'sfx-ui-start',
       },
     );
+    popIn(this, home, 1100);
     popIn(this, again, 1100);
     this.time.delayedCall(1700, () => {
-      this.tweens.add({ targets: again, scale: 1.04, yoyo: true, repeat: -1, duration: 800 });
-    });
-  }
-
-  /** Every player who finishes a round gets one sticker, whatever the score. */
-  private addStickerReward(cx: number): void {
-    const banner = this.add.container(0, 0);
-    const panel = createPanel(this, cx, 1626, 920, 96, 40, 'gold');
-    const glow = addGlow(this, 190, 1626, 220, 0.6);
-    const badge = this.add.image(190, 1626, 'capsule').setDisplaySize(78, 78);
-    const title = this.add
-      .text(
-        cx + 70,
-        1608,
-        'YOU WIN 1 FREE STICKER!',
-        textStyle({ size: 40, color: COLORS.goldLight, glow: 'rgba(255,170,60,0.8)' }),
-      )
-      .setOrigin(0.5);
-    const hint = this.add
-      .text(
-        cx + 70,
-        1649,
-        'SHOW THIS SCREEN TO OUR STAFF',
-        textStyle({ size: 24, letterSpacing: 3, color: COLORS.cream }),
-      )
-      .setOrigin(0.5);
-    banner.add([panel, glow, badge, title, hint]);
-    banner.setAlpha(0);
-    this.tweens.add({ targets: banner, alpha: 1, delay: 1050, duration: 450 });
-    this.tweens.add({ targets: badge, angle: 360, duration: 9000, repeat: -1 });
-    this.tweens.add({
-      targets: [badge, glow],
-      scale: '*=1.12',
-      yoyo: true,
-      repeat: -1,
-      duration: 700,
-      ease: 'Sine.easeInOut',
+      this.tweens.add({ targets: again, scale: 1.03, yoyo: true, repeat: -1, duration: 800 });
     });
   }
 
   /** Score card (left column). The number counts up, then pops. */
   private addScoreCard(): void {
-    createPanel(this, LEFT_X, 410, 560, 250);
+    createPanel(this, LEFT_X, 410, CARD_WIDTH, 250);
     this.add
       .text(
         LEFT_X + 3, // letter spacing leaves a trailing gap, nudge to look centred
-        345,
+        335,
         'YOUR SCORE',
         textStyle({ size: 38, letterSpacing: 6, color: COLORS.cream }),
       )
@@ -148,12 +132,22 @@ export class ResultScene extends Phaser.Scene {
     const score = this.add
       .text(
         LEFT_X,
-        432,
+        418,
         '0',
-        textStyle({ size: 130, color: COLORS.goldLight, glow: 'rgba(255,170,60,0.9)' }),
+        textStyle({ size: 124, color: COLORS.goldLight, glow: 'rgba(255,170,60,0.9)' }),
       )
       .setOrigin(0.5);
     countUp(this, score, this.result.score, 1000, 250);
+    // How full the meter ended up, stated plainly under the score.
+    const brightness = this.add
+      .text(
+        LEFT_X + 2,
+        500,
+        `BRIGHTNESS  ${Math.round(this.result.meterPct)}%`,
+        textStyle({ size: 34, letterSpacing: 4, color: COLORS.goldSoft }),
+      )
+      .setOrigin(0.5);
+    popIn(this, brightness, 900, 0.85);
     this.playCountTicks();
     this.time.delayedCall(1300, () => {
       bump(this, score, 1.12, 140);
@@ -207,10 +201,10 @@ export class ResultScene extends Phaser.Scene {
 
   /** Small before/after card: the stained tooth (Day 1) turns clean (Day 7) a moment after it appears. */
   private addDayCompare(): void {
-    createPanel(this, LEFT_X, 650, 560, 215, 34, 'gold');
-    this.add.image(LEFT_X - 150, 636, 'tooth1').setDisplaySize(110, 140);
+    createPanel(this, LEFT_X, 650, CARD_WIDTH, 215, 34, 'gold');
+    this.add.image(LEFT_X - 140, 636, 'tooth1').setDisplaySize(110, 140);
     const clean = this.add
-      .image(LEFT_X + 150, 636, 'tooth4')
+      .image(LEFT_X + 140, 636, 'tooth4')
       .setDisplaySize(113, 140)
       .setAlpha(0);
     this.tweens.add({ targets: clean, alpha: 1, delay: 700, duration: 900 });
@@ -219,8 +213,8 @@ export class ResultScene extends Phaser.Scene {
       this.add
         .text(x, 722, text, textStyle({ size: 28, letterSpacing: 3, color: COLORS.goldLight }))
         .setOrigin(0.5);
-    label(LEFT_X - 150, 'DAY 1');
-    label(LEFT_X + 150, 'DAY 7');
+    label(LEFT_X - 140, 'DAY 1');
+    label(LEFT_X + 140, 'DAY 7');
     const arrow = this.add
       .text(
         LEFT_X,
@@ -241,7 +235,7 @@ export class ResultScene extends Phaser.Scene {
 
     for (const [x, y, size, delay] of [
       [715, 330, 84, 0],
-      [985, 690, 96, 600],
+      [935, 705, 96, 600],
       [705, 735, 70, 1100],
     ] as const) {
       addGlow(this, x, y, size * 2.2, 0.6);

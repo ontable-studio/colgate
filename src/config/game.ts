@@ -74,9 +74,9 @@ export interface GameRules {
 
 /** On-screen size (px) of each falling object; textures differ in resolution. */
 export const OBJECT_SIZE: Readonly<Record<FallingKind, number>> = {
-  capsule: 150,
-  decoy: 150,
-  stain: 175,
+  capsule: 120,
+  decoy: 120,
+  stain: 140,
 };
 
 /**
@@ -88,7 +88,7 @@ export const OBJECT_SIZE: Readonly<Record<FallingKind, number>> = {
 export const RULES: GameRules = {
   durationSec: 15,
   meterFull: 95,
-  points: { capsule: 10, stain: -10, decoy: -5 },
+  points: { capsule: 10, stain: -10, decoy: -1 },
   meter: { winShare: 0.6, stainCost: 1, decoyCost: 0.5 },
   combo: [
     { streak: 2, multiplier: 2 },
@@ -112,7 +112,7 @@ export const RULES: GameRules = {
   },
   catching: {
     lineY: 1400,
-    basketHalfWidth: 141,
+    basketHalfWidth: 125,
     capsuleForgiveness: 0.5,
     hazardForgiveness: -0.25,
     basketSpeed: 1400,
