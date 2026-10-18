@@ -44,6 +44,19 @@ describe('PlaysRepository', () => {
     expect(top.map((p) => p.id)).toEqual([fastEarlier.id, fast.id, slow.id]);
   });
 
+  it('reports the rank of a play outside the top, and nothing extra for one inside it', async () => {
+    const plays = [90, 80, 70, 60, 50].map((score) => play({ score }));
+    for (const p of plays) await repo.add(p);
+    const low = plays[4];
+    const best = plays[0];
+    if (!low || !best) throw new Error('missing play');
+    const outside = await repo.board(3, low.id);
+    expect(outside.top).toHaveLength(3);
+    expect(outside.mine?.rank).toBe(5);
+    expect(outside.mine?.play.id).toBe(low.id);
+    expect((await repo.board(3, best.id)).mine).toBeUndefined();
+  });
+
   it('tracks pending plays and marks them synced', async () => {
     const a = play();
     const b = play();

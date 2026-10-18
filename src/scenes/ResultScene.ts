@@ -58,7 +58,7 @@ export class ResultScene extends Phaser.Scene {
     this.addMeter(cx);
 
     // Leaderboard card (filled in once the play is saved)
-    createPanel(this, cx, 1250, 920, 560);
+    createPanel(this, cx, 1265, 920, 590);
     this.add
       .text(
         cx,
@@ -261,38 +261,63 @@ export class ResultScene extends Phaser.Scene {
     };
     await repo.add(play);
 
-    const top = await repo.topScores(BOARD_SIZE);
+    const { top, mine } = await repo.board(BOARD_SIZE, play.id);
     // The scene may have been left (idle reset) while the DB was busy.
     if (!this.scene.isActive()) return;
 
     top.forEach((entry, i) => {
       const y = BOARD_TOP + i * ROW_STEP + ROW_STEP / 2;
-      const mine = entry.id === play.id;
-      const color = mine ? COLORS.goldLight : COLORS.white;
-      const delay = 350 + i * 70;
-      if (mine) {
-        const row = this.add
-          .rectangle(GAME_WIDTH / 2, y, 840, ROW_STEP - 4, 0xffc83d, 0.22)
-          .setOrigin(0.5);
-        slideIn(this, row, 160, delay);
-        this.tweens.add({
-          targets: row,
-          fillAlpha: 0.42,
-          yoyo: true,
-          repeat: -1,
-          duration: 700,
-          delay: delay + 500,
-        });
-      }
-      const cell = (x: number, text: string, origin: number) => {
-        const label = this.add
-          .text(x, y, text, textStyle({ size: 36, color }))
-          .setOrigin(origin, 0.5);
-        slideIn(this, label, 160, delay);
-      };
-      cell(210, `${i + 1}.`, 1);
-      cell(262, entry.initials, 0);
-      cell(870, String(entry.score), 1);
+      this.addBoardRow(y, i + 1, entry, entry.id === play.id, 350 + i * 70);
     });
+
+    // Outside the top 10: the player's own place goes at the very bottom, under a dotted divider.
+    if (mine) {
+      const y = BOARD_TOP + BOARD_SIZE * ROW_STEP + ROW_STEP / 2 + 14;
+      const delay = 350 + BOARD_SIZE * 70;
+      const divider = this.add
+        .text(
+          GAME_WIDTH / 2,
+          y - ROW_STEP / 2 - 2,
+          '. . . . . . . . . . . . . . . . . .',
+          textStyle({ size: 22, color: COLORS.goldSoft }),
+        )
+        .setOrigin(0.5);
+      slideIn(this, divider, 160, delay);
+      this.addBoardRow(y, mine.rank, mine.play, true, delay);
+    }
+  }
+
+  /** One line of the leaderboard: rank, initials and score; the player's own line glows. */
+  private addBoardRow(
+    y: number,
+    rank: number,
+    entry: PlayRecord,
+    isMine: boolean,
+    delay: number,
+  ): void {
+    const color = isMine ? COLORS.goldLight : COLORS.white;
+    if (isMine) {
+      const row = this.add
+        .rectangle(GAME_WIDTH / 2, y, 840, ROW_STEP - 4, 0xffc83d, 0.22)
+        .setOrigin(0.5);
+      slideIn(this, row, 160, delay);
+      this.tweens.add({
+        targets: row,
+        fillAlpha: 0.42,
+        yoyo: true,
+        repeat: -1,
+        duration: 700,
+        delay: delay + 500,
+      });
+    }
+    const cell = (x: number, text: string, origin: number): void => {
+      const label = this.add
+        .text(x, y, text, textStyle({ size: 36, color }))
+        .setOrigin(origin, 0.5);
+      slideIn(this, label, 160, delay);
+    };
+    cell(210, `${rank}.`, 1);
+    cell(262, entry.initials, 0);
+    cell(870, String(entry.score), 1);
   }
 }
