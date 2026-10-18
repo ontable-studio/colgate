@@ -30,7 +30,7 @@ export class AdminScene extends Phaser.Scene {
   create(): void {
     const cx = GAME_WIDTH / 2;
     this.resetArmed = false;
-    addBackground(this);
+    addBackground(this, 'bg-main');
 
     this.add.text(cx, 130, 'ADMIN', textStyle({ size: 90 })).setOrigin(0.5);
 

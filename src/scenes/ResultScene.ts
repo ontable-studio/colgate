@@ -7,7 +7,7 @@ import type { PlayRecord } from '@/domain/play';
 import type { SessionResult } from '@/domain/session';
 import { newId } from '@/util/id';
 import { createButton } from '@/ui/button';
-import { addBackground, addConfetti, addGlow, addHeader, addSparkles } from '@/ui/effects';
+import { addBackground, addGlow, addHeader, addSparkles } from '@/ui/effects';
 import { createMeter } from '@/ui/meter';
 import { bump, countUp, fadeIn, float, popIn, slideIn } from '@/ui/motion';
 import { addHomeButton } from '@/ui/homeButton';
@@ -44,8 +44,7 @@ export class ResultScene extends Phaser.Scene {
     const cx = GAME_WIDTH / 2;
     fadeIn(this);
     audio.playMusic('bgm-attract', 1200);
-    addBackground(this);
-    addConfetti(this);
+    addBackground(this, 'winning');
     addSparkles(this, 10, { x: 40, y: 260, width: 1000, height: 700 });
     addHeader(this, false);
     addHomeButton(this);

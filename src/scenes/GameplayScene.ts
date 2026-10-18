@@ -7,14 +7,13 @@ import { crossedLine, isCaught } from '@/domain/catching';
 import { GameSession } from '@/domain/session';
 import { Spawner, type SpawnEvent } from '@/domain/spawner';
 import { addArt } from '@/ui/art/canvas';
-import { DECOY_TEXTURES } from '@/ui/art/objects';
 import { addBackground, addGlow } from '@/ui/effects';
 import { createMeter, type Meter } from '@/ui/meter';
 import { bump, fadeIn, floatText, popIn, shards, sparkBurst } from '@/ui/motion';
 import { COLORS, textStyle } from '@/ui/theme';
 import { SceneKey } from './keys';
 
-const BASKET_WIDTH = 300;
+const BASKET_WIDTH = 320;
 const BASKET_HEIGHT = 194;
 const BASKET_Y = 1470;
 const HINT_VISIBLE_MS = 4500;
@@ -62,7 +61,7 @@ export class GameplayScene extends Phaser.Scene {
 
     fadeIn(this);
     audio.playMusic('bgm-game');
-    addBackground(this, 'bg-play');
+    addBackground(this, 'gameplay');
     this.addHud();
     this.addHint();
 
@@ -239,15 +238,13 @@ export class GameplayScene extends Phaser.Scene {
     const size = OBJECT_SIZE[kind];
     // If a frame arrived late, start the object where it would already be so spacing stays even.
     const y = -size + (event.speed * (elapsedMs - event.atMs)) / 1000;
-    // Decoys come in several looks (bubble, pills) but all count as the same kind.
-    const texture: string =
-      kind === 'decoy' ? Phaser.Utils.Array.GetRandom([...DECOY_TEXTURES]) : kind;
-    const obj = this.falling.create(event.x, y, texture) as Phaser.Physics.Arcade.Image;
+    // The molecule is the 'capsule' texture, the germ the 'stain' one and the bubble the 'decoy' one.
+    const obj = this.falling.create(event.x, y, kind) as Phaser.Physics.Arcade.Image;
     obj.setDisplaySize(size, size);
     obj.setData('kind', kind);
     obj.setData('previousY', y);
     obj.setVelocityY(event.speed);
-    // Everything tumbles a little as it falls; capsules and stains (which have a face) turn slowly.
+    // Everything tumbles a little as it falls; molecules and germs (which have a face) turn slowly.
     const spin = kind === 'decoy' ? 170 : 70;
     obj.setAngularVelocity(Phaser.Math.Between(-spin, spin));
   }

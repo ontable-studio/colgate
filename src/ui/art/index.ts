@@ -9,7 +9,7 @@ import { makeStage } from './stage';
 /**
  * Draw every procedural texture once at boot. Needs 'logo-colgate' to be loaded already.
  * Texture keys: bg-main, bg-play, logo-tab, lockup, ring, big-c, c-orbit, title-game, title-how,
- * title-unlock, ico-*, spark, glow, confetti, decoy, decoy-pill-a/b, stain, basket, meter-track,
+ * title-unlock, ico-*, spark, glow, confetti, meter-track,
  * meter-fill, stage (buttons/panels are cached on demand).
  */
 export function registerUiArt(scene: Phaser.Scene): void {

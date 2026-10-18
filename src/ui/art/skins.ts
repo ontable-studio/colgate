@@ -48,7 +48,8 @@ const BUTTON_STYLE: Record<
 
 /**
  * Glowing pill button with a double outline. 'red' is the quiet default (keys, secondary);
- * 'gold' is the primary call to action.
+ * 'gold' is the primary call to action and uses the supplied glossy orange-gold artwork
+ * ('btn-gold'), stretched in the middle so the rounded ends keep their shape.
  */
 export function makeButtonSkin(
   scene: Phaser.Scene,
@@ -59,6 +60,11 @@ export function makeButtonSkin(
   const key = buttonSkinKey(w, h, variant);
   if (scene.textures.exists(key)) return key;
   const style = BUTTON_STYLE[variant];
+
+  if (variant === 'gold' && scene.textures.exists('btn-gold')) {
+    drawGoldSkin(scene, key, w, h);
+    return key;
+  }
 
   drawTexture(scene, key, w + SKIN_PAD * 2, h + SKIN_PAD * 2, (ctx) => {
     const x = SKIN_PAD;
@@ -106,6 +112,41 @@ export function makeButtonSkin(
     ctx.stroke();
   });
   return key;
+}
+
+/** Source art: pill body is about 84% of the image height; its glow sits in the margin. */
+const GOLD_BODY_RATIO = 0.84;
+/** Width (source px) of each rounded end that must not be stretched. */
+const GOLD_CAP = 230;
+
+function drawGoldSkin(scene: Phaser.Scene, key: string, w: number, h: number): void {
+  const image = scene.textures.get('btn-gold').getSourceImage() as CanvasImageSource & {
+    width: number;
+    height: number;
+  };
+  const scale = h / (image.height * GOLD_BODY_RATIO);
+  const drawH = image.height * scale;
+  const cap = GOLD_CAP * scale;
+  const margin = ((1 - GOLD_BODY_RATIO) / 2) * image.height * scale; // glow around the body
+  const drawW = w + margin * 2;
+  drawTexture(scene, key, w + SKIN_PAD * 2, h + SKIN_PAD * 2, (ctx) => {
+    const x = SKIN_PAD - margin;
+    const y = SKIN_PAD + h / 2 - drawH / 2;
+    const middleSrc = image.width - GOLD_CAP * 2;
+    ctx.drawImage(image, 0, 0, GOLD_CAP, image.height, x, y, cap, drawH);
+    ctx.drawImage(image, GOLD_CAP, 0, middleSrc, image.height, x + cap, y, drawW - cap * 2, drawH);
+    ctx.drawImage(
+      image,
+      image.width - GOLD_CAP,
+      0,
+      GOLD_CAP,
+      image.height,
+      x + drawW - cap,
+      y,
+      cap,
+      drawH,
+    );
+  });
 }
 
 /** Dark translucent card used for instructions and the leaderboard. */

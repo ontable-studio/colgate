@@ -47,7 +47,7 @@ export class UnlockScene extends Phaser.Scene {
     audio.stopMusic(300);
     // The chord inside the stinger lands about 0.9 s in; it meets the last tooth and its burst.
     this.time.delayedCall(300, () => audio.playSfx('sfx-unlock'));
-    addBackground(this);
+    addBackground(this, 'winning');
     addSparkles(this, 16, { x: 60, y: 560, width: 960, height: 1150 });
     addHeader(this, false);
     popIn(this, addArt(this, cx, 470, 'title-unlock'), 120, 0.6);

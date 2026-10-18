@@ -42,7 +42,7 @@ export class InitialsScene extends Phaser.Scene implements IdleAware {
     const cx = GAME_WIDTH / 2;
     fadeIn(this);
     audio.playMusic('bgm-attract', 1200);
-    addBackground(this);
+    addBackground(this, 'winning');
     addSparkles(this, 8, { x: 40, y: 300, width: 1000, height: 600 });
     addHeader(this, false);
 

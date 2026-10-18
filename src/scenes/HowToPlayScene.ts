@@ -41,7 +41,7 @@ export class HowToPlayScene extends Phaser.Scene {
     });
 
     // The basket, gently swaying, shows what the player will be moving.
-    const basket = this.add.image(cx, BASKET_Y, 'basket').setDisplaySize(300, 194);
+    const basket = this.add.image(cx, BASKET_Y, 'basket').setDisplaySize(320, 194);
     popIn(this, basket, 760);
     this.time.delayedCall(760, () => audio.playSfx('sfx-pop'));
     this.time.delayedCall(1300, () => {
@@ -107,7 +107,7 @@ export class HowToPlayScene extends Phaser.Scene {
     const panel = createPanel(this, GAME_WIDTH / 2, y, PANEL_WIDTH, PANEL_HEIGHT, 36, 'gold');
     const glow = addGlow(this, 190, y, 300, 0.7);
     const capsule = this.add.image(190, y, 'capsule').setDisplaySize(170, 170);
-    const text = this.label(340, y, 'CATCH VITAMIN\nC CAPSULES', 540);
+    const text = this.label(340, y, 'CATCH VITAMIN\nC MOLECULES', 540);
 
     this.tweens.add({
       targets: [capsule, glow],
@@ -122,10 +122,10 @@ export class HowToPlayScene extends Phaser.Scene {
 
   private rowAvoid(y: number): Phaser.GameObjects.Container {
     const panel = createPanel(this, GAME_WIDTH / 2, y, PANEL_WIDTH, PANEL_HEIGHT, 36, 'gold');
-    const stain = addArt(this, 160, y, 'stain').setDisplaySize(150, 150);
-    const pill = addArt(this, 300, y, 'decoy-pill-a').setDisplaySize(120, 120);
+    const stain = this.add.image(160, y, 'stain').setDisplaySize(150, 150);
+    const bubble = this.add.image(300, y, 'decoy').setDisplaySize(125, 125);
     const cross = addArt(this, 420, y, 'ico-x').setDisplaySize(86, 86);
-    const text = this.label(520, y, 'AVOID STAINS\n& DECOYS', 380);
+    const text = this.label(520, y, 'AVOID GERMS\n& BUBBLES', 380);
 
     this.tweens.add({
       targets: stain,
@@ -135,7 +135,7 @@ export class HowToPlayScene extends Phaser.Scene {
       duration: 700,
     });
     this.tweens.add({
-      targets: pill,
+      targets: bubble,
       angle: { from: -14, to: 14 },
       yoyo: true,
       repeat: -1,
@@ -148,6 +148,6 @@ export class HowToPlayScene extends Phaser.Scene {
       repeat: -1,
       duration: 600,
     });
-    return this.row([panel, stain, pill, cross, text]);
+    return this.row([panel, stain, bubble, cross, text]);
   }
 }

@@ -42,7 +42,7 @@ export default defineConfig({
         name: 'Colgate Optic White Vitamin C - Catch the Brightness',
         short_name: 'Catch the Brightness',
         description:
-          'Catch the Vitamin C capsules, dodge the stains and unlock your brightest smile.',
+          'Catch the Vitamin C molecules, dodge the germs and unlock your brightest smile.',
         display: 'fullscreen',
         orientation: 'portrait',
         // TODO(brand): confirm exact Colgate red with Oji
@@ -61,8 +61,8 @@ export default defineConfig({
       },
       workbox: {
         // Default only precaches js/css/html: game assets MUST be listed here to work offline.
-        globPatterns: ['**/*.{js,css,html,ico,png,svg,webp,jpg,mp3,ogg,otf,woff2,json}'],
-        maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
+        globPatterns: ['**/*.{js,css,html,ico,png,svg,webp,jpg,mp3,ogg,mp4,otf,woff2,json}'],
+        maximumFileSizeToCacheInBytes: 8 * 1024 * 1024,
       },
     }),
   ],

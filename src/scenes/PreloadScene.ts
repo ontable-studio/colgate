@@ -2,11 +2,16 @@ import Phaser from 'phaser';
 import { initAudio } from '@/audio';
 import { MUSIC_KEYS, SFX_KEYS } from '@/config/audio';
 import { registerUiArt } from '@/ui/art';
+import { preloadVideos } from '@/ui/videoBackground';
 import { SceneKey } from './keys';
 
 /** Game-ready assets exported by tools/export-assets (texture key = file name without extension). */
 const IMAGES = [
   'capsule',
+  'stain',
+  'decoy',
+  'basket',
+  'btn-gold',
   'tube',
   'dropper',
   'flare',
@@ -20,7 +25,7 @@ const IMAGES = [
 
 /**
  * Loads the supplied art and the sound files, then draws the rest of the UI kit (backgrounds,
- * buttons, icons, basket, stain, ...) procedurally. To replace any generated texture with real
+ * buttons, icons, ...) procedurally. To replace any generated texture with real
  * art from Oji, load it here under the same key and drop the matching draw call in `ui/art`.
  */
 export class PreloadScene extends Phaser.Scene {
@@ -37,6 +42,7 @@ export class PreloadScene extends Phaser.Scene {
   }
 
   create(): void {
+    preloadVideos();
     registerUiArt(this);
     initAudio(this.sound);
     this.scene.start(SceneKey.Attract);
