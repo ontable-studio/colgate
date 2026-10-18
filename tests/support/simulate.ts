@@ -70,7 +70,7 @@ export function simulateRound(
     .filter((landing) => landing.landMs <= totalMs)
     .sort((a, b) => a.landMs - b.landMs);
 
-  const session = new GameSession(rules);
+  const session = new GameSession(rules, events.filter((e) => e.kind === 'capsule').length);
   let clock = 0;
   let filledAt: number | undefined;
   for (const { event, landMs } of landings) {

@@ -25,8 +25,17 @@ export interface GameRules {
   readonly points: Readonly<Record<FallingKind, number>>;
   /** The meter counts up to this value, shown as the percentage (95 = the paste's "95% high purity"). */
   readonly meterFull: number;
-  /** Brightness meter change (percentage points) per kind. Meter is clamped to 0..`meterFull`. */
-  readonly meter: Readonly<Record<FallingKind, number>>;
+  /**
+   * Brightness meter. The round knows how many capsules will fall (`capsuleTotal`, counted from
+   * the schedule); the player needs `winShare` of them to fill the meter, so the rest is a
+   * reserve that can be spent on misses and hits. A capsule fills 1/needed of the meter, a stain
+   * takes back `stainCost` capsules' worth and a decoy `decoyCost`.
+   */
+  readonly meter: {
+    readonly winShare: number;
+    readonly stainCost: number;
+    readonly decoyCost: number;
+  };
   /** Capsules caught in a row multiply their points: the highest tier whose `streak` is reached
    *  applies. A stain, a decoy or a missed capsule breaks the streak. Sorted by `streak`. */
   readonly combo: readonly { readonly streak: number; readonly multiplier: number }[];
@@ -80,7 +89,7 @@ export const RULES: GameRules = {
   durationSec: 15,
   meterFull: 95,
   points: { capsule: 10, stain: -10, decoy: -5 },
-  meter: { capsule: 10, stain: -9, decoy: -5 },
+  meter: { winShare: 0.6, stainCost: 1, decoyCost: 0.5 },
   combo: [
     { streak: 2, multiplier: 2 },
     { streak: 4, multiplier: 3 },

@@ -61,6 +61,7 @@ Catatan: Unity WebGL tidak dipakai (berat untuk browser TV).
 
 Semua angka ada di `src/config/game.ts` dan masih asumsi sampai klien mengonfirmasi. Keseimbangannya divalidasi dengan simulasi (`tests/domain/balance.test.ts`).
 
+- **Meter berdasarkan jumlah kapsul:** jumlah kapsul yang akan jatuh dihitung dari jadwal ronde (misalnya 18). Pemain butuh 60% darinya (misalnya 11) untuk mencapai 95%; sisanya cadangan. Noda mengurangi meter sebesar satu kapsul, pengecoh setengah kapsul. Angka di `RULES.meter` (`winShare`, `stainCost`, `decoyCost`).
 - Timer 15 detik, selalu dimainkan penuh walau meter sudah 95%; tidak ada bonus waktu. Setelah meter penuh pemain terus mengumpulkan kombo, jadi skor tetap berbeda antar pemain.
 - **Combo**: kapsul berturut-turut menaikkan pengali poin (2 → ×2, 4 → ×3, 6 → ×4, 8 → ×5). Noda, decoy, atau kapsul yang terlewat memutus combo. Combo hanya memengaruhi skor, bukan meter, jadi syarat menang tidak berubah. Seri di leaderboard dipecah: skor sama → yang selesai lebih cepat, lalu yang main lebih dulu.
 - **Reward (konfirmasi klien):** semua pemain yang menyelesaikan permainan mendapat 1 sticker, berapa pun skornya. Layar akhir menampilkan "YOU WIN 1 FREE STICKER!" dan meminta pemain menunjukkan layar ke staf; layar admin menampilkan jumlah sticker (1 per permainan).

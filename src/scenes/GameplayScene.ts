@@ -43,8 +43,8 @@ export class GameplayScene extends Phaser.Scene {
   }
 
   create(): void {
-    this.session = new GameSession(RULES);
     this.spawner = new Spawner(RULES);
+    this.session = new GameSession(RULES, this.spawner.capsuleCount);
     this.hintHidden = false;
     this.lastScore = 0;
     this.lastSecs = RULES.durationSec;

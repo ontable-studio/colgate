@@ -112,6 +112,11 @@ export class Spawner {
     this.events.sort((a, b) => a.atMs - b.atMs);
   }
 
+  /** How many capsules fall in this round (all of them land before the time is up). */
+  get capsuleCount(): number {
+    return this.events.filter((e) => e.kind === 'capsule').length;
+  }
+
   /** Every object that should exist by `elapsedMs`, in order. Call each frame. */
   due(elapsedMs: number): SpawnEvent[] {
     const events: SpawnEvent[] = [];

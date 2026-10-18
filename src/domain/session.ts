@@ -21,7 +21,15 @@ export class GameSession {
   private _remainingMs: number;
   private readonly totalMs: number;
 
-  constructor(private readonly rules: GameRules) {
+  /** Meter gained per capsule: the meter is full after `winShare` of the round's capsules. */
+  private readonly meterPerCapsule: number;
+
+  constructor(
+    private readonly rules: GameRules,
+    capsuleTotal: number,
+  ) {
+    const needed = Math.max(1, Math.round(capsuleTotal * rules.meter.winShare));
+    this.meterPerCapsule = rules.meterFull / needed;
     this.totalMs = rules.durationSec * 1000;
     this._remainingMs = this.totalMs;
   }
@@ -71,11 +79,14 @@ export class GameSession {
     const points = this.rules.points[kind] * (kind === 'capsule' ? this.multiplier : 1);
     this._lastPoints = points;
     this._score = Math.max(0, this._score + points);
-    this._meterPct = Math.min(
-      this.rules.meterFull,
-      Math.max(0, this._meterPct + this.rules.meter[kind]),
-    );
-    if (this._meterPct >= this.rules.meterFull) this._filled = true;
+    const cost = {
+      capsule: -1,
+      stain: this.rules.meter.stainCost,
+      decoy: this.rules.meter.decoyCost,
+    };
+    const change = kind === 'capsule' ? this.meterPerCapsule : -cost[kind] * this.meterPerCapsule;
+    this._meterPct = Math.min(this.rules.meterFull, Math.max(0, this._meterPct + change));
+    if (this._meterPct >= this.rules.meterFull - 1e-6) this._filled = true;
     if (kind === 'capsule') this._catches += 1;
     else this._hits += 1;
   }
@@ -88,7 +99,7 @@ export class GameSession {
   result(): SessionResult {
     return {
       score: this._score,
-      meterPct: this._meterPct,
+      meterPct: Math.round(this._meterPct),
       catches: this._catches,
       hits: this._hits,
       durationSec: Math.round((this.totalMs - this._remainingMs) / 1000),
