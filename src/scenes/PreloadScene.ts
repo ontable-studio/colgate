@@ -2,27 +2,10 @@ import Phaser from 'phaser';
 import { initAudio } from '@/audio';
 import { MUSIC_KEYS, SFX_KEYS } from '@/config/audio';
 import { registerUiArt } from '@/ui/art';
-import { preloadVideos } from '@/ui/videoBackground';
 import { SceneKey } from './keys';
 
 /** Game-ready assets exported by tools/export-assets (texture key = file name without extension). */
-const IMAGES = [
-  'capsule',
-  'stain',
-  'decoy',
-  'basket',
-  'btn-gold',
-  'ico-drag',
-  'tube',
-  'dropper',
-  'flare',
-  'tooth1',
-  'tooth2',
-  'tooth3',
-  'tooth4',
-  'logo-colgate',
-  'logo-wordmark',
-] as const;
+const IMAGES = ['capsule', 'btn-gold', 'tube', 'logo-colgate', 'logo-wordmark'] as const;
 
 /**
  * Loads the supplied art and the sound files, then draws the rest of the UI kit (backgrounds,
@@ -43,7 +26,6 @@ export class PreloadScene extends Phaser.Scene {
   }
 
   create(): void {
-    preloadVideos();
     registerUiArt(this);
     initAudio(this.sound);
     this.scene.start(SceneKey.Attract);

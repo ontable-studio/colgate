@@ -1,23 +1,16 @@
 import Phaser from 'phaser';
 import { quality } from '@/config/quality';
 import { addArt } from './art/canvas';
-import { GAME_HEIGHT, GAME_WIDTH } from '@/config/game';
-import { videoBackdrop, type VideoName } from './videoBackground';
+import { GAME_WIDTH } from '@/config/game';
+import { addLightShader } from './lightShader';
+import { popIn, riseIn } from './motion';
 
 /**
- * Full-screen background (call first so everything draws above it). A video name plays that
- * looping clip behind the transparent canvas; 'bg-main' / 'bg-play' draw a still image instead.
+ * Full-screen background (call first so everything draws above it): calm red with ambient light
+ * that falls from the top and keeps moving (see lightShader.ts).
  */
-export function addBackground(
-  scene: Phaser.Scene,
-  key: VideoName | 'bg-main' | 'bg-play' = 'home',
-): void {
-  if (key === 'bg-main' || key === 'bg-play') {
-    videoBackdrop.show(null);
-    scene.add.image(GAME_WIDTH / 2, GAME_HEIGHT / 2, key).setDisplaySize(GAME_WIDTH, GAME_HEIGHT);
-    return;
-  }
-  videoBackdrop.show(key);
+export function addBackground(scene: Phaser.Scene): void {
+  addLightShader(scene);
 }
 
 /** Soft warm halo, additive so it brightens whatever is behind it. */
@@ -65,8 +58,8 @@ export function addSparkles(
   }
 }
 
-/** Logo tab at the top plus the "Optic White Vitamin C" lockup below it. */
+/** Logo tab at the top plus the "Optic White Vitamin C" lockup below it; both animate in. */
 export function addHeader(scene: Phaser.Scene, withLockup = true): void {
-  addArt(scene, GAME_WIDTH / 2, 0, 'logo-tab').setOrigin(0.5, 0);
-  if (withLockup) addArt(scene, GAME_WIDTH / 2, 330, 'lockup');
+  riseIn(scene, addArt(scene, GAME_WIDTH / 2, 0, 'logo-tab').setOrigin(0.5, 0), -200, 0, 650);
+  if (withLockup) popIn(scene, addArt(scene, GAME_WIDTH / 2, 330, 'lockup'), 250, 0.85);
 }

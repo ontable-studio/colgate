@@ -1,96 +1,70 @@
 import Phaser from 'phaser';
 import { audio } from '@/audio';
-import { GAME_WIDTH, OBJECT_SIZE, RULES, type FallingKind } from '@/config/game';
-import { stepToward } from '@/domain/basketMotion';
-import { comboDetune } from '@/domain/audioSettings';
-import { crossedLine, isCaught } from '@/domain/catching';
+import { GAME_WIDTH, RULES, type BubbleSize } from '@/config/game';
+import { findTapped, pickSize, type BubbleBody } from '@/domain/bubbles';
 import { GameSession } from '@/domain/session';
-import { Spawner, type SpawnEvent } from '@/domain/spawner';
 import { addArt } from '@/ui/art/canvas';
 import { addBackground, addGlow } from '@/ui/effects';
-import { createMeter, type Meter } from '@/ui/meter';
-import { bump, fadeIn, floatText, popIn, shards, sparkBurst } from '@/ui/motion';
-import { COLORS, GLOW_PAD, textStyle } from '@/ui/theme';
+import { createBrushMeter, type BrushMeter } from '@/ui/brushMeter';
+import { bump, fadeIn, floatText, riseIn, slideIn, sparkBurst } from '@/ui/motion';
+import { COLORS, textStyle } from '@/ui/theme';
+import type { GameResultData } from './data';
 import { SceneKey } from './keys';
 
-/** Sized for a 43" portrait TV: big enough to read from a metre or two, small enough not to crowd. */
-const BASKET_WIDTH = 270;
-const BASKET_HEIGHT = 164;
-const BASKET_Y = 1480;
-const HINT_VISIBLE_MS = 4500;
 const TIMER_WARNING_SECS = 5;
-/** Get-ready countdown before the clock starts; the basket can already be moved. */
+/** Get-ready countdown before the clock starts; nothing can be tapped yet. */
 const COUNTDOWN_MS = 3000;
+/** Pause after the target is reached, so the full toothbrush and the burst are seen. */
+const WIN_PAUSE_MS = 1100;
+const BRUSH_X = 130;
+const BRUSH_Y = 1250;
+/** Molecules keep out of the toothbrush and its percentage (bottom left). */
+const BRUSH_ZONE = { right: 340, top: 900 };
+const FADE_OUT_MS = 500;
 
+interface Bubble extends BubbleBody {
+  x: number;
+  y: number;
+  readonly image: Phaser.GameObjects.Image;
+  readonly glow: Phaser.GameObjects.Image;
+  readonly radius: number;
+  vx: number;
+  vy: number;
+  age: number;
+}
+
+/** Tap the floating Vitamin C molecules; each one fills the toothbrush a little more. */
 export class GameplayScene extends Phaser.Scene {
   private session!: GameSession;
-  private basket!: Phaser.GameObjects.Image;
-  private spawner!: Spawner;
-  private falling!: Phaser.Physics.Arcade.Group;
+  private bubbles: Bubble[] = [];
+  private brush!: BrushMeter;
   private timerText!: Phaser.GameObjects.Text;
-  private scoreText!: Phaser.GameObjects.Text;
-  private meter!: Meter;
-  private hint: Phaser.GameObjects.GameObject[] = [];
-  private hintHidden = false;
-  private lastScore = 0;
-  private lastSecs = 0;
-  private lastBasketX = GAME_WIDTH / 2;
-  private targetX = GAME_WIDTH / 2;
-  private combo = 0;
-  private comboText!: Phaser.GameObjects.Text;
-  private lastMultiplier = 1;
+  private countdownText!: Phaser.GameObjects.Text;
   private countdownLeftMs = COUNTDOWN_MS;
   private countdownShown = 0;
-  private countdownText!: Phaser.GameObjects.Text;
+  private lastSecs = 0;
+  private sinceSpawnMs = 0;
+  private finishing = false;
 
   constructor() {
     super(SceneKey.Gameplay);
   }
 
   create(): void {
-    this.spawner = new Spawner(RULES);
-    this.session = new GameSession(RULES, this.spawner.capsuleCount);
-    this.hintHidden = false;
-    this.lastScore = 0;
-    this.lastSecs = RULES.durationSec;
-    this.lastBasketX = GAME_WIDTH / 2;
-    this.targetX = GAME_WIDTH / 2;
-    this.combo = 0;
-    this.lastMultiplier = 1;
+    this.session = new GameSession(RULES);
+    this.bubbles = [];
     this.countdownLeftMs = COUNTDOWN_MS;
     this.countdownShown = 0;
+    this.lastSecs = RULES.durationSec;
+    this.sinceSpawnMs = RULES.spawn.intervalMs;
+    this.finishing = false;
 
     fadeIn(this);
     audio.playMusic('bgm-game');
-    addBackground(this, 'gameplay');
-    this.addHud();
-    this.addHint();
-
-    this.basket = this.add.image(GAME_WIDTH / 2, BASKET_Y, 'basket');
-    this.basket.setDisplaySize(BASKET_WIDTH, BASKET_HEIGHT);
-    // In front of the falling objects: a caught molecule sinks behind the basket's front, into it.
-    this.basket.setDepth(5);
-    popIn(this, this.basket, 100, 0.6);
-    // Physics only moves the objects; whether one counts is decided by geometry (domain/catching.ts).
-    this.falling = this.physics.add.group();
-
-    this.meter = createMeter(this, GAME_WIDTH / 2, 1745, { showPercent: true });
-    this.add
-      .text(
-        GAME_WIDTH / 2,
-        1822,
-        'BRIGHTNESS METER',
-        textStyle({ size: 34, letterSpacing: 5, color: COLORS.cream }),
-      )
-      .setOrigin(0.5);
-
-    const follow = (pointer: Phaser.Input.Pointer): void => {
-      this.targetX = Phaser.Math.Clamp(pointer.x, BASKET_WIDTH / 2, GAME_WIDTH - BASKET_WIDTH / 2);
-      this.hideHint();
-    };
-    this.input.on('pointermove', follow);
-    this.input.on('pointerdown', follow);
-    this.time.delayedCall(HINT_VISIBLE_MS, () => this.hideHint());
+    addBackground(this);
+    this.addTimer();
+    this.brush = createBrushMeter(this, BRUSH_X, BRUSH_Y);
+    for (const part of this.brush.parts) slideIn(this, part, -260, 250);
 
     this.countdownText = this.add
       .text(
@@ -101,42 +75,32 @@ export class GameplayScene extends Phaser.Scene {
       )
       .setOrigin(0.5)
       .setDepth(50);
+
+    this.input.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
+      this.onTap(pointer.x, pointer.y);
+    });
   }
 
   override update(_time: number, delta: number): void {
-    // Capped step so one long frame after a hiccup cannot make the basket jump.
-    this.basket.x = stepToward(
-      this.basket.x,
-      this.targetX,
-      RULES.catching.basketSpeed,
-      Math.min(delta, 50),
-    );
-
     if (this.countdownLeftMs > 0) {
       this.runCountdown(delta);
       return;
     }
-    this.session.tick(delta);
-
-    const elapsedMs = RULES.durationSec * 1000 - this.session.remainingMs;
-    for (const event of this.spawner.due(elapsedMs)) this.spawn(event, elapsedMs);
-    this.resolveLandings();
-
-    this.animateBasket();
-    this.updateHud();
-
-    if (this.session.isOver) {
-      audio.stopMusic(500);
-      audio.playSfx('sfx-timeup', { volume: 0.8 });
-      this.scene.start(SceneKey.Unlock, { result: this.session.result() });
+    // Capped step so one long frame after a hiccup cannot make molecules jump.
+    const step = Math.min(delta, 50);
+    if (!this.finishing) {
+      this.session.tick(delta);
+      this.updateTimer();
+      this.spawnIfDue(step);
     }
+    this.moveBubbles(step);
+
+    if (!this.finishing && this.session.isOver) this.finish();
   }
 
-  /** 3, 2, 1 before the round: nothing falls and the clock stands still. */
+  /** 3, 2, 1 before the round: nothing floats and the clock stands still. */
   private runCountdown(delta: number): void {
     this.countdownLeftMs -= delta;
-    this.animateBasket();
-    this.updateHud();
     const shown = Math.max(1, Math.ceil(this.countdownLeftMs / 1000));
     if (this.countdownLeftMs <= 0) {
       this.countdownText.destroy();
@@ -151,194 +115,226 @@ export class GameplayScene extends Phaser.Scene {
     }
   }
 
-  /** The basket leans into the direction it is being dragged and settles back when it stops. */
-  private animateBasket(): void {
-    const dx = this.basket.x - this.lastBasketX;
-    this.lastBasketX = this.basket.x;
-    const lean = Phaser.Math.Clamp(dx * 0.5, -12, 12);
-    this.basket.angle += (lean - this.basket.angle) * 0.25;
-  }
-
-  private updateHud(): void {
-    const secs = Math.ceil(this.session.remainingMs / 1000);
-    this.timerText.setText(`00:${String(secs).padStart(2, '0')}`);
-    if (secs !== this.lastSecs) {
-      this.lastSecs = secs;
-      if (secs <= TIMER_WARNING_SECS) {
-        this.timerText.setColor('#FF9C8A');
-        bump(this, this.timerText, 1.22, 160);
-        // The last seconds tick higher in pitch as they run out.
-        audio.playSfx('sfx-tick', { detune: (TIMER_WARNING_SECS - secs) * 70 });
-      }
-    }
-
-    this.scoreText.setText(String(this.session.score));
-    if (this.session.score !== this.lastScore) {
-      this.lastScore = this.session.score;
-      bump(this, this.scoreText, 1.28, 120);
-    }
-    this.meter.setValue(this.session.meterPct);
-
-    const multiplier = this.session.multiplier;
-    if (multiplier !== this.lastMultiplier) {
-      this.lastMultiplier = multiplier;
-      this.comboText.setText(`x${multiplier}`).setVisible(multiplier > 1);
-      if (multiplier > 1) bump(this, this.comboText, 1.5, 180);
-    }
-  }
-
-  /** Stopwatch + timer on the left, score on the right. */
-  private addHud(): void {
-    const stopwatch = addArt(this, 135, 112, 'ico-stopwatch').setDisplaySize(84, 84);
+  /** Gold-outlined pill: alarm clock on the left, the time and "TIME LEFT" beside it. */
+  private addTimer(): void {
+    const cx = GAME_WIDTH / 2;
+    const y = 120;
+    const pill = addArt(this, cx, y, 'timer-pill');
+    const clock = addArt(this, cx - 134, y, 'ico-alarm').setDisplaySize(96, 96);
     this.timerText = this.add
-      .text(196, 112, '00:00', textStyle({ size: 76, align: 'left' }))
-      .setOrigin(0, 0.5);
-    const scoreLabel = this.add
+      .text(cx + 62, y - 12, formatTime(RULES.durationSec), textStyle({ size: 80 }))
+      .setOrigin(0.5);
+    const caption = this.add
       .text(
-        1000,
-        76,
-        'SCORE',
-        textStyle({ size: 36, align: 'right', letterSpacing: 6, color: COLORS.cream }),
+        cx + 62,
+        y + 38,
+        'TIME LEFT',
+        textStyle({ size: 24, letterSpacing: 3, color: COLORS.cream }),
       )
-      .setOrigin(1, 0.5);
-    this.scoreText = this.add
-      .text(
-        1000 + GLOW_PAD,
-        146,
-        '0',
-        textStyle({ size: 90, align: 'right', glow: 'rgba(255,170,60,0.8)' }),
-      )
-      .setOrigin(1, 0.5);
-
-    this.comboText = this.add
-      .text(1000, 230, 'x2', textStyle({ size: 64, align: 'right', color: COLORS.goldLight }))
-      .setOrigin(1, 0.5)
-      .setVisible(false);
-
-    // Keep the HUD above falling objects.
-    for (const item of [stopwatch, this.timerText, scoreLabel, this.scoreText, this.comboText])
+      .setOrigin(0.5);
+    for (const item of [pill, clock, this.timerText, caption]) {
       item.setDepth(10);
+      riseIn(this, item, -180, 100, 600);
+    }
   }
 
-  /** "Drag left/right" hint under the basket, shown only at the start of a round. */
-  private addHint(): void {
-    const icon = this.add.image(GAME_WIDTH / 2, 1625, 'ico-drag').setDisplaySize(240, 213);
-    this.hint = [icon];
-    this.tweens.add({
-      targets: icon,
-      x: { from: GAME_WIDTH / 2 - 150, to: GAME_WIDTH / 2 + 150 },
-      yoyo: true,
-      repeat: -1,
-      duration: 900,
-      ease: 'Sine.easeInOut',
+  private updateTimer(): void {
+    const secs = Math.ceil(this.session.remainingMs / 1000);
+    this.timerText.setText(formatTime(secs));
+    if (secs === this.lastSecs) return;
+    this.lastSecs = secs;
+    if (secs <= TIMER_WARNING_SECS) {
+      this.timerText.setColor('#FF9C8A');
+      bump(this, this.timerText, 1.22, 160);
+      // The last seconds tick higher in pitch as they run out.
+      audio.playSfx('sfx-tick', { detune: (TIMER_WARNING_SECS - secs) * 70 });
+    }
+  }
+
+  private spawnIfDue(step: number): void {
+    this.sinceSpawnMs += step;
+    if (this.sinceSpawnMs < RULES.spawn.intervalMs) return;
+    if (this.bubbles.length >= RULES.spawn.maxOnScreen) return;
+    this.sinceSpawnMs = 0;
+    this.spawn();
+  }
+
+  private spawn(): void {
+    const size = pickSize(RULES.bubbles, Math.random());
+    const diameter = RULES.bubbles[size].diameter;
+    const radius = diameter / 2;
+    const { left, right, top, bottom } = RULES.area;
+
+    // Try a few spots; take the first that is clear of the toothbrush and the other molecules.
+    let x = 0;
+    let y = 0;
+    for (let attempt = 0; attempt < 12; attempt++) {
+      x = Phaser.Math.Between(left + radius, right - radius);
+      y = Phaser.Math.Between(top + radius, bottom - radius);
+      const inBrushZone = x - radius < BRUSH_ZONE.right && y + radius > BRUSH_ZONE.top;
+      const crowded = this.bubbles.some(
+        (b) => Math.hypot(b.x - x, b.y - y) < (b.radius + radius) * 0.95,
+      );
+      if (!inBrushZone && !crowded) break;
+    }
+
+    const glow = addGlow(this, x, y, diameter * 2.2, 0);
+    const image = this.add.image(x, y, 'capsule').setDisplaySize(diameter, diameter);
+    const angle = Math.random() * Math.PI * 2;
+    const speed = RULES.spawn.driftSpeed * Phaser.Math.FloatBetween(0.5, 1);
+    this.bubbles.push({
+      x,
+      y,
+      size,
+      image,
+      glow,
+      radius,
+      vx: Math.cos(angle) * speed,
+      vy: Math.sin(angle) * speed,
+      age: 0,
     });
+    // Pop in: grows from nothing.
+    const full = image.scale;
+    image.setScale(0);
+    this.tweens.add({ targets: image, scale: full, duration: 260, ease: 'Back.easeOut' });
   }
 
-  private hideHint(): void {
-    if (this.hintHidden) return;
-    this.hintHidden = true;
-    this.tweens.add({ targets: this.hint, alpha: 0, duration: 500 });
-  }
+  /** Drift, bounce off the edges of the play area and fade out molecules nobody tapped. */
+  private moveBubbles(step: number): void {
+    const { left, right, top, bottom } = RULES.area;
+    const seconds = step / 1000;
+    for (const b of [...this.bubbles]) {
+      b.age += step;
+      b.x += b.vx * seconds;
+      b.y += b.vy * seconds;
+      if (b.x < left + b.radius || b.x > right - b.radius) b.vx = -b.vx;
+      if (b.y < top + b.radius || b.y > bottom - b.radius) b.vy = -b.vy;
+      b.image.setPosition(b.x, b.y);
+      b.glow.setPosition(b.x, b.y);
+      b.image.setAngle(b.image.angle + 12 * seconds);
 
-  private spawn(event: SpawnEvent, elapsedMs: number): void {
-    const { kind } = event;
-    const size = OBJECT_SIZE[kind];
-    // If a frame arrived late, start the object where it would already be so spacing stays even.
-    const y = -size + (event.speed * (elapsedMs - event.atMs)) / 1000;
-    // The molecule is the 'capsule' texture, the germ the 'stain' one and the bubble the 'decoy' one.
-    const obj = this.falling.create(event.x, y, kind) as Phaser.Physics.Arcade.Image;
-    obj.setDisplaySize(size, size);
-    obj.setData('kind', kind);
-    obj.setData('previousY', y);
-    obj.setVelocityY(event.speed);
-    // Everything tumbles a little as it falls; molecules and germs (which have a face) turn slowly.
-    const spin = kind === 'decoy' ? 170 : 70;
-    obj.setAngularVelocity(Phaser.Math.Between(-spin, spin));
-  }
-
-  /**
-   * The moment an object's centre reaches the rim of the basket it either counts or it does not.
-   * Capsules are forgiving (a rim touch scores), hazards strict (only a clear drop into the bowl
-   * is a hit). A missed capsule dims so the player can see it did not count.
-   */
-  private resolveLandings(): void {
-    for (const child of this.falling.getChildren()) {
-      const obj = child as Phaser.Physics.Arcade.Image;
-      const kind = obj.getData('kind') as FallingKind;
-      const previousY = obj.getData('previousY') as number;
-      obj.setData('previousY', obj.y);
-
-      if (crossedLine(previousY, obj.y, RULES.catching.lineY)) {
-        const radius = OBJECT_SIZE[kind] / 2;
-        if (isCaught(kind, obj.x, this.basket.x, radius, RULES.catching)) {
-          this.onCaught(obj);
-          continue;
-        }
-        if (kind === 'capsule') {
-          this.session.missCapsule();
-          this.tweens.add({ targets: obj, alpha: 0.35, duration: 120 });
-        }
+      const remaining = RULES.spawn.lifetimeMs - b.age;
+      const fade = Math.min(1, Math.max(0, remaining / FADE_OUT_MS));
+      b.image.setAlpha(fade);
+      b.glow.setAlpha(0.55 * fade * Math.min(1, b.age / 260));
+      if (remaining <= 0 || this.finishing) {
+        this.remove(b);
+        b.image.destroy();
+        b.glow.destroy();
       }
-      // Anything that got past vanishes just below the basket instead of sliding over the meter.
-      if (obj.y > BASKET_Y + 140) obj.destroy();
     }
   }
 
-  private onCaught(obj: Phaser.Physics.Arcade.Image): void {
-    const kind = obj.getData('kind') as FallingKind;
-    this.session.catch(kind);
-    this.feedback(kind, obj.x, obj.y);
-    if (kind === 'capsule') this.dropIntoBasket(obj);
-    else obj.destroy();
+  private remove(bubble: Bubble): void {
+    const index = this.bubbles.indexOf(bubble);
+    if (index >= 0) this.bubbles.splice(index, 1);
   }
 
-  /** A caught molecule keeps falling, shrinking, behind the front of the basket: it goes in. */
-  private dropIntoBasket(obj: Phaser.Physics.Arcade.Image): void {
-    this.falling.remove(obj);
-    obj.disableBody(false, false);
-    const offset = obj.x - this.basket.x;
+  private onTap(x: number, y: number): void {
+    if (this.countdownLeftMs > 0 || this.finishing || this.session.isOver) return;
+    this.showAim(x, y);
+    const target = this.bubbles[findTapped(this.bubbles, RULES, x, y)];
+    if (!target) {
+      this.session.miss();
+      audio.playSfx('sfx-decoy', { volume: 0.7 });
+      this.showMissed(x, y);
+      return;
+    }
+
+    const size: BubbleSize = target.size;
+    const points = this.session.pop(size);
+    this.brush.setValue(this.session.meterPct);
+    this.brush.pulse();
+    // Smaller (harder, higher paying) molecules ring higher.
+    audio.playSfx('sfx-catch', { detune: points * 60 });
+    this.remove(target);
+    this.burst(target, points);
+  }
+
+  /** The molecule bursts: a flash, sparks and "+5 points" rising from it. */
+  private burst(bubble: Bubble, points: number): void {
+    const { x, y } = bubble;
     this.tweens.add({
-      targets: obj,
-      y: BASKET_Y + 20,
-      scale: obj.scale * 0.65,
-      alpha: 0.15,
-      duration: 240,
-      ease: 'Cubic.easeIn',
-      onUpdate: () => obj.setX(this.basket.x + offset),
-      onComplete: () => obj.destroy(),
+      targets: [bubble.image, bubble.glow],
+      scale: '*=1.5',
+      alpha: 0,
+      duration: 220,
+      onComplete: () => {
+        bubble.image.destroy();
+        bubble.glow.destroy();
+      },
+    });
+    const flash = addGlow(this, x, y, bubble.radius, 1);
+    this.tweens.add({
+      targets: flash,
+      displayWidth: bubble.radius * 4,
+      displayHeight: bubble.radius * 4,
+      alpha: 0,
+      duration: 380,
+      onComplete: () => flash.destroy(),
+    });
+    sparkBurst(this, x, y, 6, 150);
+    floatText(this, x, y - bubble.radius - 20, `+${points} points`, COLORS.goldLight);
+  }
+
+  /** Aim marker that settles onto the spot that was tapped. */
+  private showAim(x: number, y: number): void {
+    const aim = addArt(this, x, y, 'crosshair').setDepth(15);
+    const rest = aim.scale;
+    aim.setScale(rest * 1.8).setAlpha(0.2);
+    this.tweens.add({
+      targets: aim,
+      scale: rest,
+      alpha: 1,
+      duration: 120,
+      onComplete: () => {
+        this.tweens.add({
+          targets: aim,
+          alpha: 0,
+          duration: 260,
+          onComplete: () => aim.destroy(),
+        });
+      },
     });
   }
 
-  /** Reward / penalty cue at the moment of the catch. */
-  private feedback(kind: FallingKind, x: number, y: number): void {
-    bump(this, this.basket, 1.06, 90);
-    const points = this.session.lastPoints;
-    const label = `${points > 0 ? '+' : ''}${points}`;
-    this.combo = kind === 'capsule' ? this.combo + 1 : 0;
-
-    if (kind === 'capsule') {
-      // Capsules caught in a row climb the scale one semitone at a time.
-      audio.playSfx('sfx-catch', { detune: comboDetune(this.combo) });
-      const burst = addGlow(this, x, y, 120, 1);
-      this.tweens.add({
-        targets: burst,
-        displayWidth: 380,
-        displayHeight: 380,
-        alpha: 0,
-        duration: 380,
-        onComplete: () => burst.destroy(),
-      });
-      sparkBurst(this, x, y, 6, 150);
-      floatText(this, x, y - 70, label, COLORS.goldLight);
-      this.meter.pulse();
-    } else if (kind === 'stain') {
-      audio.playSfx('sfx-stain');
-      shards(this, x, y);
-      this.cameras.main.shake(140, 0.006);
-      floatText(this, x, y - 70, label, '#FF8A7A');
-    } else {
-      audio.playSfx('sfx-decoy');
-      floatText(this, x, y - 70, label, '#FFC4B8');
-    }
+  private showMissed(x: number, y: number): void {
+    const label = this.add
+      .text(
+        x,
+        y - 90,
+        'MISSED!',
+        textStyle({ size: 56, color: '#FFD0C4', glow: 'rgba(120,0,10,0.9)' }),
+      )
+      .setOrigin(0.5)
+      .setDepth(20);
+    this.tweens.add({
+      targets: label,
+      y: label.y - 70,
+      alpha: 0,
+      duration: 700,
+      ease: 'Cubic.easeOut',
+      onComplete: () => label.destroy(),
+    });
   }
+
+  /** Time is up or the toothbrush is full: celebrate if it is full, then show the result. */
+  private finish(): void {
+    this.finishing = true;
+    audio.stopMusic(500);
+    const won = this.session.reachedTarget;
+    if (won) {
+      audio.playSfx('sfx-unlock');
+      sparkBurst(this, BRUSH_X, BRUSH_Y, 18, 360);
+    } else {
+      audio.playSfx('sfx-timeup', { volume: 0.8 });
+    }
+    this.time.delayedCall(won ? WIN_PAUSE_MS : 400, () => {
+      this.scene.start(SceneKey.Result, { result: this.session.result() } satisfies GameResultData);
+    });
+  }
+}
+
+function formatTime(secs: number): string {
+  return `00:${String(Math.max(0, secs)).padStart(2, '0')}`;
 }

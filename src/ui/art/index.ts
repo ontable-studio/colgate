@@ -1,48 +1,47 @@
 import type Phaser from 'phaser';
 import { makeBackgrounds } from './background';
-import { makeBigC, makeGradientText, makeLockup, makeLogoTab, makeRing } from './brand';
+import {
+  makeBaruBadge,
+  makeBigC,
+  makeGradientText,
+  makeLockup,
+  makeLogoTab,
+  makeRing,
+} from './brand';
 import { makeIcons } from './icons';
 import { makeObjects } from './objects';
-import { makeMeter } from './skins';
+import { makeBrush } from './brush';
 import { makeStage } from './stage';
 
 /**
  * Draw every procedural texture once at boot. Needs 'logo-colgate' to be loaded already.
- * Texture keys: bg-main, bg-play, logo-tab, lockup, ring, big-c, c-orbit, title-game, title-how,
- * title-unlock, ico-*, spark, glow, confetti, meter-track,
- * meter-fill, stage (buttons/panels are cached on demand).
+ * Texture keys: bg-main, logo-tab, lockup, ring, big-c, c-orbit, title-game, title-how,
+ * ico-*, brush-empty, brush-fill, crosshair, badge-baru, podium, spark, glow, confetti
+ * (buttons/panels are cached on demand).
  */
 export function registerUiArt(scene: Phaser.Scene): void {
   makeBackgrounds(scene);
   makeIcons(scene);
   makeObjects(scene);
-  makeMeter(scene);
+  makeBrush(scene);
+  makeStage(scene);
   makeLogoTab(scene);
   makeLockup(scene);
   makeRing(scene);
   makeBigC(scene);
-  makeStage(scene);
+  makeBaruBadge(scene);
 
   makeGradientText(
     scene,
     'title-game',
     [
-      { text: 'CATCH THE', size: 100 },
-      { text: 'BRIGHTNESS', size: 126 },
+      { text: '95%', size: 220 },
+      { text: 'VITAMIN BLAST', size: 96 },
     ],
-    { weight: 'boldItalic', maxWidth: 660, gap: 0.02 },
+    { weight: 'boldItalic', maxWidth: 640, gap: 0.0 },
   );
   makeGradientText(scene, 'title-how', [{ text: 'HOW TO PLAY', size: 92 }], {
     weight: 'bold',
     maxWidth: 760,
   });
-  makeGradientText(
-    scene,
-    'title-unlock',
-    [
-      { text: 'UNLOCK YOUR', size: 100 },
-      { text: 'BRIGHTEST SMILE!', size: 100 },
-    ],
-    { weight: 'boldItalic', maxWidth: 900, gap: 0.06 },
-  );
 }

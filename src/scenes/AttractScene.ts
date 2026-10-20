@@ -3,26 +3,43 @@ import { audio } from '@/audio';
 import { GAME_WIDTH } from '@/config/game';
 import { addArt } from '@/ui/art/canvas';
 import { createButton } from '@/ui/button';
-import { addBackground, addGlow, addHeader, addSparkles } from '@/ui/effects';
-import { fadeIn, float, popIn } from '@/ui/motion';
+import { addBackground, addGlow, addHeader } from '@/ui/effects';
+import { fadeIn, float, popIn, riseIn } from '@/ui/motion';
+import { textStyle } from '@/ui/theme';
 import { SceneKey } from './keys';
 
 const ADMIN_HOTSPOT_SIZE = 220;
 const ADMIN_HOLD_MS = 2000;
 
 /*
- * Vertical layout (1080x1920), top to bottom, nothing shares a row:
- *   0-250     Colgate tab            235-425   Optic White lockup
- *   435-1055  ring + title           1030-1650 tube (left) and the big "C" (right)
- *   1660-1830 PLAY NOW
+ * Vertical layout (1080x1920), everything centred:
+ *   0-250     Colgate tab            235-425   Optic White lockup, claim just below it
+ *   600-800   title "95% VITAMIN BLAST", then a clear gap
+ *   780-1540  the smaller "C" (gap facing right), the tube in front of it
+ *   1630-1900 glossy stage the tube stands on, PLAY NOW in front of it
  */
-const RING_Y = 745;
-const RING_SIZE = 780;
-const HERO_Y = 1260;
-const TUBE_HEIGHT = 780;
-const TUBE_WIDTH = 279;
-/** How far the platform's back edge sits above the tube's foot. */
-const STAGE_FOOT_OFFSET = 110;
+const CX = GAME_WIDTH / 2;
+const RING_Y = 1180;
+const RING_SIZE = 760;
+const TITLE_Y = 668;
+const TUBE_HEIGHT = 764;
+const TUBE_WIDTH = 275;
+/** Back corner of the stage; the tube's glass foot rests on it. */
+const STAGE_Y = 1610;
+const TUBE_Y = STAGE_Y - TUBE_HEIGHT / 2 + 14;
+const CLAIM_Y = 490;
+const BUTTON_Y = 1745;
+
+/** Entrance order (ms): stage, then the C, the tube, the title, the claim, the badge, the button. */
+const ENTER = {
+  stage: 100,
+  ring: 300,
+  tube: 550,
+  title: 1000,
+  claim: 1250,
+  badge: 1450,
+  cta: 1650,
+};
 
 /** Looping idle screen that invites people to play. Everything else returns here when idle. */
 export class AttractScene extends Phaser.Scene {
@@ -35,15 +52,17 @@ export class AttractScene extends Phaser.Scene {
     fadeIn(this);
     audio.playMusic('bgm-attract');
     addBackground(this);
-    addSparkles(this, 14, { x: 60, y: 440, width: 960, height: 1200 });
-    this.addRing(cx);
+    this.addStage();
+    this.addRing();
     this.addHero();
     addHeader(this);
-    this.addTitle(cx);
+    this.addTitle();
+    this.addClaim();
+    this.addBadge();
     this.addAdminHotspot();
 
     // Warm halo that breathes behind the call to action.
-    const halo = addGlow(this, cx, 1745, 1000, 0.25);
+    const halo = addGlow(this, cx, BUTTON_Y, 1000, 0.25);
     this.tweens.add({
       targets: halo,
       alpha: 0.6,
@@ -55,7 +74,7 @@ export class AttractScene extends Phaser.Scene {
     const cta = createButton(
       this,
       cx,
-      1745,
+      BUTTON_Y,
       'START',
       () => {
         // Fullscreen needs a user gesture, so request it from the first tap. Best effort.
@@ -77,22 +96,37 @@ export class AttractScene extends Phaser.Scene {
         sound: 'sfx-ui-start',
       },
     );
-    this.tweens.add({ targets: cta, scale: 1.04, yoyo: true, repeat: -1, duration: 800 });
+    // The button rises last, then keeps pulsing.
+    riseIn(this, cta, 160, ENTER.cta, 600);
+    this.time.delayedCall(ENTER.cta + 700, () => {
+      this.tweens.add({ targets: cta, scale: 1.04, yoyo: true, repeat: -1, duration: 800 });
+    });
+    this.time.delayedCall(ENTER.cta, () => audio.playSfx('sfx-pop'));
   }
 
-  /** Gold "C" ring, floating gently (it does not turn). Drawn before the hero so the tube stands in front. */
-  private addRing(cx: number): void {
-    const ring = addArt(this, cx, RING_Y, 'ring').setDisplaySize(RING_SIZE, RING_SIZE);
-    float(this, ring, 14, 3000);
+  /** Gold "C" (an open ring, gap facing right), floating gently. Drawn before the tube so it stands in front. */
+  private addRing(): void {
+    const ring = addArt(this, CX, RING_Y, 'ring').setDisplaySize(RING_SIZE, RING_SIZE);
+    // The C swings in (a little turn plus a pop), then floats.
+    popIn(this, ring, ENTER.ring, 0.55);
+    ring.setAngle(-40);
+    this.tweens.add({
+      targets: ring,
+      angle: 0,
+      duration: 900,
+      delay: ENTER.ring,
+      ease: 'Cubic.easeOut',
+    });
+    this.time.delayedCall(ENTER.ring + 900, () => float(this, ring, 14, 3000));
   }
 
   /** The game title popping in inside the ring. */
-  private addTitle(cx: number): void {
-    const title = addArt(this, cx, RING_Y, 'title-game').setAngle(-4);
-    title.setScale(title.scale * 0.95);
-    popIn(this, title, 150, 0.5);
-    this.time.delayedCall(150, () => audio.playSfx('sfx-pop'));
-    this.time.delayedCall(900, () => {
+  private addTitle(): void {
+    const title = addArt(this, CX, TITLE_Y, 'title-game').setAngle(-4);
+    title.setScale(title.scale * 0.88);
+    popIn(this, title, ENTER.title, 0.5);
+    this.time.delayedCall(ENTER.title, () => audio.playSfx('sfx-pop'));
+    this.time.delayedCall(ENTER.title + 800, () => {
       this.tweens.add({
         targets: title,
         scale: title.scale * 1.03,
@@ -125,62 +159,51 @@ export class AttractScene extends Phaser.Scene {
       .on('pointerout', cancel);
   }
 
-  /** Hero: the tube centred on its platform in front of the ring, capsules floating around. */
+  /** The product claim, centred just under the "Optic White Vitamin C" lockup. */
+  private addClaim(): void {
+    const claim = this.add
+      .text(
+        CX,
+        CLAIM_Y,
+        'MENGURANGI NODA 7 TAHUN\nHANYA DALAM 7 HARI*',
+        textStyle({ size: 42, weight: 'light', lineSpacing: 8 }),
+      )
+      .setOrigin(0.5);
+    popIn(this, claim, ENTER.claim, 0.9);
+  }
+
+  /** The glossy stage (drawn in ui/art/stage.ts), its back corner under the tube. */
+  private addStage(): void {
+    const stage = addArt(this, CX, STAGE_Y, 'podium').setOrigin(0.5, 0);
+    riseIn(this, stage, 120, ENTER.stage, 700);
+  }
+
+  /** Hero: the tube standing on the stage in front of the "C", with a warm glow behind it. */
   private addHero(): void {
-    const tubeX = GAME_WIDTH / 2;
-    const cX = tubeX;
-    // Glossy platform the tube stands on (its feet sit just below the platform's back edge).
-    const tubeFootY = HERO_Y + TUBE_HEIGHT / 2;
-    addArt(this, GAME_WIDTH / 2, tubeFootY - STAGE_FOOT_OFFSET, 'stage').setOrigin(0.5, 0);
-    const flare = this.add
-      .image(GAME_WIDTH / 2, HERO_Y, 'flare')
-      .setDisplaySize(1100, 1100)
-      .setBlendMode(Phaser.BlendModes.ADD)
-      .setAlpha(0.5);
-    this.tweens.add({ targets: flare, angle: 360, duration: 26_000, repeat: -1 });
+    const glow = addGlow(this, CX, TUBE_Y, 760, 0);
+    this.tweens.add({ targets: glow, alpha: 0.6, delay: ENTER.tube + 300, duration: 800 });
+    const tube = this.add
+      .image(CX, TUBE_Y, 'tube')
+      .setDisplaySize(TUBE_WIDTH, TUBE_HEIGHT)
+      .setDepth(2);
+    // The tube rises up out of the stage.
+    riseIn(this, tube, 420, ENTER.tube, 800);
+    this.time.delayedCall(ENTER.tube, () => audio.playSfx('sfx-whoosh'));
+  }
 
-    // Warm glow behind the tube.
-    addGlow(this, cX, HERO_Y, 760, 0.6);
-
-    // The Vitamin C dropper from the key visual, tip pointing down into the ring.
-    const dropperGlow = addGlow(this, 885, 570, 600, 0.45);
-    const dropper = this.add.image(885, 570, 'dropper').setDisplaySize(360, 384).setAngle(4);
-    float(this, [dropper, dropperGlow], 14, 2600, 300);
-
-    const tube = this.add.image(tubeX, HERO_Y, 'tube').setDisplaySize(TUBE_WIDTH, TUBE_HEIGHT);
-    float(this, tube, 12, 2400);
-
-    // Vitamin C molecules of different sizes, scattered so they fill the space around the ring and
-    // tube without covering the title, tube, dropper or button. Smaller ones float less.
-    const capsules = [
-      { x: 110, y: 300, size: 70, delay: 200 },
-      { x: 990, y: 330, size: 85, delay: 900 },
-      { x: 85, y: 560, size: 135, delay: 0 },
-      { x: 130, y: 830, size: 75, delay: 1300 },
-      { x: 1000, y: 800, size: 110, delay: 500 },
-      { x: 70, y: 1040, size: 105, delay: 700 },
-      { x: 955, y: 1050, size: 70, delay: 1600 },
-      { x: 185, y: 1260, size: 140, delay: 1000 },
-      { x: 985, y: 1150, size: 95, delay: 300 },
-      { x: 880, y: 1360, size: 60, delay: 1100 },
-      { x: 960, y: 1440, size: 130, delay: 1500 },
-      { x: 80, y: 1510, size: 85, delay: 600 },
-      { x: 270, y: 1590, size: 58, delay: 1800 },
-      { x: 900, y: 1595, size: 78, delay: 400 },
-    ];
-    for (const c of capsules) {
-      const glow = addGlow(this, c.x, c.y, c.size * 2.4, 0.65);
-      const img = this.add.image(c.x, c.y, 'capsule').setDisplaySize(c.size, c.size);
-      this.tweens.add({
-        targets: [img, glow],
-        y: c.y - (18 + c.size * 0.25),
-        yoyo: true,
-        repeat: -1,
-        duration: 1500 + c.size * 6,
-        delay: c.delay,
-        ease: 'Sine.easeInOut',
-      });
-      this.tweens.add({ targets: img, angle: 360, duration: 12_000 + c.size * 40, repeat: -1 });
-    }
+  /** The orange "BARU" tag beside the top of the tube pops on with a small wobble. */
+  private addBadge(): void {
+    // Its left end tucks behind the tube's edge.
+    const x = CX + TUBE_WIDTH / 2 + 40;
+    const y = TUBE_Y - TUBE_HEIGHT / 2 + 60;
+    const badge = addArt(this, x, y, 'badge-baru').setDepth(1);
+    popIn(this, badge, ENTER.badge, 0.3);
+    this.tweens.add({
+      targets: badge,
+      angle: { from: -14, to: 0 },
+      duration: 700,
+      delay: ENTER.badge,
+      ease: 'Back.easeOut',
+    });
   }
 }

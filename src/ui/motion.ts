@@ -42,6 +42,19 @@ export function slideIn(scene: Phaser.Scene, target: Animated, fromDx: number, d
   });
 }
 
+/** Slide in vertically (negative `fromDy` drops in from above) while fading in. */
+export function riseIn(
+  scene: Phaser.Scene,
+  target: Animated,
+  fromDy: number,
+  delay = 0,
+  duration = 600,
+): void {
+  const { y } = target;
+  target.setY(y + fromDy).setAlpha(0);
+  scene.tweens.add({ targets: target, y, alpha: 1, duration, delay, ease: 'Back.easeOut' });
+}
+
 /** Gentle endless bob (up and down). */
 export function float(
   scene: Phaser.Scene,

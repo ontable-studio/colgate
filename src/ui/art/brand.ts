@@ -72,7 +72,7 @@ export function makeLockup(scene: Phaser.Scene): void {
   });
 }
 
-/** Glowing open ring (gap at the upper right) that frames the game title (820x820). */
+/** Glowing "C": an open ring with its gap facing right, behind the tube (820x820). */
 export function makeRing(scene: Phaser.Scene): void {
   drawTexture(scene, 'ring', 820, 820, (ctx, w, h) => {
     const rim = ctx.createLinearGradient(0, h, w, 0);
@@ -87,14 +87,14 @@ export function makeRing(scene: Phaser.Scene): void {
     ctx.lineWidth = 18;
     ctx.strokeStyle = rim;
     ctx.beginPath();
-    ctx.arc(w / 2, h / 2, 350, (-20 * Math.PI) / 180, (285 * Math.PI) / 180);
+    ctx.arc(w / 2, h / 2, 350, (38 * Math.PI) / 180, (322 * Math.PI) / 180);
     ctx.stroke();
     ctx.restore();
 
     ctx.lineWidth = 7;
     ctx.strokeStyle = 'rgba(255,255,255,0.9)';
     ctx.beginPath();
-    ctx.arc(w / 2, h / 2, 350, (-20 * Math.PI) / 180, (285 * Math.PI) / 180);
+    ctx.arc(w / 2, h / 2, 350, (38 * Math.PI) / 180, (322 * Math.PI) / 180);
     ctx.stroke();
   });
 }
@@ -205,5 +205,35 @@ export function makeGradientText(
 
       top += line.size * (1 + gap);
     }
+  });
+}
+
+/** Orange "BARU" tag (new) that sits beside the tube (130x64). */
+export function makeBaruBadge(scene: Phaser.Scene): void {
+  drawTexture(scene, 'badge-baru', 130, 64, (ctx, w, h) => {
+    const body = ctx.createLinearGradient(0, 0, 0, h);
+    body.addColorStop(0, '#FFB52E');
+    body.addColorStop(1, '#EE7F12');
+    ctx.save();
+    ctx.shadowColor = 'rgba(90,10,0,0.45)';
+    ctx.shadowBlur = 8;
+    ctx.shadowOffsetY = 3;
+    ctx.fillStyle = body;
+    // Tab with a slanted left edge, like the pack's tag.
+    ctx.beginPath();
+    ctx.moveTo(18, 6);
+    ctx.lineTo(w - 12, 6);
+    ctx.quadraticCurveTo(w - 4, 6, w - 4, 14);
+    ctx.lineTo(w - 4, h - 14);
+    ctx.quadraticCurveTo(w - 4, h - 6, w - 12, h - 6);
+    ctx.lineTo(4, h - 6);
+    ctx.closePath();
+    ctx.fill();
+    ctx.restore();
+    ctx.fillStyle = '#FFFFFF';
+    ctx.font = canvasFont('bold', 34);
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('BARU', w / 2 + 4, h / 2 + 2);
   });
 }

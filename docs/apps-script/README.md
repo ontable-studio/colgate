@@ -9,6 +9,7 @@
 Notes:
 
 - The URL and secret are embedded in the shipped JS, so anyone with the page can post rows. The secret only reduces noise. Keep the sheet free of personal data until the client decides what is collected (see PLAN.md).
+- Updating from an older version (which had `initials`, `catches`, `hits`): just redeploy the new script. It adds the missing columns (`pops`, `misses`) to the header row on the next play and keeps the old columns and their data; no manual header change needed.
 - Re-sending the same play is safe: rows are de-duplicated by `id`.
 - To verify from the real TV browser (CORS/redirect behaviour), play one round online and check the sheet. This must be tested early.
 - After editing the script, create a **new version** of the deployment or the old code keeps running.
@@ -19,7 +20,7 @@ Do **not** pass `-X POST`: Apps Script answers with a 302 redirect and `-X POST`
 
 ```bash
 curl -sL "<EXEC_URL>" -H "Content-Type: text/plain" \
-  -d '{"secret":"<SECRET>","plays":[{"id":"test-1","timestamp":"2026-10-14T10:00:00Z","deviceId":"booth-01","initials":"TST","score":10,"meterPct":5,"catches":1,"hits":0,"durationSec":40,"gameVersion":"0.1.0"}]}'
+  -d '{"secret":"<SECRET>","plays":[{"id":"test-1","timestamp":"2026-10-14T10:00:00Z","deviceId":"booth-01","score":10,"meterPct":5,"pops":1,"misses":0,"durationSec":40,"gameVersion":"0.1.0"}]}'
 ```
 
 Expected: `{"ok":true,"accepted":["test-1"]}`. A wrong secret returns `{"ok":false,"error":"unauthorized"}`. Sending the same `id` again is accepted again but adds no new row.
