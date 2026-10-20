@@ -182,7 +182,10 @@ export class AttractScene extends Phaser.Scene {
   private addHero(): void {
     const glow = addGlow(this, CX, TUBE_Y, 760, 0);
     this.tweens.add({ targets: glow, alpha: 0.6, delay: ENTER.tube + 300, duration: 800 });
-    const tube = this.add.image(CX, TUBE_Y, 'tube').setDisplaySize(TUBE_WIDTH, TUBE_HEIGHT);
+    const tube = this.add
+      .image(CX, TUBE_Y, 'tube')
+      .setDisplaySize(TUBE_WIDTH, TUBE_HEIGHT)
+      .setDepth(2);
     // The tube rises up out of the stage.
     riseIn(this, tube, 420, ENTER.tube, 800);
     this.time.delayedCall(ENTER.tube, () => audio.playSfx('sfx-whoosh'));
@@ -190,9 +193,10 @@ export class AttractScene extends Phaser.Scene {
 
   /** The orange "BARU" tag beside the top of the tube pops on with a small wobble. */
   private addBadge(): void {
-    const x = CX + TUBE_WIDTH / 2 + 62;
+    // Its left end tucks behind the tube's edge.
+    const x = CX + TUBE_WIDTH / 2 + 30;
     const y = TUBE_Y - TUBE_HEIGHT / 2 + 60;
-    const badge = addArt(this, x, y, 'badge-baru');
+    const badge = addArt(this, x, y, 'badge-baru').setDepth(1);
     popIn(this, badge, ENTER.badge, 0.3);
     this.tweens.add({
       targets: badge,
