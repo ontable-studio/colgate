@@ -72,7 +72,7 @@ export function makeLockup(scene: Phaser.Scene): void {
   });
 }
 
-/** Glowing open ring (gap at the upper right) that frames the game title (820x820). */
+/** Glowing "C": an open ring with its gap facing right, behind the tube (820x820). */
 export function makeRing(scene: Phaser.Scene): void {
   drawTexture(scene, 'ring', 820, 820, (ctx, w, h) => {
     const rim = ctx.createLinearGradient(0, h, w, 0);
@@ -87,14 +87,14 @@ export function makeRing(scene: Phaser.Scene): void {
     ctx.lineWidth = 18;
     ctx.strokeStyle = rim;
     ctx.beginPath();
-    ctx.arc(w / 2, h / 2, 350, (-20 * Math.PI) / 180, (285 * Math.PI) / 180);
+    ctx.arc(w / 2, h / 2, 350, (38 * Math.PI) / 180, (322 * Math.PI) / 180);
     ctx.stroke();
     ctx.restore();
 
     ctx.lineWidth = 7;
     ctx.strokeStyle = 'rgba(255,255,255,0.9)';
     ctx.beginPath();
-    ctx.arc(w / 2, h / 2, 350, (-20 * Math.PI) / 180, (285 * Math.PI) / 180);
+    ctx.arc(w / 2, h / 2, 350, (38 * Math.PI) / 180, (322 * Math.PI) / 180);
     ctx.stroke();
   });
 }

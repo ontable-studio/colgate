@@ -9,11 +9,10 @@ const play = (over: Partial<PlayRecord> = {}): PlayRecord => ({
   id: `p${++counter}`,
   timestamp: new Date(2026, 9, 28, 10, 0, counter).toISOString(),
   deviceId: 'booth-test',
-  initials: 'AAA',
   score: 0,
   meterPct: 0,
-  catches: 0,
-  hits: 0,
+  pops: 0,
+  misses: 0,
   durationSec: 40,
   gameVersion: '0.0.0',
   syncStatus: 'pending',
@@ -26,37 +25,6 @@ beforeEach(async () => {
 });
 
 describe('PlaysRepository', () => {
-  it('returns top scores highest first, earlier play wins ties', async () => {
-    const a = play({ score: 50 });
-    const b = play({ score: 80 });
-    const c = play({ score: 50 });
-    for (const p of [a, b, c]) await repo.add(p);
-    const top = await repo.topScores(2);
-    expect(top.map((p) => p.id)).toEqual([b.id, a.id]);
-  });
-
-  it('breaks a tie by faster finish, then by earlier play', async () => {
-    const slow = play({ score: 90, durationSec: 30, timestamp: '2026-10-28T09:00:00.000Z' });
-    const fast = play({ score: 90, durationSec: 18, timestamp: '2026-10-28T10:00:00.000Z' });
-    const fastEarlier = play({ score: 90, durationSec: 18, timestamp: '2026-10-28T08:00:00.000Z' });
-    for (const p of [slow, fast, fastEarlier]) await repo.add(p);
-    const top = await repo.topScores(3);
-    expect(top.map((p) => p.id)).toEqual([fastEarlier.id, fast.id, slow.id]);
-  });
-
-  it('reports the rank of a play outside the top, and nothing extra for one inside it', async () => {
-    const plays = [90, 80, 70, 60, 50].map((score) => play({ score }));
-    for (const p of plays) await repo.add(p);
-    const low = plays[4];
-    const best = plays[0];
-    if (!low || !best) throw new Error('missing play');
-    const outside = await repo.board(3, low.id);
-    expect(outside.top).toHaveLength(3);
-    expect(outside.mine?.rank).toBe(5);
-    expect(outside.mine?.play.id).toBe(low.id);
-    expect((await repo.board(3, best.id)).mine).toBeUndefined();
-  });
-
   it('tracks pending plays and marks them synced', async () => {
     const a = play();
     const b = play();

@@ -4,11 +4,10 @@ const COLUMNS = [
   'id',
   'timestamp',
   'deviceId',
-  'initials',
   'score',
   'meterPct',
-  'catches',
-  'hits',
+  'pops',
+  'misses',
   'durationSec',
   'gameVersion',
   'syncStatus',
@@ -23,7 +22,7 @@ function escapeCell(value: string | number): string {
 export function playsToCsv(plays: readonly PlayRecord[]): string {
   const lines = [COLUMNS.join(',')];
   for (const play of plays) {
-    lines.push(COLUMNS.map((col) => escapeCell(play[col])).join(','));
+    lines.push(COLUMNS.map((col) => escapeCell(play[col] ?? '')).join(','));
   }
   return `\uFEFF${lines.join('\r\n')}\r\n`;
 }

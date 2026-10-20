@@ -2,19 +2,18 @@
  * Receives play results from the booth game and appends them to the active sheet.
  *
  * Setup: see README.md in this folder.
- * Request: POST text/plain body = JSON { secret, plays: [{ id, timestamp, deviceId, initials,
- *          score, meterPct, catches, hits, durationSec, gameVersion }] }
+ * Request: POST text/plain body = JSON { secret, plays: [{ id, timestamp, deviceId,
+ *          score, meterPct, pops, misses, durationSec, gameVersion }] }
  * Response: JSON { ok: true, accepted: [ids] }  (duplicates are accepted but not re-added)
  */
 var HEADERS = [
   'id',
   'timestamp',
   'deviceId',
-  'initials',
   'score',
   'meterPct',
-  'catches',
-  'hits',
+  'pops',
+  'misses',
   'durationSec',
   'gameVersion',
 ];

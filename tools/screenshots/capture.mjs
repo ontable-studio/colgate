@@ -64,27 +64,25 @@ for (let i = 0; i < 60; i++) {
   if (r.result?.value === true) break;
 }
 
-const result = { score: 584, meterPct: 95, catches: 22, hits: 1, durationSec: 22 };
-const lose = { score: 120, meterPct: 62, catches: 12, hits: 4, durationSec: 40 };
+const result = { score: 95, meterPct: 95, pops: 24, misses: 5, durationSec: 22 };
+const lose = { score: 55, meterPct: 55, pops: 15, misses: 9, durationSec: 30 };
 const shots = [
   ['01-attract', 'Attract', {}, 2500],
   ['02-how-to-play', 'HowToPlay', {}, 3500],
   ['03-gameplay', 'Gameplay', {}, 7000],
-  ['04-unlock', 'Unlock', { result }, 2300],
-  ['05-initials', 'Initials', { result }, 3000],
-  ['06-result', 'Result', { result }, 4500],
-  ['07-result-time-up', 'Result', { result: lose }, 4500],
-  ['08-admin', 'Admin', {}, 2500],
+  ['04-result', 'Result', { result }, 4500],
+  ['05-result-time-up', 'Result', { result: lose }, 4500],
+  ['06-admin', 'Admin', {}, 2500],
 ];
-const keys = ['Attract', 'HowToPlay', 'Gameplay', 'Unlock', 'Initials', 'Result', 'Admin'];
+const keys = ['Attract', 'HowToPlay', 'Gameplay', 'Result', 'Admin'];
 for (const [name, scene, data, wait] of shots) {
   await run(
     `${JSON.stringify(keys)}.forEach(k => __game.scene.stop(k)); __game.scene.start(${JSON.stringify(scene)}, ${JSON.stringify(data)}); 1`,
   );
   if (scene === 'Gameplay') {
-    // Sweep the basket a little so the shot shows a round in progress.
+    // Tap the floating molecules a few times so the shot shows a round in progress.
     await run(
-      "(async()=>{const g=__game.scene.getScene('Gameplay'); for (let i=0;i<20;i++){ g.targetX = 300 + (i%2)*480; await new Promise(r=>setTimeout(r,300)); } })()",
+      "(async()=>{const g=__game.scene.getScene('Gameplay'); await new Promise(r=>setTimeout(r,3300)); for (let i=0;i<8;i++){ const b=g.bubbles[0]; if (b) g.onTap(b.x,b.y); await new Promise(r=>setTimeout(r,500)); } })()",
     );
   } else {
     // Wiggle the mouse now and then so the idle timeout does not send us back to the start screen.
