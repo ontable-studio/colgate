@@ -194,7 +194,7 @@ export class AttractScene extends Phaser.Scene {
   /** The orange "BARU" tag beside the top of the tube pops on with a small wobble. */
   private addBadge(): void {
     // Its left end tucks behind the tube's edge.
-    const x = CX + TUBE_WIDTH / 2 + 30;
+    const x = CX + TUBE_WIDTH / 2 + 40;
     const y = TUBE_Y - TUBE_HEIGHT / 2 + 60;
     const badge = addArt(this, x, y, 'badge-baru').setDepth(1);
     popIn(this, badge, ENTER.badge, 0.3);
