@@ -51,20 +51,22 @@ void main() {
     float h1 = hash(vec2(fi, 1.3));
     float h2 = hash(vec2(fi, 5.7));
     float h3 = hash(vec2(fi, 9.1));
-    float arg = time * (0.9 + 0.9 * h3) + fi * 5.3 + h1 * 6.2832;
-    float turn = floor((arg + 1.5708) / 6.2832);
+    float arg = time * (0.4 + 0.3 * h3) + fi * 5.3 + h1 * 6.2832;
+    float cycle = (arg + 1.5708) / 6.2832;
+    float turn = floor(cycle);
+    // A new spot each turn, then a slow drift sideways while it shines and fades.
     float center = (fi - 3.5) * 0.2 + (hash(vec2(fi, turn)) - 0.5) * 0.35
-                 + 0.04 * sin(time * (0.2 + 0.3 * h1) + fi);
+                 + (fract(cycle) - 0.5) * 0.1;
     float width = 0.05 + 0.06 * h2;
     float d = (angle - center) / width;
     float shape = exp(-d * d);
-    float lit = smoothstep(0.5, 1.0, 0.5 + 0.5 * sin(arg));
+    float lit = smoothstep(0.3, 1.0, 0.5 + 0.5 * sin(arg));
     beams += shape * lit;
   }
   float falloff = smoothstep(1.9, 0.05, dist);
   float haze = 0.75 + 0.5 * noise(vec2(p.x * 2.2 + time * 0.05, p.y * 1.6 - time * 0.12));
   float light = min(beams, 1.2) * falloff * haze;
-  vec3 color = red + vec3(1.0, 0.55, 0.38) * light * 0.7;
+  vec3 color = red + vec3(1.0, 0.55, 0.38) * light * 0.5;
 
   // A warm pool of light at the top, breathing slowly.
   color += vec3(1.0, 0.45, 0.3) * smoothstep(0.75, 0.0, dist) * (0.28 + 0.06 * sin(time * 1.1));
@@ -82,9 +84,9 @@ void main() {
     float radius = 0.08 + 0.08 * hash(key + 11.3);
     float r = length(local - offset) / radius;
     float glow = exp(-r * r * 1.6);
-    float twinkle = pow(0.5 + 0.5 * sin(time * (1.4 + 2.6 * hash(key + 5.5)) + seed * 40.0), 2.0);
-    float present = step(0.45, seed);
-    color += vec3(1.0, 0.6, 0.48) * glow * twinkle * present * (0.5 - 0.08 * fl);
+    float twinkle = pow(0.5 + 0.5 * sin(time * (0.8 + 1.4 * hash(key + 5.5)) + seed * 40.0), 2.0);
+    float present = step(0.8, seed);
+    color += vec3(1.0, 0.6, 0.48) * glow * twinkle * present * (0.32 - 0.05 * fl);
   }
 
   gl_FragColor = vec4(color, 1.0);
