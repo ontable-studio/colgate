@@ -57,9 +57,10 @@ export class ResultScene extends Phaser.Scene {
       .text(cx, 560, headline, textStyle({ size: 84, glow: 'rgba(255,150,40,0.7)' }))
       .setOrigin(0.5);
     popIn(this, title, 200, 0.7);
-    this.add
+    const leadText = this.add
       .text(cx, 670, lead, textStyle({ size: 46, letterSpacing: 5, color: COLORS.cream }))
       .setOrigin(0.5);
+    popIn(this, leadText, 450, 0.9);
 
     // The percentage with a molecule to its left, the pair centred as one group.
     addGlow(this, cx, 900, 1000, 0.35);
@@ -80,12 +81,15 @@ export class ResultScene extends Phaser.Scene {
     const molecule = this.add
       .image(left + MOLECULE_SIZE / 2, 900, 'capsule')
       .setDisplaySize(MOLECULE_SIZE, MOLECULE_SIZE);
-    float(this, molecule, 12, 1900);
+    popIn(this, molecule, 650, 0.2);
+    popIn(this, pct, 650, 0.6);
+    this.time.delayedCall(1500, () => float(this, molecule, 12, 1900));
     countUp(this, pct, Math.round(this.result.meterPct), 1200, 300, '%');
 
-    this.add
+    const subtitle = this.add
       .text(cx, 1090, 'High Purity Vitamin C', textStyle({ size: 56, weight: 'light' }))
       .setOrigin(0.5);
+    popIn(this, subtitle, 1300, 0.9);
     if (!won) {
       this.add
         .text(

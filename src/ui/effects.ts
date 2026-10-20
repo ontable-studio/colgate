@@ -3,6 +3,7 @@ import { quality } from '@/config/quality';
 import { addArt } from './art/canvas';
 import { GAME_WIDTH } from '@/config/game';
 import { addLightShader } from './lightShader';
+import { popIn, riseIn } from './motion';
 
 /**
  * Full-screen background (call first so everything draws above it): calm red with ambient light
@@ -57,8 +58,8 @@ export function addSparkles(
   }
 }
 
-/** Logo tab at the top plus the "Optic White Vitamin C" lockup below it. */
+/** Logo tab at the top plus the "Optic White Vitamin C" lockup below it; both animate in. */
 export function addHeader(scene: Phaser.Scene, withLockup = true): void {
-  addArt(scene, GAME_WIDTH / 2, 0, 'logo-tab').setOrigin(0.5, 0);
-  if (withLockup) addArt(scene, GAME_WIDTH / 2, 330, 'lockup');
+  riseIn(scene, addArt(scene, GAME_WIDTH / 2, 0, 'logo-tab').setOrigin(0.5, 0), -200, 0, 650);
+  if (withLockup) popIn(scene, addArt(scene, GAME_WIDTH / 2, 330, 'lockup'), 250, 0.85);
 }

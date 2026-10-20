@@ -6,7 +6,7 @@ import { GameSession } from '@/domain/session';
 import { addArt } from '@/ui/art/canvas';
 import { addBackground, addGlow } from '@/ui/effects';
 import { createBrushMeter, type BrushMeter } from '@/ui/brushMeter';
-import { bump, fadeIn, floatText, sparkBurst } from '@/ui/motion';
+import { bump, fadeIn, floatText, riseIn, slideIn, sparkBurst } from '@/ui/motion';
 import { COLORS, textStyle } from '@/ui/theme';
 import type { GameResultData } from './data';
 import { SceneKey } from './keys';
@@ -64,6 +64,7 @@ export class GameplayScene extends Phaser.Scene {
     addBackground(this);
     this.addTimer();
     this.brush = createBrushMeter(this, BRUSH_X, BRUSH_Y);
+    for (const part of this.brush.parts) slideIn(this, part, -260, 250);
 
     this.countdownText = this.add
       .text(
@@ -131,7 +132,10 @@ export class GameplayScene extends Phaser.Scene {
         textStyle({ size: 24, letterSpacing: 3, color: COLORS.cream }),
       )
       .setOrigin(0.5);
-    for (const item of [pill, clock, this.timerText, caption]) item.setDepth(10);
+    for (const item of [pill, clock, this.timerText, caption]) {
+      item.setDepth(10);
+      riseIn(this, item, -180, 100, 600);
+    }
   }
 
   private updateTimer(): void {

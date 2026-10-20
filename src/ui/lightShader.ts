@@ -42,7 +42,7 @@ void main() {
   float t = time * 0.0004;
   float beams = noise(vec2(angle * 9.0 + t * 90.0, 1.7));
   beams = beams * 0.65 + noise(vec2(angle * 17.0 - t * 140.0, 8.3)) * 0.35;
-  beams = smoothstep(0.38, 0.85, beams);
+  beams = smoothstep(0.2, 0.95, beams);
   float breathe = 0.65 + 0.35 * sin(time * 0.0007 + angle * 5.0);
   float falloff = smoothstep(1.9, 0.05, dist);
   float spread = smoothstep(1.1, 0.25, abs(angle));

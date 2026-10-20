@@ -8,6 +8,8 @@ export interface BrushMeter {
   /** 0..RULES.targetPoints: the gold rises from the bottom of the brush. */
   setValue: (percent: number) => void;
   pulse: () => void;
+  /** Everything it is made of, so a scene can animate the whole meter in. */
+  parts: (Phaser.GameObjects.Image | Phaser.GameObjects.Text)[];
 }
 
 /**
@@ -21,7 +23,7 @@ export function createBrushMeter(
   height = 620,
 ): BrushMeter {
   const width = (BRUSH_WIDTH / BRUSH_HEIGHT) * height;
-  scene.add.image(x, y, 'brush-empty').setDisplaySize(width, height);
+  const empty = scene.add.image(x, y, 'brush-empty').setDisplaySize(width, height);
   const fill = scene.add.image(x, y, 'brush-fill').setDisplaySize(width, height);
   const source = scene.textures.get('brush-fill').getSourceImage();
 
@@ -38,5 +40,5 @@ export function createBrushMeter(
   };
   const pulse = (): void => bump(scene, percent, 1.22, 120);
   setValue(0);
-  return { setValue, pulse };
+  return { setValue, pulse, parts: [empty, fill, percent] };
 }

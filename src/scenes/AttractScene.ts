@@ -4,7 +4,7 @@ import { GAME_WIDTH } from '@/config/game';
 import { addArt } from '@/ui/art/canvas';
 import { createButton } from '@/ui/button';
 import { addBackground, addGlow, addHeader } from '@/ui/effects';
-import { fadeIn, float, popIn } from '@/ui/motion';
+import { fadeIn, float, popIn, riseIn } from '@/ui/motion';
 import { textStyle } from '@/ui/theme';
 import { SceneKey } from './keys';
 
@@ -30,6 +30,17 @@ const TUBE_Y = STAGE_Y - TUBE_HEIGHT / 2 + 14;
 const CLAIM_Y = 490;
 const BUTTON_Y = 1745;
 
+/** Entrance order (ms): stage, then the C, the tube, the title, the claim, the badge, the button. */
+const ENTER = {
+  stage: 100,
+  ring: 300,
+  tube: 550,
+  title: 1000,
+  claim: 1250,
+  badge: 1450,
+  cta: 1650,
+};
+
 /** Looping idle screen that invites people to play. Everything else returns here when idle. */
 export class AttractScene extends Phaser.Scene {
   constructor() {
@@ -47,6 +58,7 @@ export class AttractScene extends Phaser.Scene {
     addHeader(this);
     this.addTitle();
     this.addClaim();
+    this.addBadge();
     this.addAdminHotspot();
 
     // Warm halo that breathes behind the call to action.
@@ -84,22 +96,37 @@ export class AttractScene extends Phaser.Scene {
         sound: 'sfx-ui-start',
       },
     );
-    this.tweens.add({ targets: cta, scale: 1.04, yoyo: true, repeat: -1, duration: 800 });
+    // The button rises last, then keeps pulsing.
+    riseIn(this, cta, 160, ENTER.cta, 600);
+    this.time.delayedCall(ENTER.cta + 700, () => {
+      this.tweens.add({ targets: cta, scale: 1.04, yoyo: true, repeat: -1, duration: 800 });
+    });
+    this.time.delayedCall(ENTER.cta, () => audio.playSfx('sfx-pop'));
   }
 
   /** Gold "C" (an open ring, gap facing right), floating gently. Drawn before the tube so it stands in front. */
   private addRing(): void {
     const ring = addArt(this, CX, RING_Y, 'ring').setDisplaySize(RING_SIZE, RING_SIZE);
-    float(this, ring, 14, 3000);
+    // The C swings in (a little turn plus a pop), then floats.
+    popIn(this, ring, ENTER.ring, 0.55);
+    ring.setAngle(-40);
+    this.tweens.add({
+      targets: ring,
+      angle: 0,
+      duration: 900,
+      delay: ENTER.ring,
+      ease: 'Cubic.easeOut',
+    });
+    this.time.delayedCall(ENTER.ring + 900, () => float(this, ring, 14, 3000));
   }
 
   /** The game title popping in inside the ring. */
   private addTitle(): void {
     const title = addArt(this, CX, TITLE_Y, 'title-game').setAngle(-4);
     title.setScale(title.scale * 0.88);
-    popIn(this, title, 150, 0.5);
-    this.time.delayedCall(150, () => audio.playSfx('sfx-pop'));
-    this.time.delayedCall(900, () => {
+    popIn(this, title, ENTER.title, 0.5);
+    this.time.delayedCall(ENTER.title, () => audio.playSfx('sfx-pop'));
+    this.time.delayedCall(ENTER.title + 800, () => {
       this.tweens.add({
         targets: title,
         scale: title.scale * 1.03,
@@ -142,17 +169,37 @@ export class AttractScene extends Phaser.Scene {
         textStyle({ size: 42, weight: 'light', lineSpacing: 8 }),
       )
       .setOrigin(0.5);
-    popIn(this, claim, 500, 0.9);
+    popIn(this, claim, ENTER.claim, 0.9);
   }
 
   /** The glossy stage (drawn in ui/art/stage.ts), its back corner under the tube. */
   private addStage(): void {
-    addArt(this, CX, STAGE_Y, 'podium').setOrigin(0.5, 0);
+    const stage = addArt(this, CX, STAGE_Y, 'podium').setOrigin(0.5, 0);
+    riseIn(this, stage, 120, ENTER.stage, 700);
   }
 
   /** Hero: the tube standing on the stage in front of the "C", with a warm glow behind it. */
   private addHero(): void {
-    addGlow(this, CX, TUBE_Y, 760, 0.6);
-    this.add.image(CX, TUBE_Y, 'tube').setDisplaySize(TUBE_WIDTH, TUBE_HEIGHT);
+    const glow = addGlow(this, CX, TUBE_Y, 760, 0);
+    this.tweens.add({ targets: glow, alpha: 0.6, delay: ENTER.tube + 300, duration: 800 });
+    const tube = this.add.image(CX, TUBE_Y, 'tube').setDisplaySize(TUBE_WIDTH, TUBE_HEIGHT);
+    // The tube rises up out of the stage.
+    riseIn(this, tube, 420, ENTER.tube, 800);
+    this.time.delayedCall(ENTER.tube, () => audio.playSfx('sfx-whoosh'));
+  }
+
+  /** The orange "BARU" tag beside the top of the tube pops on with a small wobble. */
+  private addBadge(): void {
+    const x = CX + TUBE_WIDTH / 2 + 62;
+    const y = TUBE_Y - TUBE_HEIGHT / 2 + 60;
+    const badge = addArt(this, x, y, 'badge-baru');
+    popIn(this, badge, ENTER.badge, 0.3);
+    this.tweens.add({
+      targets: badge,
+      angle: { from: -14, to: 0 },
+      duration: 700,
+      delay: ENTER.badge,
+      ease: 'Back.easeOut',
+    });
   }
 }

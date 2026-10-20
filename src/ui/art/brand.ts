@@ -207,3 +207,33 @@ export function makeGradientText(
     }
   });
 }
+
+/** Orange "BARU" tag (new) that sits beside the tube (130x64). */
+export function makeBaruBadge(scene: Phaser.Scene): void {
+  drawTexture(scene, 'badge-baru', 130, 64, (ctx, w, h) => {
+    const body = ctx.createLinearGradient(0, 0, 0, h);
+    body.addColorStop(0, '#FFB52E');
+    body.addColorStop(1, '#EE7F12');
+    ctx.save();
+    ctx.shadowColor = 'rgba(90,10,0,0.45)';
+    ctx.shadowBlur = 8;
+    ctx.shadowOffsetY = 3;
+    ctx.fillStyle = body;
+    // Tab with a slanted left edge, like the pack's tag.
+    ctx.beginPath();
+    ctx.moveTo(18, 6);
+    ctx.lineTo(w - 12, 6);
+    ctx.quadraticCurveTo(w - 4, 6, w - 4, 14);
+    ctx.lineTo(w - 4, h - 14);
+    ctx.quadraticCurveTo(w - 4, h - 6, w - 12, h - 6);
+    ctx.lineTo(4, h - 6);
+    ctx.closePath();
+    ctx.fill();
+    ctx.restore();
+    ctx.fillStyle = '#FFFFFF';
+    ctx.font = canvasFont('bold', 34);
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('BARU', w / 2 + 4, h / 2 + 2);
+  });
+}

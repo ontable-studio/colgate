@@ -9,6 +9,7 @@
 Notes:
 
 - The URL and secret are embedded in the shipped JS, so anyone with the page can post rows. The secret only reduces noise. Keep the sheet free of personal data until the client decides what is collected (see PLAN.md).
+- Updating from an older version (which had `initials`, `catches`, `hits`): just redeploy the new script. It adds the missing columns (`pops`, `misses`) to the header row on the next play and keeps the old columns and their data; no manual header change needed.
 - Re-sending the same play is safe: rows are de-duplicated by `id`.
 - To verify from the real TV browser (CORS/redirect behaviour), play one round online and check the sheet. This must be tested early.
 - After editing the script, create a **new version** of the deployment or the old code keeps running.
