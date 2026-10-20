@@ -4,13 +4,19 @@ import { GAME_HEIGHT, GAME_WIDTH } from '@/config/game';
 const KEY = 'ambient-light';
 
 /**
- * Ambient light from above, computed per pixel every frame: soft volumetric beams fanning out from
- * a point above the top edge, each one drifting and breathing on its own, with haze moving through
- * them and a few dust motes catching the light. Nothing here is a drawn shape, so it moves like
- * real light through smoke. (Kept cheap: a few sines and one hash noise, no loops over many octaves.)
+ * Ambient light from above, computed per pixel every frame (`time` is in seconds):
+ *  - beams fanning out from a point above the top edge. Each one shines in turn on its own
+ *    rhythm and, between two turns, comes back somewhere else, so the light seems to wander at
+ *    random across the screen;
+ *  - soft glowing particles in three sizes that drift upward and twinkle all over the screen.
+ * Nothing is a drawn shape. Kept cheap: one small loop and a few hashes per pixel.
  */
 const FRAGMENT = `
+#ifdef GL_FRAGMENT_PRECISION_HIGH
+precision highp float;
+#else
 precision mediump float;
+#endif
 uniform float time;
 uniform vec2 resolution;
 
@@ -37,35 +43,49 @@ void main() {
   float vignette = smoothstep(1.25, 0.35, length(uv - vec2(0.5, 0.5)));
   red *= 0.55 + 0.45 * vignette;
 
-  // Beams: noise across the angle gives uneven rays; time slides it so the beams drift, and a
-  // second slower layer makes them swell and fade.
-  float t = time * 0.0004;
-  float beams = noise(vec2(angle * 9.0 + t * 90.0, 1.7));
-  beams = beams * 0.65 + noise(vec2(angle * 17.0 - t * 140.0, 8.3)) * 0.35;
-  beams = smoothstep(0.2, 0.95, beams);
-  float breathe = 0.65 + 0.35 * sin(time * 0.0007 + angle * 5.0);
+  // Beams that take turns. Each has its own period (about 3.5 to 7 s) and lights up for part of
+  // it; when it has faded out completely it picks a new spot for its next turn.
+  float beams = 0.0;
+  for (int i = 0; i < 8; i++) {
+    float fi = float(i);
+    float h1 = hash(vec2(fi, 1.3));
+    float h2 = hash(vec2(fi, 5.7));
+    float h3 = hash(vec2(fi, 9.1));
+    float arg = time * (0.9 + 0.9 * h3) + fi * 5.3 + h1 * 6.2832;
+    float turn = floor((arg + 1.5708) / 6.2832);
+    float center = (fi - 3.5) * 0.2 + (hash(vec2(fi, turn)) - 0.5) * 0.35
+                 + 0.04 * sin(time * (0.2 + 0.3 * h1) + fi);
+    float width = 0.05 + 0.06 * h2;
+    float d = (angle - center) / width;
+    float shape = exp(-d * d);
+    float lit = smoothstep(0.5, 1.0, 0.5 + 0.5 * sin(arg));
+    beams += shape * lit;
+  }
   float falloff = smoothstep(1.9, 0.05, dist);
-  float spread = smoothstep(1.1, 0.25, abs(angle));
+  float haze = 0.75 + 0.5 * noise(vec2(p.x * 2.2 + time * 0.05, p.y * 1.6 - time * 0.12));
+  float light = min(beams, 1.2) * falloff * haze;
+  vec3 color = red + vec3(1.0, 0.55, 0.38) * light * 0.7;
 
-  // Haze drifting slowly downward through the beams.
-  float haze = noise(vec2(p.x * 2.2 + t * 30.0, p.y * 1.6 - t * 55.0));
-  haze = 0.7 + 0.5 * haze;
+  // A warm pool of light at the top, breathing slowly.
+  color += vec3(1.0, 0.45, 0.3) * smoothstep(0.75, 0.0, dist) * (0.28 + 0.06 * sin(time * 1.1));
 
-  float light = beams * breathe * falloff * spread * haze;
-  vec3 color = red + vec3(1.0, 0.55, 0.38) * light * 0.55;
-
-  // A warm pool of light at the top.
-  color += vec3(1.0, 0.45, 0.3) * smoothstep(0.75, 0.0, dist) * (0.28 + 0.06 * sin(time * 0.0011));
-
-  // Dust motes: sparse points that float up slowly and twinkle.
-  vec2 g = vec2(uv.x * aspect, uv.y) * 9.0 + vec2(0.0, -time * 0.00005 * 9.0);
-  vec2 cell = floor(g);
-  vec2 local = fract(g) - 0.5;
-  float seed = hash(cell);
-  vec2 offset = vec2(hash(cell + 3.1), hash(cell + 7.7)) - 0.5;
-  float mote = smoothstep(0.06, 0.0, length(local - offset * 0.6));
-  mote *= step(0.78, seed) * (0.5 + 0.5 * sin(time * 0.002 + seed * 40.0));
-  color += vec3(1.0, 0.8, 0.6) * mote * 0.5 * falloff;
+  // Glowing particles: three layers (large and few, small and many) that float up and twinkle.
+  for (int l = 0; l < 3; l++) {
+    float fl = float(l);
+    float scale = 5.0 + fl * 3.5;
+    vec2 g = vec2(uv.x * aspect, uv.y) * scale + vec2(0.0, -time * (0.25 + 0.15 * fl));
+    vec2 cell = floor(g);
+    vec2 local = fract(g) - 0.5;
+    vec2 key = cell + fl * 17.0;
+    float seed = hash(key);
+    vec2 offset = (vec2(hash(key + 3.1), hash(key + 7.7)) - 0.5) * 0.6;
+    float radius = 0.08 + 0.08 * hash(key + 11.3);
+    float r = length(local - offset) / radius;
+    float glow = exp(-r * r * 1.6);
+    float twinkle = pow(0.5 + 0.5 * sin(time * (1.4 + 2.6 * hash(key + 5.5)) + seed * 40.0), 2.0);
+    float present = step(0.45, seed);
+    color += vec3(1.0, 0.6, 0.48) * glow * twinkle * present * (0.5 - 0.08 * fl);
+  }
 
   gl_FragColor = vec4(color, 1.0);
 }
