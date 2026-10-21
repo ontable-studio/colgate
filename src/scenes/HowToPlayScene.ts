@@ -114,6 +114,7 @@ export class HowToPlayScene extends Phaser.Scene {
     const x = 300;
     const empty = this.add.image(x, y, 'brush-empty').setDisplaySize(brushW, brushH);
     const fill = this.add.image(x, y, 'brush-fill').setDisplaySize(brushW, brushH);
+    const outline = this.add.image(x, y, 'brush-outline').setDisplaySize(brushW, brushH);
     const wave = addWaveFill(this, fill);
     const state = { ratio: 0 };
     this.tweens.add({
@@ -133,6 +134,6 @@ export class HowToPlayScene extends Phaser.Scene {
       `REACH\n${RULES.targetPoints}% VITAMIN C BLAST`,
       TEXT_WIDTH - 50,
     );
-    return this.row([panel, empty, fill, text]);
+    return this.row([panel, empty, fill, outline, text]);
   }
 }

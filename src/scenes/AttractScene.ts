@@ -20,15 +20,18 @@ const ADMIN_HOLD_MS = 2000;
 const CX = GAME_WIDTH / 2;
 const RING_Y = 1180;
 const RING_SIZE = 760;
-const TITLE_Y = 620;
+const TITLE_Y = 550;
 /**
- * The packshot (tube standing on the podium, 1520x1416) is drawn at this scale, its bottom edge on
- * the bottom of the screen. The tube is 394 px wide and 1030 px tall in the file, so it stands
- * about 740 px tall on screen.
+ * The packshot (tube standing on the podium) is drawn at this scale. The file is 1520x1616: the
+ * artwork is 1416 tall and the last 200 rows are the podium's bottom edge repeated, so the whole
+ * thing can be lifted PACK_LIFT px off the bottom of the screen without a gap under the podium.
+ * The tube is 394 px wide and 1030 px tall in the file, so it stands about 740 px tall on screen.
  */
 const PACK_SCALE = 0.72;
-const PACK_Y = GAME_HEIGHT - (1416 * PACK_SCALE) / 2;
-const TUBE_TOP = GAME_HEIGHT - 1416 * PACK_SCALE;
+const PACK_LIFT = 90;
+const PACK_ART_BOTTOM = GAME_HEIGHT - PACK_LIFT;
+const PACK_Y = PACK_ART_BOTTOM - 1416 * PACK_SCALE + (1616 * PACK_SCALE) / 2;
+const TUBE_TOP = PACK_ART_BOTTOM - 1416 * PACK_SCALE;
 const TUBE_HEIGHT = 1030 * PACK_SCALE;
 const TUBE_HALF_WIDTH = (394 / 2) * PACK_SCALE;
 const BUTTON_Y = 1745;

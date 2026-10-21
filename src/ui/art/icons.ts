@@ -71,6 +71,65 @@ export function makeIcons(scene: Phaser.Scene): void {
     ctx.globalCompositeOperation = 'source-over';
   });
 
+  // Save / download: an arrow dropping into a tray.
+  drawTexture(scene, 'ico-save', 200, 200, (ctx) => {
+    ctx.strokeStyle = '#FFF1D6';
+    ctx.fillStyle = '#FFF1D6';
+    ctx.lineWidth = 18;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    ctx.beginPath();
+    ctx.moveTo(100, 28);
+    ctx.lineTo(100, 100);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(60, 82);
+    ctx.lineTo(100, 124);
+    ctx.lineTo(140, 82);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(34, 128);
+    ctx.lineTo(34, 168);
+    ctx.lineTo(166, 168);
+    ctx.lineTo(166, 128);
+    ctx.stroke();
+  });
+
+  // Reset / delete: a trash can.
+  drawTexture(scene, 'ico-trash', 200, 200, (ctx) => {
+    ctx.strokeStyle = '#FFF1D6';
+    ctx.fillStyle = '#FFF1D6';
+    ctx.lineWidth = 16;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    // Lid and handle.
+    ctx.beginPath();
+    ctx.moveTo(36, 56);
+    ctx.lineTo(164, 56);
+    ctx.moveTo(78, 56);
+    ctx.lineTo(78, 36);
+    ctx.lineTo(122, 36);
+    ctx.lineTo(122, 56);
+    ctx.stroke();
+    // Bin.
+    ctx.beginPath();
+    ctx.moveTo(52, 56);
+    ctx.lineTo(60, 164);
+    ctx.lineTo(140, 164);
+    ctx.lineTo(148, 56);
+    ctx.stroke();
+    // Slats.
+    ctx.lineWidth = 12;
+    ctx.beginPath();
+    ctx.moveTo(88, 82);
+    ctx.lineTo(90, 140);
+    ctx.moveTo(112, 82);
+    ctx.lineTo(110, 140);
+    ctx.stroke();
+  });
+
   drawTexture(scene, 'ico-x', 200, 200, (ctx) => {
     ctx.save();
     ctx.shadowColor = 'rgba(255,80,60,0.8)';

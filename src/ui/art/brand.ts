@@ -2,13 +2,18 @@ import type Phaser from 'phaser';
 import { canvasFont } from '@/ui/theme';
 import { drawTexture, trackedText, trackedWidth } from './canvas';
 
+/** Width of the white Colgate wordmark on the tab. */
+export const LOGO_WORDMARK_WIDTH = 250;
+/** Width of the red tab; the lockup below it is scaled to the same width. */
+export const LOGO_TAB_WIDTH = 360;
+
 /**
  * Red tab hanging from the top edge: a half-ellipse that is as wide as the tab, its flat top on the
  * screen edge, so the sides curve inward from the very top (360x214, 190 of it visible). It is
  * sized snugly around the white Colgate wordmark: the logo fills about 70% of its width.
  */
 export function makeLogoTab(scene: Phaser.Scene): void {
-  drawTexture(scene, 'logo-tab', 360, 214, (ctx, w) => {
+  drawTexture(scene, 'logo-tab', LOGO_TAB_WIDTH, 214, (ctx, w) => {
     const fill = ctx.createRadialGradient(w / 2, 30, 15, w / 2, 0, 230);
     fill.addColorStop(0, '#F5202A');
     fill.addColorStop(1, '#D3101B');
@@ -25,7 +30,7 @@ export function makeLogoTab(scene: Phaser.Scene): void {
 
     const logo = scene.textures.get('logo-colgate').getSourceImage() as CanvasImageSource;
     // Wordmark with the brand's smile (the file is 1448x588).
-    const lw = 250;
+    const lw = LOGO_WORDMARK_WIDTH;
     const lh = (lw * 588) / 1448;
     ctx.drawImage(logo, w / 2 - lw / 2, 48, lw, lh);
   });
@@ -73,7 +78,20 @@ export function makeLockup(scene: Phaser.Scene): void {
     ctx.font = canvasFont('light', 116);
     const capHeight = 74 * 0.7;
     ctx.fillText('C', left + vitamin + gap, baseline - capHeight / 2 + 116 * 0.35);
+    lockupBounds = {
+      left: Math.min(startX, left),
+      right: Math.max(startX + line1 + 14 + 15, left + vitamin + gap + letterC),
+      top: 56 - 46 * 0.7,
+    };
   });
+}
+
+/** Where the lettering sits inside the 'lockup' texture (design units), set by `makeLockup`. */
+let lockupBounds = { left: 0, right: 640, top: 0 };
+
+export function lockupContent(): { width: number; centerX: number; top: number } {
+  const { left, right, top } = lockupBounds;
+  return { width: right - left, centerX: (left + right) / 2, top };
 }
 
 /** Glowing "C": an open ring with its gap facing right, behind the tube (820x820). */

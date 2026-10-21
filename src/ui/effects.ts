@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { quality } from '@/config/quality';
+import { LOGO_TAB_WIDTH, lockupContent } from './art/brand';
 import { addArt } from './art/canvas';
 import { GAME_WIDTH } from '@/config/game';
 import { addLightShader } from './lightShader';
@@ -58,10 +59,20 @@ export function addSparkles(
   }
 }
 
+/** Where the top of the lockup lettering sits (just under the logo tab). */
+const LOCKUP_TOP = 250;
+
 /** Logo tab at the top plus the "Optic White Vitamin C" lockup below it; both animate in. */
 export function addHeader(scene: Phaser.Scene, withLockup = true): void {
   // No overshoot: the tab hangs from the top edge and must never dip below its place.
   const tab = addArt(scene, GAME_WIDTH / 2, 0, 'logo-tab').setOrigin(0.5, 0);
   riseIn(scene, tab, -220, 0, 650, 'Cubic.easeOut');
-  if (withLockup) popIn(scene, addArt(scene, GAME_WIDTH / 2, 330, 'lockup'), 250, 0.85);
+  if (!withLockup) return;
+  // The lettering is as wide as the red tab above it, its top just under the tab.
+  const { width, centerX, top } = lockupContent();
+  const fit = LOGO_TAB_WIDTH / width;
+  const lockup = addArt(scene, 0, 0, 'lockup');
+  lockup.setScale(lockup.scale * fit);
+  lockup.setPosition(GAME_WIDTH / 2 - (centerX - 320) * fit, LOCKUP_TOP + (95 - top) * fit);
+  popIn(scene, lockup, 250, 0.85);
 }
