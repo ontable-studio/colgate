@@ -40,6 +40,11 @@ export interface GameRules {
   };
   /** A tap counts when it lands within this share of the radius beyond the molecule's edge. */
   readonly tapForgiveness: number;
+  /**
+   * Shooting range around a molecule, as a share of its radius beyond the edge. A tap that lands
+   * in this ring but misses the molecule itself makes that molecule vanish (it got away).
+   */
+  readonly missRange: number;
 }
 
 /**
@@ -57,4 +62,5 @@ export const RULES: GameRules = {
   spawn: { maxOnScreen: 6, intervalMs: 420, lifetimeMs: 2800, driftSpeed: 40 },
   area: { left: 130, right: 950, top: 330, bottom: 1560 },
   tapForgiveness: 0.25,
+  missRange: 1,
 };

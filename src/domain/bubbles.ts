@@ -29,10 +29,33 @@ export function findTapped(
   x: number,
   y: number,
 ): number {
+  return nearestWithin(bubbles, rules, x, y, rules.tapForgiveness);
+}
+
+/**
+ * The molecule a tap at (x, y) missed but was shot at: the nearest one whose shooting range
+ * (see `GameRules.missRange`) holds the tap. Call it only after `findTapped` found nothing.
+ */
+export function findMissed(
+  bubbles: readonly BubbleBody[],
+  rules: GameRules,
+  x: number,
+  y: number,
+): number {
+  return nearestWithin(bubbles, rules, x, y, rules.missRange);
+}
+
+function nearestWithin(
+  bubbles: readonly BubbleBody[],
+  rules: GameRules,
+  x: number,
+  y: number,
+  reach: number,
+): number {
   let best = -1;
   let bestDistance = Infinity;
   bubbles.forEach((bubble, index) => {
-    const radius = (rules.bubbles[bubble.size].diameter / 2) * (1 + rules.tapForgiveness);
+    const radius = (rules.bubbles[bubble.size].diameter / 2) * (1 + reach);
     const distance = Math.hypot(bubble.x - x, bubble.y - y);
     if (distance <= radius && distance < bestDistance) {
       best = index;

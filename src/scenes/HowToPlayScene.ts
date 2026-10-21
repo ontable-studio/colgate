@@ -9,7 +9,8 @@ import { fadeIn, popIn, slideIn } from '@/ui/motion';
 import { RULES } from '@/config/game';
 import { createPanel } from '@/ui/panel';
 import { COLORS, textStyle } from '@/ui/theme';
-import { BRUSH_HEIGHT, BRUSH_WIDTH } from '@/ui/art/brush';
+import { brushWidth } from '@/ui/brushMeter';
+import { addWaveFill } from '@/ui/waveFill';
 import { SceneKey } from './keys';
 
 const PANEL_WIDTH = 920;
@@ -108,12 +109,12 @@ export class HowToPlayScene extends Phaser.Scene {
   /** A toothbrush that fills up, next to the goal. */
   private rowReach(y: number): Phaser.GameObjects.Container {
     const panel = createPanel(this, GAME_WIDTH / 2, y, PANEL_WIDTH, PANEL_HEIGHT, 36, 'gold');
-    const brushH = 270;
-    const brushW = (BRUSH_WIDTH / BRUSH_HEIGHT) * brushH;
+    const brushH = 300;
+    const brushW = brushWidth(this, brushH);
     const x = 300;
     const empty = this.add.image(x, y, 'brush-empty').setDisplaySize(brushW, brushH);
     const fill = this.add.image(x, y, 'brush-fill').setDisplaySize(brushW, brushH);
-    const source = this.textures.get('brush-fill').getSourceImage();
+    const wave = addWaveFill(this, fill);
     const state = { ratio: 0 };
     this.tweens.add({
       targets: state,
@@ -124,12 +125,14 @@ export class HowToPlayScene extends Phaser.Scene {
       repeatDelay: 300,
       duration: 1800,
       ease: 'Sine.easeInOut',
-      onUpdate: () => {
-        const shown = Math.max(1, Math.round(source.height * state.ratio));
-        fill.setCrop(0, source.height - shown, source.width, shown);
-      },
+      onUpdate: () => wave.setRatio(state.ratio),
     });
-    const text = this.label(TEXT_X + 50, y, `REACH\n${RULES.targetPoints} PTS`, TEXT_WIDTH - 50);
+    const text = this.label(
+      TEXT_X + 50,
+      y,
+      `REACH\n${RULES.targetPoints}% VITAMIN C BLAST`,
+      TEXT_WIDTH - 50,
+    );
     return this.row([panel, empty, fill, text]);
   }
 }

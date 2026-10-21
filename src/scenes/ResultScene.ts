@@ -87,7 +87,7 @@ export class ResultScene extends Phaser.Scene {
     countUp(this, pct, Math.round(this.result.meterPct), 1200, 300, '%');
 
     const subtitle = this.add
-      .text(cx, 1090, 'High Purity Vitamin C', textStyle({ size: 56, weight: 'light' }))
+      .text(cx, 1090, 'High Purity Vitamin C Blast', textStyle({ size: 56, weight: 'light' }))
       .setOrigin(0.5);
     popIn(this, subtitle, 1300, 0.9);
     if (!won) {

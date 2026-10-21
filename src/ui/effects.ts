@@ -6,8 +6,8 @@ import { addLightShader } from './lightShader';
 import { popIn, riseIn } from './motion';
 
 /**
- * Full-screen background (call first so everything draws above it): calm red with ambient light
- * that falls from the top and keeps moving (see lightShader.ts).
+ * Full-screen background (call first so everything draws above it): the photo with moving
+ * ambient light and animated golden lines (see lightShader.ts).
  */
 export function addBackground(scene: Phaser.Scene): void {
   addLightShader(scene);
@@ -60,6 +60,8 @@ export function addSparkles(
 
 /** Logo tab at the top plus the "Optic White Vitamin C" lockup below it; both animate in. */
 export function addHeader(scene: Phaser.Scene, withLockup = true): void {
-  riseIn(scene, addArt(scene, GAME_WIDTH / 2, 0, 'logo-tab').setOrigin(0.5, 0), -200, 0, 650);
+  // No overshoot: the tab hangs from the top edge and must never dip below its place.
+  const tab = addArt(scene, GAME_WIDTH / 2, 0, 'logo-tab').setOrigin(0.5, 0);
+  riseIn(scene, tab, -220, 0, 650, 'Cubic.easeOut');
   if (withLockup) popIn(scene, addArt(scene, GAME_WIDTH / 2, 330, 'lockup'), 250, 0.85);
 }

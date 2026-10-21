@@ -15,4 +15,30 @@ export function makeObjects(scene: Phaser.Scene): void {
     ctx.fillStyle = g;
     ctx.fillRect(1, 1, 20, 32);
   });
+
+  // Thin dashed circle (200x200) marking a molecule's shooting range.
+  drawTexture(scene, 'miss-ring', 200, 200, (ctx) => {
+    ctx.strokeStyle = 'rgba(255,240,200,0.9)';
+    ctx.lineWidth = 3;
+    ctx.lineCap = 'round';
+    ctx.setLineDash([2, 12]);
+    ctx.beginPath();
+    ctx.arc(100, 100, 96, 0, Math.PI * 2);
+    ctx.stroke();
+  });
+
+  // Black-and-white copy of the molecule, shown while a missed one fades away. Needs 'capsule'.
+  const source = scene.textures.get('capsule').getSourceImage() as CanvasImageSource;
+  const { width, height } = source as HTMLImageElement;
+  drawTexture(
+    scene,
+    'capsule-gray',
+    width,
+    height,
+    (ctx) => {
+      ctx.filter = 'grayscale(1) brightness(0.9)';
+      ctx.drawImage(source, 0, 0, width, height);
+    },
+    1,
+  );
 }

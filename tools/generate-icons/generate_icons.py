@@ -6,6 +6,7 @@
 import math
 import os
 
+import numpy as np
 from PIL import Image, ImageDraw, ImageFilter, ImageFont
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
@@ -71,18 +72,30 @@ def share_image() -> Image.Image:
     bold = os.path.join(ASSETS, "fonts", "ColgateReady-Bold.otf")
     light = os.path.join(ASSETS, "fonts", "ColgateReady-Light.otf")
     d = ImageDraw.Draw(img)
-    d.text((70, 210), "CATCH THE", font=ImageFont.truetype(bold, 92), fill="white")
-    d.text((70, 305), "BRIGHTNESS", font=ImageFont.truetype(bold, 112), fill=(255, 201, 60))
-    d.text((74, 450), "OPTIC WHITE+ VITAMIN C", font=ImageFont.truetype(light, 40), fill="white")
-    d.text((74, 510), "Catch the capsules. Unlock your brightest smile.", font=ImageFont.truetype(light, 30), fill=(255, 233, 166))
+    d.text((70, 175), "95%", font=ImageFont.truetype(bold, 190), fill=(255, 201, 60))
+    d.text((74, 395), "VITAMIN C BLAST", font=ImageFont.truetype(bold, 74), fill="white")
+    d.text((76, 490), "OPTIC WHITE+ VITAMIN C", font=ImageFont.truetype(light, 38), fill="white")
+    d.text((76, 545), "Shoot the molecules. Fill the brush to 95%.", font=ImageFont.truetype(light, 30), fill=(255, 233, 166))
 
     img.alpha_composite(glow(900), (490, -135))
-    tube = asset("tube.webp")
-    th = 560
-    tube = tube.resize((round(tube.width * th / tube.height), th), Image.LANCZOS).rotate(8, expand=True, resample=Image.BICUBIC)
-    img.alpha_composite(tube, (800, 40))
+    # The tube standing on its podium (from the packshot), low enough that the podium bleeds off the
+    # bottom of the image. The sides fade out so the crop leaves no hard vertical edge.
+    pack = asset("packshot.webp").crop((300, 0, 1220, 1416))
+    scale = 0.42
+    pack = pack.resize((round(pack.width * scale), round(pack.height * scale)), Image.LANCZOS)
+    fade = Image.new("L", pack.size, 255)
+    fpx = fade.load()
+    ramp = round(pack.width * 0.22)
+    for x in range(pack.width):
+        v = min(1.0, x / ramp, (pack.width - 1 - x) / ramp)
+        for y in range(pack.height):
+            fpx[x, y] = round(255 * v)
+    pack.putalpha(Image.fromarray(np.minimum(np.asarray(pack.getchannel("A")), np.asarray(fade))))
+    # Tilted like the old share image; set low enough that the slanted bottom edge stays off-screen.
+    pack = pack.rotate(8, expand=True, resample=Image.BICUBIC)
+    img.alpha_composite(pack, (790, h - pack.height + 70))
     cap = asset("capsule.webp")
-    for (x, y, s) in [(650, 90, 150), (1030, 400, 130), (1085, 60, 90)]:
+    for (x, y, s) in [(650, 90, 150), (750, 330, 110), (1085, 60, 90)]:
         img.alpha_composite(cap.resize((s, s), Image.LANCZOS), (x, y))
     return img.convert("RGB")
 
