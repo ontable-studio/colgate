@@ -12,6 +12,7 @@ const IMAGES = [
   'bg-photo',
   'brush-empty',
   'brush-fill',
+  'brush-outline',
   'ico-clock',
   'timer-frame',
   'logo-colgate',

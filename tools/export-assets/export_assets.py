@@ -103,17 +103,24 @@ def export_packshot(path: str, out_dir: str) -> None:
     half = 760
     left = max(0, min(full.width - 2 * half, cx - half))
     crop = full.crop((left, 0, left + 2 * half, full.height))
-    save(crop, out_dir, "packshot")
+    # Extra rows under the podium (its last row repeated), so the scene can lift the packshot
+    # without a gap showing under it.
+    extra = 200
+    padded = Image.new("RGBA", (crop.width, crop.height + extra))
+    padded.paste(crop, (0, 0))
+    padded.paste(crop.crop((0, crop.height - 1, crop.width, crop.height)).resize((crop.width, extra)), (0, crop.height))
+    save(padded, out_dir, "packshot")
     tube_w = int(top_rows.max()) - int(top_rows.min())
     print(f"packshot crop {crop.size}, tube centre x={cx - left}, tube width ~{tube_w}px")
 
 
 def export_brush(outline_path: str, fill_path: str, out_dir: str) -> None:
-    """Toothbrush PNGs (RGBA, same canvas) -> two WebPs of the same shape and size.
+    """Toothbrush PNGs (RGBA, same canvas) -> three WebPs of the same shape and size.
 
     'brush-fill' is the filled toothbrush with its faint halo cleaned off. 'brush-empty' is the
     outline artwork laid over a translucent white copy of that silhouette, so the glass handle
-    reads as a pale empty brush on the red background.
+    reads as a pale empty brush on the red background. 'brush-outline' is the white border drawn
+    over both.
     """
     fill = Image.open(fill_path).convert("RGBA")
     outline = Image.open(outline_path).convert("RGBA")
@@ -128,7 +135,15 @@ def export_brush(outline_path: str, fill_path: str, out_dir: str) -> None:
     empty = Image.new("RGBA", fill.size, (255, 255, 255, 0))
     empty.putalpha(shape.point(lambda v: 90 if v else 0))
     empty.alpha_composite(outline)
-    for name, im in (("brush-empty", empty), ("brush-fill", clean)):
+    # Top layer: only the pale border of the outline artwork (not the tan bristles), made white,
+    # so it stays visible over the gold fill.
+    o = np.asarray(outline).astype("int")
+    border = (o[..., 3] > 90) & (o[..., 2] > 180)
+    edge = np.zeros(o.shape, dtype="uint8")
+    edge[..., :3] = 255
+    edge[..., 3] = np.where(border, o[..., 3], 0)
+    top = Image.fromarray(edge, "RGBA")
+    for name, im in (("brush-empty", empty), ("brush-fill", clean), ("brush-outline", top)):
         save(fit(im.crop(box), height=1000), out_dir, name)
 
 

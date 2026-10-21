@@ -31,6 +31,8 @@ export function createBrushMeter(
   const width = brushWidth(scene, height);
   const empty = scene.add.image(x, y, 'brush-empty').setDisplaySize(width, height);
   const fill = scene.add.image(x, y, 'brush-fill').setDisplaySize(width, height);
+  // Three layers: what is not filled yet at the back, the fill above it, the white border on top.
+  const outline = scene.add.image(x, y, 'brush-outline').setDisplaySize(width, height);
   const percent = scene.add
     .text(x + width / 2 + 24, y + height / 2 - 70, '0%', textStyle({ size: 84, align: 'left' }))
     .setOrigin(0, 0.5);
@@ -42,5 +44,5 @@ export function createBrushMeter(
   const setValue = (value: number): void => wave.setRatio(value / RULES.targetPoints);
   const pulse = (): void => bump(scene, percent, 1.22, 120);
   setValue(0);
-  return { setValue, pulse, parts: [empty, fill, percent] };
+  return { setValue, pulse, parts: [empty, fill, outline, percent] };
 }
