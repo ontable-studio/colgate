@@ -14,7 +14,6 @@ const IMAGES = [
   'brush-fill',
   'brush-outline',
   'ico-clock',
-  'timer-frame',
   'logo-colgate',
   'logo-wordmark',
 ] as const;

@@ -160,10 +160,9 @@ def main() -> None:
     # Product packshot: tube standing on the glossy podium (CMYK TIF with alpha). Cropped to a
     # 1520 px wide band around the tube so it fills the 1080 px wide screen.
     export_packshot(find(args.src, "tube podium_CMYK.tif"), args.out)
-    # Toothbrush meter (outline + filled, both on white) and the timer clock / frame.
+    # Toothbrush meter (outline + filled, both on white) and the timer clock.
     export_brush(find(args.src, "outline sikat gigi.png"), find(args.src, "isi sikat gigi.png"), args.out)
     save(fit(trim(Image.open(find(args.src, "Golden Twin-Bell Alarm Clock.png")).convert("RGBA"), 4), height=320), args.out, "ico-clock")
-    save(fit(trim(Image.open(find(args.src, "Glowing Golden Pill Frame.png")).convert("RGBA"), 4), width=900), args.out, "timer-frame")
     # Still of the new background (to be baked into a video later).
     bg = Image.open(find(args.src, "image.png_2K_*.jpeg")).convert("RGB")
     save(bg.resize((1080, round(bg.height * 1080 / bg.width)), Image.LANCZOS), args.out, "bg-photo")
