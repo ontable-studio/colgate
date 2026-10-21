@@ -2,7 +2,7 @@
   "name": "colgate-catch-the-brightness",
   "version": "0.1.0",
   "private": true,
-  "description": "Colgate Optic White Vitamin C - Catch the Brightness (booth touchscreen game)",
+  "description": "Colgate Optic White Vitamin C - 95% Vitamin C Blast (booth touchscreen game)",
   "type": "module",
   "engines": {
     "node": ">=22.12.0"

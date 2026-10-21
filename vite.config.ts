@@ -39,10 +39,10 @@ export default defineConfig({
       registerType: 'prompt',
       includeAssets: ['icons/*.png'],
       manifest: {
-        name: 'Colgate Optic White Vitamin C - Catch the Brightness',
-        short_name: 'Catch the Brightness',
+        name: 'Colgate Optic White Vitamin C - 95% Vitamin C Blast',
+        short_name: '95% Vitamin C Blast',
         description:
-          'Catch the Vitamin C molecules, dodge the germs and unlock your brightest smile.',
+          'Shoot the Vitamin C molecules and fill the toothbrush to 95% Vitamin C Blast.',
         display: 'fullscreen',
         orientation: 'portrait',
         // TODO(brand): confirm exact Colgate red with Oji

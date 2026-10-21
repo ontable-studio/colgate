@@ -12,8 +12,8 @@ const ADMIN_HOLD_MS = 2000;
 
 /*
  * Vertical layout (1080x1920), everything centred:
- *   0-250     Colgate tab            235-425   Optic White lockup
- *   520-720   title "95% VITAMIN C BLAST", then a clear gap
+ *   0-190     Colgate tab            235-425   Optic White lockup
+ *   520-740   title "95% VITAMIN C BLAST", then a clear gap
  *   780-1540  the smaller "C" (gap facing right), the tube in front of it
  *   900-1920  packshot: the tube on its glossy podium, START in front of it
  */
@@ -165,7 +165,8 @@ export class AttractScene extends Phaser.Scene {
     this.tweens.add({ targets: glow, alpha: 0.6, delay: ENTER.tube + 300, duration: 800 });
     const pack = this.add.image(CX, PACK_Y, 'packshot').setScale(PACK_SCALE).setDepth(2);
     // The product rises up into place.
-    riseIn(this, pack, 420, ENTER.tube, 800);
+    // No overshoot: the podium must never dip below the bottom edge of the screen.
+    riseIn(this, pack, 420, ENTER.tube, 800, 'Cubic.easeOut');
     this.time.delayedCall(ENTER.tube, () => audio.playSfx('sfx-whoosh'));
   }
 

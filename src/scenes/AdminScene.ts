@@ -35,16 +35,16 @@ export class AdminScene extends Phaser.Scene {
     this.add.text(cx, 130, 'ADMIN', textStyle({ size: 90 })).setOrigin(0.5);
 
     this.info = this.add
-      .text(110, 240, '', {
+      .text(110, 235, '', {
         fontFamily: 'monospace',
-        fontSize: '40px',
+        fontSize: '34px',
         color: '#ffffff',
-        lineSpacing: 14,
+        lineSpacing: 8,
       })
       .setOrigin(0, 0);
 
     this.message = this.add
-      .text(cx, 880, '', { fontFamily: 'sans-serif', fontSize: '42px', color: '#ffd9a0' })
+      .text(cx, 868, '', { fontFamily: 'sans-serif', fontSize: '42px', color: '#ffd9a0' })
       .setOrigin(0.5);
 
     const button = (y: number, label: string, onClick: () => void) =>
