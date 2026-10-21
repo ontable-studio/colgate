@@ -4,6 +4,7 @@ import { GAME_WIDTH, RULES, type BubbleSize } from '@/config/game';
 import { findMissed, findTapped, pickSize, type BubbleBody } from '@/domain/bubbles';
 import { GameSession } from '@/domain/session';
 import { addArt } from '@/ui/art/canvas';
+import { makeButtonSkin } from '@/ui/art/skins';
 import { addBackground, addGlow } from '@/ui/effects';
 import { createBrushMeter, type BrushMeter } from '@/ui/brushMeter';
 import { bump, fadeIn, floatText, riseIn, slideIn, sparkBurst } from '@/ui/motion';
@@ -115,18 +116,29 @@ export class GameplayScene extends Phaser.Scene {
     }
   }
 
-  /** Glowing gold frame: alarm clock on the left, the time and "TIME LEFT" beside it. */
+  /** Red button-style frame: alarm clock on the left, the time and "TIME LEFT" beside it. */
   private addTimer(): void {
     const cx = GAME_WIDTH / 2;
     const y = 120;
-    const pill = this.add.image(cx, y, 'timer-frame').setDisplaySize(560, 215);
-    const clock = this.add.image(cx - 158, y, 'ico-clock').setDisplaySize(100, 108);
+    // The same glowing red pill as the buttons.
+    const pill = addArt(this, cx, y, makeButtonSkin(this, 500, 140, 'red'));
+    // Clock and time form one group, centred in the pill with an even gap between them.
+    const clockHeight = 88;
+    const clock = this.add
+      .image(0, y, 'ico-clock')
+      .setDisplaySize(clockHeight * (297 / 320), clockHeight);
     this.timerText = this.add
-      .text(cx + 62, y - 12, formatTime(RULES.durationSec), textStyle({ size: 80 }))
+      .text(0, y - 12, formatTime(RULES.durationSec), textStyle({ size: 80 }))
       .setOrigin(0.5);
+    const gap = 28;
+    const groupWidth = clock.displayWidth + gap + this.timerText.width;
+    const left = cx - groupWidth / 2;
+    clock.setX(left + clock.displayWidth / 2);
+    const textX = left + clock.displayWidth + gap + this.timerText.width / 2;
+    this.timerText.setX(textX);
     const caption = this.add
       .text(
-        cx + 62,
+        textX,
         y + 38,
         'TIME LEFT',
         textStyle({ size: 24, letterSpacing: 3, color: COLORS.cream }),

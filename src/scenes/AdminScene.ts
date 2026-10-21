@@ -2,17 +2,17 @@ import Phaser from 'phaser';
 import { audio } from '@/audio';
 import { getServices } from '@/app/container';
 import { env } from '@/config/env';
-import { GAME_WIDTH } from '@/config/game';
+import { GAME_HEIGHT, GAME_WIDTH } from '@/config/game';
 import { playsToCsv } from '@/domain/csv';
 import type { PlayRecord } from '@/domain/play';
 import { createButton } from '@/ui/button';
 import { addBackground } from '@/ui/effects';
+import { popIn } from '@/ui/motion';
 import { createPanel } from '@/ui/panel';
 import { COLORS, textStyle } from '@/ui/theme';
 import { downloadText } from '@/util/download';
 import { SceneKey } from './keys';
 
-const RESET_CONFIRM_MS = 4000;
 const REFRESH_MS = 1500;
 
 /*
@@ -21,7 +21,7 @@ const REFRESH_MS = 1500;
  *   DATA PEMAIN           header of the list
  *   list                  one row per play (time and score), newest first, scrolls
  *   status                last action / sync state
- *   total | save | reset  player count, save as CSV, reset (icons; reset needs a second tap)
+ *   total | save | reset  player count, save as CSV, reset (icons; reset asks in a dialog)
  *   BACK HOME
  */
 const MARGIN = 80;
@@ -45,11 +45,11 @@ const BACK_Y = 1690;
 export class AdminScene extends Phaser.Scene {
   private message!: Phaser.GameObjects.Text;
   private total!: Phaser.GameObjects.Text;
-  private resetIcon!: Phaser.GameObjects.Image;
   private soundLabel!: Phaser.GameObjects.Text;
   private volumeLabel!: Phaser.GameObjects.Text;
   private rows!: Phaser.GameObjects.Container;
-  private resetArmed = false;
+  private dialogOpen = false;
+  private playCount = 0;
   private messageBusy = false;
   private listKey = '';
   private scrollY = 0;
@@ -61,7 +61,8 @@ export class AdminScene extends Phaser.Scene {
 
   create(): void {
     const cx = GAME_WIDTH / 2;
-    this.resetArmed = false;
+    this.dialogOpen = false;
+    this.playCount = 0;
     this.messageBusy = false;
     this.listKey = '';
     this.scrollY = 0;
@@ -180,15 +181,14 @@ export class AdminScene extends Phaser.Scene {
       () => void this.saveCsv(),
       { width: SQUARE, height: BOTTOM_HEIGHT, icon: 'ico-save' },
     );
-    const reset = createButton(
+    createButton(
       this,
       MARGIN + totalWidth + GAP * 2 + SQUARE * 1.5,
       BOTTOM_Y,
       '',
-      () => void this.resetData(),
+      () => this.resetData(),
       { width: SQUARE, height: BOTTOM_HEIGHT, icon: 'ico-trash' },
     );
-    this.resetIcon = reset.getAt<Phaser.GameObjects.Image>(1);
   }
 
   private async refresh(): Promise<void> {
@@ -196,6 +196,7 @@ export class AdminScene extends Phaser.Scene {
     const [plays, pending] = await Promise.all([repo.all(), repo.pendingCount()]);
     if (!this.scene.isActive()) return;
 
+    this.playCount = plays.length;
     this.total.setText(`TOTAL PEMAIN : ${plays.length}`);
     this.renderList(plays);
     // Idle state of the status line: sync health, unless an action message is showing.
@@ -230,7 +231,7 @@ export class AdminScene extends Phaser.Scene {
         )
         .setOrigin(0, 0.5);
       const score = this.add
-        .text(MARGIN + WIDTH - 44, mid, `${play.score} pts`, textStyle({ size: 40 }))
+        .text(MARGIN + WIDTH - 44, mid, `${Math.round(play.meterPct)}%`, textStyle({ size: 40 }))
         .setOrigin(1, 0.5);
       this.rows.add([when, score]);
     });
@@ -260,22 +261,70 @@ export class AdminScene extends Phaser.Scene {
     }
   }
 
-  /** Two taps within a few seconds: the first arms it, the second deletes everything. */
-  private async resetData(): Promise<void> {
-    if (!this.resetArmed) {
-      this.resetArmed = true;
-      this.resetIcon.setTint(0xffd36b);
-      this.say('Tap the trash icon again to delete all data', RESET_CONFIRM_MS);
-      this.time.delayedCall(RESET_CONFIRM_MS, () => {
-        this.resetArmed = false;
-        this.resetIcon.clearTint();
-      });
-      return;
-    }
-    this.resetArmed = false;
-    this.resetIcon.clearTint();
+  /** Asks first in a dialog; nothing is deleted unless HAPUS is pressed. */
+  private resetData(): void {
+    if (this.dialogOpen) return;
+    this.dialogOpen = true;
+    const cx = GAME_WIDTH / 2;
+    const cy = GAME_HEIGHT / 2;
+    const close = (): void => {
+      this.dialogOpen = false;
+      backdrop.destroy();
+      dialog.destroy();
+    };
+
+    // Dim backdrop; it also swallows taps so nothing behind the dialog can be pressed.
+    const backdrop = this.add
+      .rectangle(cx, cy, GAME_WIDTH, GAME_HEIGHT, 0x1a0004, 0.72)
+      .setDepth(100)
+      .setInteractive()
+      .setAlpha(0);
+    this.tweens.add({ targets: backdrop, alpha: 1, duration: 200 });
+
+    // Everything in the dialog sits in one container, so the panel, the texts and the buttons
+    // pop in together (positions below are relative to the middle of the screen).
+    const dialog = this.add.container(cx, cy).setDepth(101);
+    const panel = createPanel(this, 0, 0, 880, 560, 40, 'gold');
+    const title = this.add
+      .text(0, -190, 'HAPUS SEMUA DATA?', textStyle({ size: 56 }))
+      .setOrigin(0.5);
+    const body = this.add
+      .text(
+        0,
+        -50,
+        [
+          `${this.playCount} data pemain akan dihapus permanen`,
+          'dan tidak bisa dikembalikan.',
+          'Simpan dulu ke CSV bila perlu.',
+        ],
+        textStyle({ size: 38, weight: 'light', align: 'center', lineSpacing: 10 }),
+      )
+      .setOrigin(0.5);
+    const width = 380;
+    const cancel = createButton(this, -width / 2 - 20, 175, 'BATAL', close, {
+      width,
+      height: 120,
+      fontSize: 44,
+      variant: 'gold',
+    });
+    const confirm = createButton(
+      this,
+      width / 2 + 20,
+      175,
+      'HAPUS',
+      () => {
+        close();
+        void this.deleteAll();
+      },
+      { width, height: 120, fontSize: 44, icon: 'ico-trash' },
+    );
+    dialog.add([panel, title, body, cancel, confirm]);
+    popIn(this, dialog, 0, 0.8);
+  }
+
+  private async deleteAll(): Promise<void> {
     await getServices().repo.clear();
-    this.say('All local data deleted');
+    this.say('Semua data dihapus');
     await this.refresh();
   }
 
