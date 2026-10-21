@@ -1,7 +1,7 @@
 import Phaser from 'phaser';
 import { audio } from '@/audio';
 import { GAME_WIDTH, RULES, type BubbleSize } from '@/config/game';
-import { findTapped, pickSize, type BubbleBody } from '@/domain/bubbles';
+import { findMissed, findTapped, pickSize, type BubbleBody } from '@/domain/bubbles';
 import { GameSession } from '@/domain/session';
 import { addArt } from '@/ui/art/canvas';
 import { addBackground, addGlow } from '@/ui/effects';
@@ -27,6 +27,8 @@ interface Bubble extends BubbleBody {
   y: number;
   readonly image: Phaser.GameObjects.Image;
   readonly glow: Phaser.GameObjects.Image;
+  /** Dashed circle showing how far from the molecule a shot still counts as aimed at it. */
+  readonly range: Phaser.GameObjects.Image;
   readonly radius: number;
   vx: number;
   vy: number;
@@ -115,12 +117,12 @@ export class GameplayScene extends Phaser.Scene {
     }
   }
 
-  /** Gold-outlined pill: alarm clock on the left, the time and "TIME LEFT" beside it. */
+  /** Glowing gold frame: alarm clock on the left, the time and "TIME LEFT" beside it. */
   private addTimer(): void {
     const cx = GAME_WIDTH / 2;
     const y = 120;
-    const pill = addArt(this, cx, y, 'timer-pill');
-    const clock = addArt(this, cx - 134, y, 'ico-alarm').setDisplaySize(96, 96);
+    const pill = this.add.image(cx, y, 'timer-frame').setDisplaySize(560, 215);
+    const clock = this.add.image(cx - 158, y, 'ico-clock').setDisplaySize(100, 108);
     this.timerText = this.add
       .text(cx + 62, y - 12, formatTime(RULES.durationSec), textStyle({ size: 80 }))
       .setOrigin(0.5);
@@ -180,6 +182,9 @@ export class GameplayScene extends Phaser.Scene {
 
     const glow = addGlow(this, x, y, diameter * 2.2, 0);
     const image = this.add.image(x, y, 'capsule').setDisplaySize(diameter, diameter);
+    const reach = diameter * (1 + RULES.missRange);
+    const range = this.add.image(x, y, 'miss-ring').setDisplaySize(reach, reach).setAlpha(0);
+    this.tweens.add({ targets: range, alpha: 0.45, duration: 260 });
     const angle = Math.random() * Math.PI * 2;
     const speed = RULES.spawn.driftSpeed * Phaser.Math.FloatBetween(0.5, 1);
     this.bubbles.push({
@@ -188,6 +193,7 @@ export class GameplayScene extends Phaser.Scene {
       size,
       image,
       glow,
+      range,
       radius,
       vx: Math.cos(angle) * speed,
       vy: Math.sin(angle) * speed,
@@ -211,16 +217,18 @@ export class GameplayScene extends Phaser.Scene {
       if (b.y < top + b.radius || b.y > bottom - b.radius) b.vy = -b.vy;
       b.image.setPosition(b.x, b.y);
       b.glow.setPosition(b.x, b.y);
+      b.range.setPosition(b.x, b.y);
       b.image.setAngle(b.image.angle + 12 * seconds);
 
-      const remaining = RULES.spawn.lifetimeMs - b.age;
-      const fade = Math.min(1, Math.max(0, remaining / FADE_OUT_MS));
-      b.image.setAlpha(fade);
-      b.glow.setAlpha(0.55 * fade * Math.min(1, b.age / 260));
-      if (remaining <= 0 || this.finishing) {
+      b.glow.setAlpha(0.55 * Math.min(1, b.age / 260));
+      if (this.finishing) {
         this.remove(b);
         b.image.destroy();
         b.glow.destroy();
+        b.range.destroy();
+      } else if (b.age >= RULES.spawn.lifetimeMs) {
+        // Nobody shot it in time: it gets away.
+        this.vanish(b);
       }
     }
   }
@@ -238,6 +246,9 @@ export class GameplayScene extends Phaser.Scene {
       this.session.miss();
       audio.playSfx('sfx-decoy', { volume: 0.7 });
       this.showMissed(x, y);
+      // The shot was aimed at a molecule's range but missed: that molecule gets away.
+      const away = this.bubbles[findMissed(this.bubbles, RULES, x, y)];
+      if (away) this.vanish(away);
       return;
     }
 
@@ -251,9 +262,33 @@ export class GameplayScene extends Phaser.Scene {
     this.burst(target, points);
   }
 
+  /** A molecule that got away: it turns black and white at once, then fades out. */
+  private vanish(bubble: Bubble): void {
+    this.remove(bubble);
+    bubble.image.setTexture('capsule-gray');
+    this.tweens.killTweensOf(bubble.image);
+    this.tweens.killTweensOf(bubble.range);
+    this.tweens.add({ targets: [bubble.glow, bubble.range], alpha: 0, duration: 150 });
+    this.tweens.add({
+      targets: bubble.image,
+      alpha: 0,
+      scale: bubble.image.scale * 0.85,
+      delay: 150,
+      duration: FADE_OUT_MS,
+      ease: 'Sine.easeIn',
+      onComplete: () => {
+        bubble.image.destroy();
+        bubble.glow.destroy();
+        bubble.range.destroy();
+      },
+    });
+  }
+
   /** The molecule bursts: a flash, sparks and "+5 points" rising from it. */
   private burst(bubble: Bubble, points: number): void {
     const { x, y } = bubble;
+    this.tweens.killTweensOf(bubble.range);
+    this.tweens.add({ targets: bubble.range, alpha: 0, duration: 120 });
     this.tweens.add({
       targets: [bubble.image, bubble.glow],
       scale: '*=1.5',
@@ -262,6 +297,7 @@ export class GameplayScene extends Phaser.Scene {
       onComplete: () => {
         bubble.image.destroy();
         bubble.glow.destroy();
+        bubble.range.destroy();
       },
     });
     const flash = addGlow(this, x, y, bubble.radius, 1);

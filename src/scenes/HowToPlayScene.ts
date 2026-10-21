@@ -9,7 +9,7 @@ import { fadeIn, popIn, slideIn } from '@/ui/motion';
 import { RULES } from '@/config/game';
 import { createPanel } from '@/ui/panel';
 import { COLORS, textStyle } from '@/ui/theme';
-import { BRUSH_HEIGHT, BRUSH_WIDTH } from '@/ui/art/brush';
+import { brushWidth } from '@/ui/brushMeter';
 import { SceneKey } from './keys';
 
 const PANEL_WIDTH = 920;
@@ -108,8 +108,8 @@ export class HowToPlayScene extends Phaser.Scene {
   /** A toothbrush that fills up, next to the goal. */
   private rowReach(y: number): Phaser.GameObjects.Container {
     const panel = createPanel(this, GAME_WIDTH / 2, y, PANEL_WIDTH, PANEL_HEIGHT, 36, 'gold');
-    const brushH = 270;
-    const brushW = (BRUSH_WIDTH / BRUSH_HEIGHT) * brushH;
+    const brushH = 300;
+    const brushW = brushWidth(this, brushH);
     const x = 300;
     const empty = this.add.image(x, y, 'brush-empty').setDisplaySize(brushW, brushH);
     const fill = this.add.image(x, y, 'brush-fill').setDisplaySize(brushW, brushH);
@@ -129,7 +129,12 @@ export class HowToPlayScene extends Phaser.Scene {
         fill.setCrop(0, source.height - shown, source.width, shown);
       },
     });
-    const text = this.label(TEXT_X + 50, y, `REACH\n${RULES.targetPoints} PTS`, TEXT_WIDTH - 50);
+    const text = this.label(
+      TEXT_X + 50,
+      y,
+      `REACH\n${RULES.targetPoints}% VITAMIN C BLAST`,
+      TEXT_WIDTH - 50,
+    );
     return this.row([panel, empty, fill, text]);
   }
 }

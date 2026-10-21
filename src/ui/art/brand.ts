@@ -2,10 +2,14 @@ import type Phaser from 'phaser';
 import { canvasFont } from '@/ui/theme';
 import { drawTexture, trackedText, trackedWidth } from './canvas';
 
-/** Red half-disc tab at the top carrying the white Colgate wordmark (560x250). */
+/**
+ * Red tab hanging from the top edge: a half-ellipse that is as wide as the tab, its flat top on the
+ * screen edge, so the sides curve inward from the very top (360x214, 190 of it visible). It is
+ * sized snugly around the white Colgate wordmark: the logo fills about 70% of its width.
+ */
 export function makeLogoTab(scene: Phaser.Scene): void {
-  drawTexture(scene, 'logo-tab', 560, 250, (ctx) => {
-    const fill = ctx.createRadialGradient(280, 40, 20, 280, 0, 270);
+  drawTexture(scene, 'logo-tab', 360, 214, (ctx, w) => {
+    const fill = ctx.createRadialGradient(w / 2, 30, 15, w / 2, 0, 230);
     fill.addColorStop(0, '#F5202A');
     fill.addColorStop(1, '#D3101B');
     ctx.save();
@@ -14,16 +18,16 @@ export function makeLogoTab(scene: Phaser.Scene): void {
     ctx.shadowOffsetY = 6;
     ctx.fillStyle = fill;
     ctx.beginPath();
-    ctx.arc(280, -20, 205, 0, Math.PI);
+    ctx.ellipse(w / 2, 0, w / 2, 190, 0, 0, Math.PI);
     ctx.closePath();
     ctx.fill();
     ctx.restore();
 
     const logo = scene.textures.get('logo-colgate').getSourceImage() as CanvasImageSource;
     // Wordmark with the brand's smile (the file is 1448x588).
-    const w = 240;
-    const h = (w * 588) / 1448;
-    ctx.drawImage(logo, 280 - w / 2, 40, w, h);
+    const lw = 250;
+    const lh = (lw * 588) / 1448;
+    ctx.drawImage(logo, w / 2 - lw / 2, 48, lw, lh);
   });
 }
 
@@ -208,32 +212,40 @@ export function makeGradientText(
   });
 }
 
-/** Orange "BARU" tag (new) that sits beside the tube (130x64). */
+/**
+ * Orange "BARU" tag (new) that sits beside the tube (164x80): straight top and bottom edges, flat left edge (tucked
+ * behind the tube), a sharp tip at the top right and a big curve at the bottom right, with slanted
+ * bold white letters that start clear of the tube.
+ */
 export function makeBaruBadge(scene: Phaser.Scene): void {
-  drawTexture(scene, 'badge-baru', 130, 64, (ctx, w, h) => {
-    const body = ctx.createLinearGradient(0, 0, 0, h);
-    body.addColorStop(0, '#FFB52E');
-    body.addColorStop(1, '#EE7F12');
+  drawTexture(scene, 'badge-baru', 164, 80, (ctx, w, h) => {
     ctx.save();
-    ctx.shadowColor = 'rgba(90,10,0,0.45)';
+    ctx.shadowColor = 'rgba(90,10,0,0.4)';
     ctx.shadowBlur = 8;
     ctx.shadowOffsetY = 3;
+    const body = ctx.createLinearGradient(0, 0, 0, h);
+    body.addColorStop(0, '#FA9322');
+    body.addColorStop(1, '#F07F10');
     ctx.fillStyle = body;
-    // Tab with a slanted left edge, like the pack's tag.
+    // Straight top and bottom edges; the only curves are the tip at the top right (a sharp
+    // corner) and the big round-off at the bottom right.
     ctx.beginPath();
-    ctx.moveTo(18, 6);
-    ctx.lineTo(w - 12, 6);
-    ctx.quadraticCurveTo(w - 4, 6, w - 4, 14);
-    ctx.lineTo(w - 4, h - 14);
-    ctx.quadraticCurveTo(w - 4, h - 6, w - 12, h - 6);
-    ctx.lineTo(4, h - 6);
+    ctx.moveTo(0, 14);
+    ctx.lineTo(w - 40, 14);
+    // The tip flicks up and out a little past the straight edge.
+    ctx.quadraticCurveTo(w - 16, 12, w - 2, 3);
+    ctx.bezierCurveTo(w - 10, h * 0.4, w - 22, h - 10, w - 86, h - 10);
+    ctx.lineTo(0, h - 10);
     ctx.closePath();
     ctx.fill();
     ctx.restore();
     ctx.fillStyle = '#FFFFFF';
-    ctx.font = canvasFont('bold', 34);
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText('BARU', w / 2 + 4, h / 2 + 2);
+    ctx.font = canvasFont('boldItalic', 34);
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'alphabetic';
+    // The left 30 px hide behind the tube; the letters start 6 px after that. The body spans
+    // y 14..70, so its middle (42) is where the middle of the capitals goes.
+    const capHeight = 34 * 0.7;
+    ctx.fillText('BARU', 36, 42 + capHeight / 2);
   });
 }

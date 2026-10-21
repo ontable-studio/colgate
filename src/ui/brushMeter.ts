@@ -1,6 +1,5 @@
 import Phaser from 'phaser';
 import { RULES } from '@/config/game';
-import { BRUSH_HEIGHT, BRUSH_WIDTH } from './art/brush';
 import { bump } from './motion';
 import { textStyle } from './theme';
 
@@ -10,6 +9,12 @@ export interface BrushMeter {
   pulse: () => void;
   /** Everything it is made of, so a scene can animate the whole meter in. */
   parts: (Phaser.GameObjects.Image | Phaser.GameObjects.Text)[];
+}
+
+/** Width of the toothbrush artwork when it is shown `height` tall. */
+export function brushWidth(scene: Phaser.Scene, height: number): number {
+  const frame = scene.textures.getFrame('brush-fill');
+  return (frame.width / frame.height) * height;
 }
 
 /**
@@ -22,7 +27,7 @@ export function createBrushMeter(
   y: number,
   height = 620,
 ): BrushMeter {
-  const width = (BRUSH_WIDTH / BRUSH_HEIGHT) * height;
+  const width = brushWidth(scene, height);
   const empty = scene.add.image(x, y, 'brush-empty').setDisplaySize(width, height);
   const fill = scene.add.image(x, y, 'brush-fill').setDisplaySize(width, height);
   const source = scene.textures.get('brush-fill').getSourceImage();

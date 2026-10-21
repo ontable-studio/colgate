@@ -23,7 +23,7 @@ Image.MAX_IMAGE_PIXELS = None
 
 
 def find(src: str, name: str) -> str:
-    hits = glob.glob(os.path.join(src, "**", name), recursive=True)
+    hits = glob.glob(os.path.join(glob.escape(src), "**", name), recursive=True)
     if not hits:
         sys.exit(f"Source file not found under {src}: {name}")
     return hits[0]
@@ -93,6 +93,45 @@ def save(im: Image.Image, out_dir: str, name: str) -> None:
     print(f"{name}.webp  {im.width}x{im.height}  {os.path.getsize(path) / 1024:.0f} KB")
 
 
+def export_packshot(path: str, out_dir: str) -> None:
+    """Tube on the podium -> 'packshot.webp' (1520 px wide, centred on the tube) + its geometry."""
+    full = trim(read_cmyk_alpha(path, 3000))
+    alpha = np.asarray(full.getchannel("A"))
+    # Tube = the opaque columns of the topmost rows; its centre is where the crop is centred.
+    top_rows = np.where(alpha[: full.height // 4] > 128)[1]
+    cx = (int(top_rows.min()) + int(top_rows.max())) // 2
+    half = 760
+    left = max(0, min(full.width - 2 * half, cx - half))
+    crop = full.crop((left, 0, left + 2 * half, full.height))
+    save(crop, out_dir, "packshot")
+    tube_w = int(top_rows.max()) - int(top_rows.min())
+    print(f"packshot crop {crop.size}, tube centre x={cx - left}, tube width ~{tube_w}px")
+
+
+def export_brush(outline_path: str, fill_path: str, out_dir: str) -> None:
+    """Toothbrush PNGs (RGBA, same canvas) -> two WebPs of the same shape and size.
+
+    'brush-fill' is the filled toothbrush with its faint halo cleaned off. 'brush-empty' is the
+    outline artwork laid over a translucent white copy of that silhouette, so the glass handle
+    reads as a pale empty brush on the red background.
+    """
+    fill = Image.open(fill_path).convert("RGBA")
+    outline = Image.open(outline_path).convert("RGBA")
+    a = np.asarray(fill.getchannel("A"))
+    shape = Image.fromarray(np.where(a > 128, 255, 0).astype("uint8"), "L")
+    # Close the pinholes left by thresholding, so the silhouette is solid.
+    shape = shape.filter(ImageFilter.MaxFilter(5)).filter(ImageFilter.MinFilter(5))
+    box = shape.getbbox()
+    assert box
+    clean = fill.copy()
+    clean.putalpha(Image.fromarray(np.where(a > 24, a, 0).astype("uint8"), "L"))
+    empty = Image.new("RGBA", fill.size, (255, 255, 255, 0))
+    empty.putalpha(shape.point(lambda v: 90 if v else 0))
+    empty.alpha_composite(outline)
+    for name, im in (("brush-empty", empty), ("brush-fill", clean)):
+        save(fit(im.crop(box), height=1000), out_dir, name)
+
+
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--src", default=".resources")
@@ -103,9 +142,16 @@ def main() -> None:
     # Vitamin C capsule (transparent orange orb with molecule).
     save(fit(trim(read_cmyk_alpha(find(args.src, "VitC_Ball_Main_FLAT.tif"))), width=280), args.out, "capsule")
 
-    # Product tube (already RGBA PNG).
-    tube = Image.open(find(args.src, "CP11548-OW-Vit-C---Color-Conversion-80g-tube-Front-2.png")).convert("RGBA")
-    save(fit(trim(tube), height=1200), args.out, "tube")
+    # Product packshot: tube standing on the glossy podium (CMYK TIF with alpha). Cropped to a
+    # 1520 px wide band around the tube so it fills the 1080 px wide screen.
+    export_packshot(find(args.src, "tube podium_CMYK.tif"), args.out)
+    # Toothbrush meter (outline + filled, both on white) and the timer clock / frame.
+    export_brush(find(args.src, "outline sikat gigi.png"), find(args.src, "isi sikat gigi.png"), args.out)
+    save(fit(trim(Image.open(find(args.src, "Golden Twin-Bell Alarm Clock.png")).convert("RGBA"), 4), height=320), args.out, "ico-clock")
+    save(fit(trim(Image.open(find(args.src, "Glowing Golden Pill Frame.png")).convert("RGBA"), 4), width=900), args.out, "timer-frame")
+    # Still of the new background (to be baked into a video later).
+    bg = Image.open(find(args.src, "image.png_2K_*.jpeg")).convert("RGB")
+    save(bg.resize((1080, round(bg.height * 1080 / bg.width)), Image.LANCZOS), args.out, "bg-photo")
     # logo-colgate.webp / logo-wordmark.webp are NOT generated here any more: they come from the
     # Colgate logo with the smile (Wikimedia Commons "Colgate.svg"), rendered white on transparent.
     # Replace them with the official logo from the client when available.

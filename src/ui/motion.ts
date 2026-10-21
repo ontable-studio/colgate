@@ -49,10 +49,11 @@ export function riseIn(
   fromDy: number,
   delay = 0,
   duration = 600,
+  ease = 'Back.easeOut',
 ): void {
   const { y } = target;
   target.setY(y + fromDy).setAlpha(0);
-  scene.tweens.add({ targets: target, y, alpha: 1, duration, delay, ease: 'Back.easeOut' });
+  scene.tweens.add({ targets: target, y, alpha: 1, duration, delay, ease });
 }
 
 /** Gentle endless bob (up and down). */
