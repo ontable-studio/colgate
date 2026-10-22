@@ -30,20 +30,18 @@ export interface GameRules {
     readonly maxOnScreen: number;
     /** Time between two new molecules while there is room (start of the round: a busy screen). */
     readonly intervalMs: number;
-    /** A molecule that is not tapped fades away after this long. */
+    /** A molecule that is not tapped fades away after this long (the same all round). */
     readonly lifetimeMs: number;
     /** Slow drift speed (px/s) of a molecule. */
     readonly driftSpeed: number;
   };
   /**
-   * Final stretch: molecules show up less often, live shorter and drift faster, all
+   * Final stretch: molecules show up less often and drift faster, all
    * changing evenly until the round ends.
    */
   readonly rush: {
     /** Starts this many seconds before the end of the round. */
     readonly lastSec: number;
-    /** Lifetime of a molecule spawned right at the end of the round. */
-    readonly minLifetimeMs: number;
     /** Drift speed multiplier when the round ends (1 = normal speed). */
     readonly maxSpeedFactor: number;
     /** Time between two new molecules when the round ends. */
@@ -81,7 +79,6 @@ export const RULES: GameRules = {
   spawn: { maxOnScreen: 7, intervalMs: 330, lifetimeMs: 2200, driftSpeed: 110 },
   rush: {
     lastSec: 15,
-    minLifetimeMs: 1100,
     maxSpeedFactor: 2.5,
     maxIntervalMs: 500,
   },
