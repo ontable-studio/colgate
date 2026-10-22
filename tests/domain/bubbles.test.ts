@@ -5,16 +5,34 @@ import {
   findTapped,
   lifetimeFor,
   pickSize,
-  pointsFactorFor,
   spawnIntervalFor,
   speedFactorFor,
+  weightShift,
 } from '@/domain/bubbles';
 
 describe('pickSize', () => {
   it('follows the weights from one end of the roll to the other', () => {
     expect(pickSize(RULES.bubbles, 0)).toBe('small');
+    expect(pickSize(RULES.bubbles, 0.3)).toBe('small');
     expect(pickSize(RULES.bubbles, 0.5)).toBe('medium');
     expect(pickSize(RULES.bubbles, 0.99)).toBe('large');
+  });
+  it('makes the best-paying molecule more common as the round goes on', () => {
+    // start: small 4/10; end: small 7/10, large 1/10
+    expect(pickSize(RULES.bubbles, 0.5, 0)).toBe('medium');
+    expect(pickSize(RULES.bubbles, 0.5, 1)).toBe('small');
+    expect(pickSize(RULES.bubbles, 0.95, 1)).toBe('large');
+  });
+});
+
+describe('weightShift', () => {
+  it('stays 0 until the shift starts, then rises evenly to 1', () => {
+    const totalMs = RULES.durationSec * 1000;
+    const fromMs = RULES.weightShiftFromSec * 1000;
+    expect(weightShift(RULES, totalMs)).toBe(0);
+    expect(weightShift(RULES, totalMs - fromMs)).toBe(0);
+    expect(weightShift(RULES, 0)).toBe(1);
+    expect(weightShift(RULES, (totalMs - fromMs) / 2)).toBe(0.5);
   });
 });
 
@@ -41,16 +59,13 @@ describe('speedFactorFor', () => {
   });
 });
 
-describe('spawnIntervalFor and pointsFactorFor', () => {
-  it('start busy and cheap, end sparse and rich, evenly over the final stretch', () => {
-    const { lastSec, maxIntervalMs, maxPointsFactor } = RULES.rush;
+describe('spawnIntervalFor', () => {
+  it('starts busy and ends sparse, evenly over the final stretch', () => {
+    const { lastSec, maxIntervalMs } = RULES.rush;
     const { intervalMs } = RULES.spawn;
     expect(spawnIntervalFor(RULES, 30_000)).toBe(intervalMs);
     expect(spawnIntervalFor(RULES, lastSec * 1000)).toBe(intervalMs);
     expect(spawnIntervalFor(RULES, 0)).toBe(maxIntervalMs);
-    expect(pointsFactorFor(RULES, 30_000)).toBe(1);
-    expect(pointsFactorFor(RULES, 0)).toBe(maxPointsFactor);
-    expect(pointsFactorFor(RULES, (lastSec * 1000) / 2)).toBeCloseTo((1 + maxPointsFactor) / 2);
   });
 });
 

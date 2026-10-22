@@ -8,6 +8,7 @@ import {
   pickSize,
   spawnIntervalFor,
   speedFactorFor,
+  weightShift,
   type BubbleBody,
 } from '@/domain/bubbles';
 import { GameSession } from '@/domain/session';
@@ -182,7 +183,11 @@ export class GameplayScene extends Phaser.Scene {
   }
 
   private spawn(): void {
-    const size = pickSize(RULES.bubbles, Math.random());
+    const size = pickSize(
+      RULES.bubbles,
+      Math.random(),
+      weightShift(RULES, this.session.remainingMs),
+    );
     const diameter = RULES.bubbles[size].diameter;
     const radius = diameter / 2;
     const { left, right, top, bottom } = RULES.area;

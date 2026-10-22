@@ -8,12 +8,19 @@ export interface BubbleBody {
 
 const SIZES: readonly BubbleSize[] = ['small', 'medium', 'large'];
 
-/** Pick a size by weight. `roll` is a random number in [0, 1). */
-export function pickSize(bubbles: GameRules['bubbles'], roll: number): BubbleSize {
-  const total = SIZES.reduce((sum, size) => sum + bubbles[size].weight, 0);
+/**
+ * Pick a size by weight. `roll` is a random number in [0, 1). `shift` (0..1, see `weightShift`)
+ * moves the weights from `weight` to `lateWeight`.
+ */
+export function pickSize(bubbles: GameRules['bubbles'], roll: number, shift = 0): BubbleSize {
+  const weightOf = (size: BubbleSize): number => {
+    const { weight, lateWeight } = bubbles[size];
+    return weight + (lateWeight - weight) * shift;
+  };
+  const total = SIZES.reduce((sum, size) => sum + weightOf(size), 0);
   let left = roll * total;
   for (const size of SIZES) {
-    left -= bubbles[size].weight;
+    left -= weightOf(size);
     if (left < 0) return size;
   }
   return 'large';
@@ -34,15 +41,18 @@ export function speedFactorFor(rules: GameRules, remainingMs: number): number {
   return 1 + (rules.rush.maxSpeedFactor - 1) * rushProgress(rules, remainingMs);
 }
 
+/** 0 until `weightShiftFromSec` seconds into the round, then rising evenly to 1 when time is up. */
+export function weightShift(rules: GameRules, remainingMs: number): number {
+  const fromMs = rules.weightShiftFromSec * 1000;
+  const leftMs = rules.durationSec * 1000 - fromMs;
+  const elapsedMs = rules.durationSec * 1000 - remainingMs;
+  return Math.min(1, Math.max(0, (elapsedMs - fromMs) / leftMs));
+}
+
 /** Time to wait before the next molecule: short at first, longer and longer in the final stretch. */
 export function spawnIntervalFor(rules: GameRules, remainingMs: number): number {
   const { intervalMs } = rules.spawn;
   return intervalMs + (rules.rush.maxIntervalMs - intervalMs) * rushProgress(rules, remainingMs);
-}
-
-/** Multiplier on a molecule's points: 1 until the final stretch, then rising evenly. */
-export function pointsFactorFor(rules: GameRules, remainingMs: number): number {
-  return 1 + (rules.rush.maxPointsFactor - 1) * rushProgress(rules, remainingMs);
 }
 
 /** 0 until the final `rush.lastSec` seconds, then rising evenly to 1 when the round ends. */
