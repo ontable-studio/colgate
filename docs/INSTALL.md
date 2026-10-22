@@ -4,9 +4,8 @@ Untuk tim yang memasang dan menjaga game di lokasi (24-25 Oktober instalasi, eve
 
 ## 1. Sebelum berangkat
 
-- [ ] Game sudah di-deploy ke hosting dan bisa dibuka lewat HTTPS dari HP/laptop lain.
-- [ ] Sudah dites di TV yang sama atau sejenis (lihat bagian 3).
-- [ ] Bawa cadangan: laptop/mini PC dengan Chrome, kabel HDMI, dan kabel USB sentuh. Browser bawaan TV adalah titik paling berisiko.
+- [ ] Game sudah di-deploy ke hosting dan bisa dibuka lewat HTTPS.
+- [ ] Sudah dites di TV 43 inch yang akan dipakai (lihat bagian 3). Browser bawaan TV adalah titik paling berisiko.
 
 ## 2. Menyiapkan TV
 
@@ -17,34 +16,6 @@ Untuk tim yang memasang dan menjaga game di lokasi (24-25 Oktober instalasi, eve
    - Jadikan **halaman awal** atau tambahkan ke layar utama ("Add to Home screen") supaya terbuka otomatis saat TV menyala (kalau TV mendukung).
    - Masuk **fullscreen** (tombol START juga memintanya pada sentuhan pertama).
 5. Atur volume TV ke tingkat yang pas (volume game tidak punya pengaturan sendiri).
-
-### Jika memakai PC/mini PC dengan Chrome
-
-Mode kiosk membuat Chrome tampil penuh layar seperti aplikasi: tanpa bilah alamat, tanpa tab, dan pengunjung tidak bisa keluar sendiri. Cukup disiapkan sekali dengan membuat pintasan (shortcut):
-
-1. Klik kanan di Desktop → **New** → **Shortcut**.
-2. Pada kolom lokasi, tempel baris berikut (satu baris utuh). Alamat game sudah terisi; ganti hanya jika alamatnya berubah:
-
-   ```
-   "C:\Program Files\Google\Chrome\Application\chrome.exe" --kiosk --noerrdialogs --disable-pinch --overscroll-history-navigation=0 --autoplay-policy=no-user-gesture-required https://colgate-omega.vercel.app/
-   ```
-
-3. Beri nama, misalnya `95% Vitamin C Blast`, lalu klik **Finish**.
-4. Klik dua kali pintasan itu untuk membuka game. Agar terbuka otomatis saat PC menyala, salin pintasan ke folder Startup (tekan `Win + R`, ketik `shell:startup`, lalu Enter).
-5. Untuk keluar dari mode kiosk (misalnya untuk perawatan), tekan `Alt + F4` dengan keyboard.
-
-Arti tiap bagian baris tadi:
-
-| Bagian                                       | Fungsinya                                                                      |
-| -------------------------------------------- | ------------------------------------------------------------------------------ |
-| `--kiosk`                                    | Tampil penuh layar tanpa bilah alamat dan tombol browser                       |
-| `--noerrdialogs`                             | Menyembunyikan kotak pesan galat Chrome supaya tidak menutupi game             |
-| `--disable-pinch`                            | Mematikan cubit-untuk-zoom, jadi layar tidak bisa terperbesar tanpa sengaja    |
-| `--overscroll-history-navigation=0`          | Mencegah geseran dari tepi layar membuat halaman kembali (back)                |
-| `--autoplay-policy=no-user-gesture-required` | Mengizinkan musik layar awal berbunyi sendiri, tanpa menunggu sentuhan pertama |
-| `https://colgate-omega.vercel.app/`          | Alamat game yang dibuka otomatis                                               |
-
-Kalau Chrome terpasang di lokasi lain, sesuaikan bagian `C:\Program Files\...\chrome.exe`.
 
 ## 3. Uji akhir di lokasi (sekitar 15 menit)
 
@@ -64,9 +35,9 @@ Nyalakan TV dan tunggu game ke layar Attract. Tidak perlu apa-apa lagi: game mem
 | Gejala                     | Yang dilakukan                                                                                                                                                  |
 | -------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Layar putih atau game beku | Tunggu sebentar; game me-reload sendiri. Kalau muncul "Something went wrong...", tunggu sekitar 70 detik (mencoba lagi otomatis) atau muat ulang halaman manual |
-| Tidak ada suara            | Sentuh layar sekali (browser mengunci suara sebelum sentuhan). Cek volume TV. Mode PC: pakai opsi `--autoplay-policy` di atas                                   |
+| Tidak ada suara            | Sentuh layar sekali (browser mengunci suara sebelum sentuhan). Cek volume TV.                                                                                   |
 | Animasi patah-patah        | Buka URL dengan tambahan `?quality=low`, atau biarkan game mendeteksinya sendiri (efek diringankan otomatis bila layar kewalahan)                               |
-| Sentuhan tidak merespon    | Bersihkan layar, cek kabel USB sentuh, kalibrasi ulang. Pindah ke perangkat cadangan bila perlu                                                                 |
+| Sentuhan tidak merespon    | Bersihkan layar, cek kabel USB sentuh, kalibrasi ulang.                                                                                                         |
 
 ## 6. Memperbarui game saat event berjalan
 
@@ -79,13 +50,9 @@ Game menyimpan semua filenya di perangkat supaya tetap jalan saat offline. Akiba
 Cara memastikan versi terbaru:
 
 1. Tunggu 2-3 menit di layar Attract tanpa menyentuh layar. Halaman akan memuat ulang sendiri.
-2. Belum berubah? **Hard reload**: tekan `Ctrl + Shift + R` (Mac: `Cmd + Shift + R`). Cara ini melewati cache dan langsung mengambil versi terbaru dari server.
-3. Di TV tanpa keyboard: tutup browser sepenuhnya lalu buka lagi, atau hapus data situs dari pengaturan browser (**Clear cache / Site data**) lalu buka URL game kembali.
-4. Pastikan perubahan dari versi baru memang sudah terlihat di layar (misalnya tampilan atau teks yang baru diubah).
-
-Saat menguji di laptop: buka DevTools → **Application** → **Service Workers**, lalu centang **Update on reload**. Dengan begitu F5 biasa sudah cukup.
+2. Belum berubah? Tutup browser sepenuhnya lalu buka lagi, atau hapus data situs dari pengaturan browser (**Clear cache / Site data**) lalu buka URL game kembali.
+3. Pastikan perubahan dari versi baru memang sudah terlihat di layar (misalnya tampilan atau teks yang baru diubah).
 
 ## 7. Setelah event
 
-- [ ] Matikan TV dan cabut perangkat cadangan.
-- [ ] Kembalikan perangkat sesuai kesepakatan dengan klien.
+- [ ] Matikan TV.

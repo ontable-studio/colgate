@@ -31,6 +31,13 @@ export interface GameRules {
     /** Slow drift speed (px/s) of a molecule. */
     readonly driftSpeed: number;
   };
+  /** Final stretch: molecules that spawn now live shorter and shorter, down to `minLifetimeMs`. */
+  readonly rush: {
+    /** Starts this many seconds before the end of the round. */
+    readonly lastSec: number;
+    /** Lifetime of a molecule spawned right at the end of the round. */
+    readonly minLifetimeMs: number;
+  };
   /** Rectangle molecules float in (clear of the HUD at the top and the toothbrush at the left). */
   readonly area: {
     readonly left: number;
@@ -59,8 +66,9 @@ export const RULES: GameRules = {
     medium: { diameter: 150, points: 3, weight: 4 },
     large: { diameter: 210, points: 2, weight: 3 },
   },
-  spawn: { maxOnScreen: 6, intervalMs: 420, lifetimeMs: 2800, driftSpeed: 40 },
+  spawn: { maxOnScreen: 6, intervalMs: 800, lifetimeMs: 2200, driftSpeed: 70 },
+  rush: { lastSec: 10, minLifetimeMs: 1100 },
   area: { left: 130, right: 950, top: 330, bottom: 1560 },
-  tapForgiveness: 0.25,
+  tapForgiveness: 0.15,
   missRange: 1,
 };

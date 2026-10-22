@@ -189,7 +189,7 @@ def build_html(body: str, toc, version: str, today: str) -> str:
   <h1>Daftar isi</h1>
   <ol>{toc_items}</ol>
   <div class="note"><b>Cara memakai:</b> ikuti bagian 1 sampai 3 berurutan saat instalasi, centang tiap kotak.
-  Bagian 4 sampai 7 dipakai harian selama event, bagian 8 setelah event selesai.</div>
+  Bagian 4 sampai 6 dipakai harian selama event, bagian 7 setelah event selesai.</div>
 </section>
 <main>{body}</main></body></html>"""
 

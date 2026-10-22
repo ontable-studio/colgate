@@ -1,12 +1,25 @@
 import { describe, expect, it } from 'vitest';
 import { RULES } from '@/config/game';
-import { findMissed, findTapped, pickSize } from '@/domain/bubbles';
+import { findMissed, findTapped, lifetimeFor, pickSize } from '@/domain/bubbles';
 
 describe('pickSize', () => {
   it('follows the weights from one end of the roll to the other', () => {
     expect(pickSize(RULES.bubbles, 0)).toBe('small');
     expect(pickSize(RULES.bubbles, 0.5)).toBe('medium');
     expect(pickSize(RULES.bubbles, 0.99)).toBe('large');
+  });
+});
+
+describe('lifetimeFor', () => {
+  const { lifetimeMs } = RULES.spawn;
+  const { lastSec, minLifetimeMs } = RULES.rush;
+  it('is the normal lifetime until the final stretch', () => {
+    expect(lifetimeFor(RULES, 30_000)).toBe(lifetimeMs);
+    expect(lifetimeFor(RULES, lastSec * 1000)).toBe(lifetimeMs);
+  });
+  it('shrinks evenly to the minimum at the end', () => {
+    expect(lifetimeFor(RULES, 0)).toBe(minLifetimeMs);
+    expect(lifetimeFor(RULES, (lastSec * 1000) / 2)).toBe((lifetimeMs + minLifetimeMs) / 2);
   });
 });
 

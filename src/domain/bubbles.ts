@@ -20,6 +20,19 @@ export function pickSize(bubbles: GameRules['bubbles'], roll: number): BubbleSiz
 }
 
 /**
+ * How long a molecule spawned now lives. Normal until the last `rush.lastSec` seconds, then it
+ * shrinks evenly down to `rush.minLifetimeMs` when the round ends.
+ */
+export function lifetimeFor(rules: GameRules, remainingMs: number): number {
+  const { lifetimeMs } = rules.spawn;
+  const { lastSec, minLifetimeMs } = rules.rush;
+  const rushMs = lastSec * 1000;
+  if (remainingMs >= rushMs) return lifetimeMs;
+  const share = Math.max(0, remainingMs) / rushMs;
+  return minLifetimeMs + (lifetimeMs - minLifetimeMs) * share;
+}
+
+/**
  * The molecule a tap at (x, y) pops, if any: the one whose centre is nearest, among those the tap
  * lands on (a little outside the edge still counts, so a small molecule is not unfair).
  */
