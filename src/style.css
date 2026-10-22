@@ -1,7 +1,7 @@
 /* Brand font supplied by the client (display: block so canvas text never renders in a fallback). */
 @font-face {
   font-family: 'Colgate Ready';
-  src: url('/assets/fonts/ColgateReady-Light.otf') format('opentype');
+  src: url('./assets/fonts/ColgateReady-Light.otf') format('opentype');
   font-weight: 300;
   font-style: normal;
   font-display: block;
@@ -9,7 +9,7 @@
 
 @font-face {
   font-family: 'Colgate Ready';
-  src: url('/assets/fonts/ColgateReady-Bold.otf') format('opentype');
+  src: url('./assets/fonts/ColgateReady-Bold.otf') format('opentype');
   font-weight: 700;
   font-style: normal;
   font-display: block;
@@ -17,7 +17,7 @@
 
 @font-face {
   font-family: 'Colgate Ready';
-  src: url('/assets/fonts/ColgateReady-BoldItalic.otf') format('opentype');
+  src: url('./assets/fonts/ColgateReady-BoldItalic.otf') format('opentype');
   font-weight: 700;
   font-style: italic;
   font-display: block;

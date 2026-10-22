@@ -58,7 +58,7 @@ Idb caveat: a transaction auto-closes if you await unrelated async work (e.g. `f
 
 ## Sound
 
-All audio is synthesised by `tools/generate-audio/generate_audio.py` (no samples), so it is royalty free and reproducible: 14 effects and two music loops, each written as OGG (gapless loops) and MP3 (fallback for TV browsers without Vorbis) into `public/assets/audio/`.
+All audio is synthesised by `tools/generate-audio/generate_audio.py` (no samples), so it is royalty free and reproducible: 14 effects and two music loops, each written as OGG (gapless loops) and MP3 (fallback for TV browsers without Vorbis) into `src/assets/audio/`.
 
 - **Direction:** bright and clean like the product. Rewards are high, short and rising (glass bells); penalties are low and dull but never harsh; music stays well below the effects.
 - **Music:** `bgm-attract` (92 BPM, 8 bars, calm and sparkling) plays on Attract, How to Play and Result. `bgm-game` (124 BPM, 16 bars, four sections that build up) plays during a round and cross-fades in and out.

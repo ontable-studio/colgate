@@ -2,7 +2,7 @@
 
 Usage (from the repo root):
     pip install -r tools/export-assets/requirements.txt
-    python tools/export-assets/export_assets.py [--src .resources] [--out public/assets]
+    python tools/export-assets/export_assets.py [--src .resources] [--out src/assets]
 
 Source files are looked up by name anywhere under --src (the Drive export has many duplicates).
 Re-run whenever Oji sends a new version of a source file.
@@ -150,7 +150,7 @@ def export_brush(outline_path: str, fill_path: str, out_dir: str) -> None:
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--src", default=".resources")
-    ap.add_argument("--out", default="public/assets")
+    ap.add_argument("--out", default="src/assets")
     args = ap.parse_args()
     os.makedirs(args.out, exist_ok=True)
 
