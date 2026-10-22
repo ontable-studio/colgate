@@ -12,12 +12,16 @@ export interface BubbleSpec {
   readonly diameter: number;
   /** Points for popping it: the smaller the molecule, the harder to hit and the more it pays. */
   readonly points: number;
-  /** Relative chance of spawning. */
+  /** Relative chance of spawning until `weightShiftFromSec`. */
   readonly weight: number;
+  /** Relative chance of spawning at the end of the round; moves evenly from `weight` to this. */
+  readonly lateWeight: number;
 }
 
 export interface GameRules {
   readonly durationSec: number;
+  /** The spawn chances start moving from `weight` to `lateWeight` this many seconds in. */
+  readonly weightShiftFromSec: number;
   /** Points needed to fill the toothbrush; shown as the percentage (95 pts = "95% Vitamin C"). */
   readonly targetPoints: number;
   readonly bubbles: Readonly<Record<BubbleSize, BubbleSpec>>;
@@ -32,7 +36,7 @@ export interface GameRules {
     readonly driftSpeed: number;
   };
   /**
-   * Final stretch: molecules show up less often, live shorter, drift faster and pay more, all
+   * Final stretch: molecules show up less often, live shorter and drift faster, all
    * changing evenly until the round ends.
    */
   readonly rush: {
@@ -44,8 +48,6 @@ export interface GameRules {
     readonly maxSpeedFactor: number;
     /** Time between two new molecules when the round ends. */
     readonly maxIntervalMs: number;
-    /** Points multiplier when the round ends (1 = base points). */
-    readonly maxPointsFactor: number;
   };
   /** Rectangle molecules float in (clear of the HUD at the top and the toothbrush at the left). */
   readonly area: {
@@ -69,19 +71,19 @@ export interface GameRules {
  */
 export const RULES: GameRules = {
   durationSec: 30,
+  weightShiftFromSec: 10,
   targetPoints: 95,
   bubbles: {
-    small: { diameter: 100, points: 2, weight: 3 },
-    medium: { diameter: 150, points: 1, weight: 4 },
-    large: { diameter: 210, points: 0.5, weight: 3 },
+    small: { diameter: 100, points: 3, weight: 4, lateWeight: 7 },
+    medium: { diameter: 150, points: 2, weight: 3, lateWeight: 2 },
+    large: { diameter: 210, points: 1, weight: 3, lateWeight: 1 },
   },
-  spawn: { maxOnScreen: 7, intervalMs: 380, lifetimeMs: 2200, driftSpeed: 110 },
+  spawn: { maxOnScreen: 7, intervalMs: 330, lifetimeMs: 2200, driftSpeed: 110 },
   rush: {
     lastSec: 15,
     minLifetimeMs: 1100,
     maxSpeedFactor: 2.5,
-    maxIntervalMs: 900,
-    maxPointsFactor: 8,
+    maxIntervalMs: 500,
   },
   area: { left: 130, right: 950, top: 330, bottom: 1560 },
   tapForgiveness: 0.15,

@@ -1,5 +1,4 @@
 import type { BubbleSize, GameRules } from '@/config/game';
-import { pointsFactorFor } from '@/domain/bubbles';
 
 export interface SessionResult {
   /** Points scored (can pass the target; the percentage cannot). */
@@ -51,10 +50,7 @@ export class GameSession {
   /** A molecule was popped; returns the points it paid (0 once the session is over). */
   pop(size: BubbleSize): number {
     if (this.isOver) return 0;
-    const base = this.rules.bubbles[size].points;
-    // Fewer molecules come late in the round, so each one pays more.
-    // Rounded to the nearest half point so the numbers on screen stay tidy.
-    const points = Math.round(base * pointsFactorFor(this.rules, this._remainingMs) * 2) / 2;
+    const points = this.rules.bubbles[size].points;
     this._score += points;
     this._pops += 1;
     return points;
