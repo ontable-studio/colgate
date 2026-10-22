@@ -4,7 +4,6 @@ import { GAME_WIDTH, RULES, type BubbleSize } from '@/config/game';
 import {
   findMissed,
   findTapped,
-  lifetimeFor,
   pickSize,
   spawnIntervalFor,
   speedFactorFor,
@@ -41,8 +40,6 @@ interface Bubble extends BubbleBody {
   vx: number;
   vy: number;
   age: number;
-  /** Fades away after this long if nobody taps it. */
-  readonly lifetimeMs: number;
 }
 
 /** Tap the floating Vitamin C molecules; each one fills the toothbrush a little more. */
@@ -219,7 +216,6 @@ export class GameplayScene extends Phaser.Scene {
       vx: Math.cos(angle) * speed,
       vy: Math.sin(angle) * speed,
       age: 0,
-      lifetimeMs: lifetimeFor(RULES, this.session.remainingMs),
     });
     // Pop in: grows from nothing.
     const full = image.scale;
@@ -247,7 +243,7 @@ export class GameplayScene extends Phaser.Scene {
         this.remove(b);
         b.image.destroy();
         b.glow.destroy();
-      } else if (b.age >= b.lifetimeMs) {
+      } else if (b.age >= RULES.spawn.lifetimeMs) {
         // Nobody shot it in time: it gets away.
         this.vanish(b);
       }

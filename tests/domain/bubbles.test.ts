@@ -3,7 +3,6 @@ import { RULES } from '@/config/game';
 import {
   findMissed,
   findTapped,
-  lifetimeFor,
   pickSize,
   spawnIntervalFor,
   speedFactorFor,
@@ -33,19 +32,6 @@ describe('weightShift', () => {
     expect(weightShift(RULES, totalMs - fromMs)).toBe(0);
     expect(weightShift(RULES, 0)).toBe(1);
     expect(weightShift(RULES, (totalMs - fromMs) / 2)).toBe(0.5);
-  });
-});
-
-describe('lifetimeFor', () => {
-  const { lifetimeMs } = RULES.spawn;
-  const { lastSec, minLifetimeMs } = RULES.rush;
-  it('is the normal lifetime until the final stretch', () => {
-    expect(lifetimeFor(RULES, 30_000)).toBe(lifetimeMs);
-    expect(lifetimeFor(RULES, lastSec * 1000)).toBe(lifetimeMs);
-  });
-  it('shrinks evenly to the minimum at the end', () => {
-    expect(lifetimeFor(RULES, 0)).toBe(minLifetimeMs);
-    expect(lifetimeFor(RULES, (lastSec * 1000) / 2)).toBe((lifetimeMs + minLifetimeMs) / 2);
   });
 });
 
