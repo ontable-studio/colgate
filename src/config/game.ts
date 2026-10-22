@@ -32,18 +32,13 @@ export interface GameRules {
     readonly intervalMs: number;
     /** A molecule that is not tapped fades away after this long (the same all round). */
     readonly lifetimeMs: number;
-    /** Slow drift speed (px/s) of a molecule. */
+    /** Slow drift speed (px/s) of a molecule; the same all round. */
     readonly driftSpeed: number;
   };
-  /**
-   * Final stretch: molecules show up less often and drift faster, all
-   * changing evenly until the round ends.
-   */
+  /** Final stretch: molecules show up less often, changing evenly until the round ends. */
   readonly rush: {
     /** Starts this many seconds before the end of the round. */
     readonly lastSec: number;
-    /** Drift speed multiplier when the round ends (1 = normal speed). */
-    readonly maxSpeedFactor: number;
     /** Time between two new molecules when the round ends. */
     readonly maxIntervalMs: number;
   };
@@ -53,6 +48,13 @@ export interface GameRules {
     readonly right: number;
     readonly top: number;
     readonly bottom: number;
+  };
+  /** Keeping molecules from running into each other. */
+  readonly crowd: {
+    /** A new molecule only appears if it is at least this far (px) from every other one. */
+    readonly spawnGapPx: number;
+    /** A molecule slows down when it heads toward another one closer than this gap (px). */
+    readonly slowRangePx: number;
   };
   /** A tap counts when it lands within this share of the radius beyond the molecule's edge. */
   readonly tapForgiveness: number;
@@ -76,13 +78,13 @@ export const RULES: GameRules = {
     medium: { diameter: 150, points: 2, weight: 3, lateWeight: 2 },
     large: { diameter: 210, points: 1, weight: 3, lateWeight: 1 },
   },
-  spawn: { maxOnScreen: 7, intervalMs: 330, lifetimeMs: 2200, driftSpeed: 110 },
+  spawn: { maxOnScreen: 7, intervalMs: 330, lifetimeMs: 2200, driftSpeed: 80 },
   rush: {
     lastSec: 15,
-    maxSpeedFactor: 2.5,
     maxIntervalMs: 500,
   },
   area: { left: 130, right: 950, top: 330, bottom: 1560 },
+  crowd: { spawnGapPx: 30, slowRangePx: 90 },
   tapForgiveness: 0.15,
   missRange: 1,
 };

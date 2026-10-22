@@ -5,7 +5,8 @@ import {
   findTapped,
   pickSize,
   spawnIntervalFor,
-  speedFactorFor,
+  crowdSlowdown,
+  isClearOfOthers,
   weightShift,
 } from '@/domain/bubbles';
 
@@ -35,13 +36,29 @@ describe('weightShift', () => {
   });
 });
 
-describe('speedFactorFor', () => {
-  it('is normal until the final stretch and rises evenly to the maximum', () => {
-    const { lastSec, maxSpeedFactor } = RULES.rush;
-    expect(speedFactorFor(RULES, 30_000)).toBe(1);
-    expect(speedFactorFor(RULES, lastSec * 1000)).toBe(1);
-    expect(speedFactorFor(RULES, (lastSec * 1000) / 2)).toBeCloseTo((1 + maxSpeedFactor) / 2);
-    expect(speedFactorFor(RULES, 0)).toBe(maxSpeedFactor);
+describe('crowdSlowdown', () => {
+  const crowd = RULES.crowd;
+  const mover = (x: number, vx: number) => ({ x, y: 0, vx, vy: 0, radius: 50 });
+  it('keeps full speed when nothing is close', () => {
+    const self = mover(0, 50);
+    expect(crowdSlowdown(self, [self, mover(100 + crowd.slowRangePx + 10, 0)], crowd)).toBe(1);
+  });
+  it('slows down when heading toward a close molecule, to a stop when touching', () => {
+    const self = mover(0, 50);
+    const half = mover(100 + crowd.slowRangePx / 2, 0);
+    expect(crowdSlowdown(self, [half], crowd)).toBeCloseTo(0.5);
+    expect(crowdSlowdown(self, [mover(100, 0)], crowd)).toBe(0);
+  });
+  it('does not slow molecules that are moving apart', () => {
+    expect(crowdSlowdown(mover(0, -50), [mover(110, 0)], crowd)).toBe(1);
+  });
+});
+
+describe('isClearOfOthers', () => {
+  const others = [{ x: 0, y: 0, radius: 50 }];
+  it('needs the gap on top of the two radii', () => {
+    expect(isClearOfOthers(others, 100 + 30, 0, 50, 30)).toBe(true);
+    expect(isClearOfOthers(others, 100 + 29, 0, 50, 30)).toBe(false);
   });
 });
 

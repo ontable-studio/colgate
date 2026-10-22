@@ -6,7 +6,8 @@ import {
   findTapped,
   pickSize,
   spawnIntervalFor,
-  speedFactorFor,
+  crowdSlowdown,
+  isClearOfOthers,
   weightShift,
   type BubbleBody,
 } from '@/domain/bubbles';
@@ -175,11 +176,11 @@ export class GameplayScene extends Phaser.Scene {
     this.sinceSpawnMs += step;
     if (this.sinceSpawnMs < spawnIntervalFor(RULES, this.session.remainingMs)) return;
     if (this.bubbles.length >= RULES.spawn.maxOnScreen) return;
-    this.sinceSpawnMs = 0;
-    this.spawn();
+    if (this.spawn()) this.sinceSpawnMs = 0;
   }
 
-  private spawn(): void {
+  /** Adds a molecule where it is clear of the toothbrush and the others; false if there is no room. */
+  private spawn(): boolean {
     const size = pickSize(
       RULES.bubbles,
       Math.random(),
@@ -190,17 +191,18 @@ export class GameplayScene extends Phaser.Scene {
     const { left, right, top, bottom } = RULES.area;
 
     // Try a few spots; take the first that is clear of the toothbrush and the other molecules.
-    let x = 0;
-    let y = 0;
-    for (let attempt = 0; attempt < 12; attempt++) {
-      x = Phaser.Math.Between(left + radius, right - radius);
-      y = Phaser.Math.Between(top + radius, bottom - radius);
+    let spot: { x: number; y: number } | undefined;
+    for (let attempt = 0; attempt < 20 && !spot; attempt++) {
+      const x = Phaser.Math.Between(left + radius, right - radius);
+      const y = Phaser.Math.Between(top + radius, bottom - radius);
       const inBrushZone = x - radius < BRUSH_ZONE.right && y + radius > BRUSH_ZONE.top;
-      const crowded = this.bubbles.some(
-        (b) => Math.hypot(b.x - x, b.y - y) < (b.radius + radius) * 0.95,
-      );
-      if (!inBrushZone && !crowded) break;
+      if (!inBrushZone && isClearOfOthers(this.bubbles, x, y, radius, RULES.crowd.spawnGapPx)) {
+        spot = { x, y };
+      }
     }
+    // No room right now: try again on the next frame instead of overlapping another molecule.
+    if (!spot) return false;
+    const { x, y } = spot;
 
     const glow = addGlow(this, x, y, diameter * 2.2, 0);
     const image = this.add.image(x, y, 'capsule').setDisplaySize(diameter, diameter);
@@ -221,15 +223,17 @@ export class GameplayScene extends Phaser.Scene {
     const full = image.scale;
     image.setScale(0);
     this.tweens.add({ targets: image, scale: full, duration: 260, ease: 'Back.easeOut' });
+    return true;
   }
 
   /** Drift, bounce off the edges of the play area and fade out molecules nobody tapped. */
   private moveBubbles(step: number): void {
     const { left, right, top, bottom } = RULES.area;
     const seconds = step / 1000;
-    const speed = speedFactorFor(RULES, this.session.remainingMs);
     for (const b of [...this.bubbles]) {
       b.age += step;
+      // Slow down instead of bumping into a molecule that is close ahead.
+      const speed = crowdSlowdown(b, this.bubbles, RULES.crowd);
       b.x += b.vx * speed * seconds;
       b.y += b.vy * speed * seconds;
       if (b.x < left + b.radius || b.x > right - b.radius) b.vx = -b.vx;
