@@ -28,10 +28,11 @@ export function makeLogoTab(scene: Phaser.Scene): void {
     ctx.fill();
     ctx.restore();
 
-    const logo = scene.textures.get('logo-colgate').getSourceImage() as CanvasImageSource;
-    // Wordmark with the brand's smile (the file is 1448x588).
+    const logo = scene.textures.get('logo-colgate').getSourceImage() as HTMLImageElement;
+    // Wordmark with the brand's smile. Height follows the loaded file's own ratio so a stale cached
+    // copy of the image can never come out stretched.
     const lw = LOGO_WORDMARK_WIDTH;
-    const lh = (lw * 588) / 1448;
+    const lh = (lw * logo.height) / logo.width;
     ctx.drawImage(logo, w / 2 - lw / 2, 48, lw, lh);
   });
 }
