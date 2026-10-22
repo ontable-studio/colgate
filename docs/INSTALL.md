@@ -31,7 +31,7 @@ Mode kiosk membuat Chrome tampil penuh layar seperti aplikasi: tanpa bilah alama
    "C:\Program Files\Google\Chrome\Application\chrome.exe" --kiosk --noerrdialogs --disable-pinch --overscroll-history-navigation=0 --autoplay-policy=no-user-gesture-required https://colgate-omega.vercel.app/
    ```
 
-3. Beri nama, misalnya `Catch the Brightness`, lalu klik **Finish**.
+3. Beri nama, misalnya `95% Vitamin C Blast`, lalu klik **Finish**.
 4. Klik dua kali pintasan itu untuk membuka game. Agar terbuka otomatis saat PC menyala, salin pintasan ke folder Startup (tekan `Win + R`, ketik `shell:startup`, lalu Enter).
 5. Untuk keluar dari mode kiosk (misalnya untuk perawatan), tekan `Alt + F4` dengan keyboard.
 
