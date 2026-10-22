@@ -10,7 +10,7 @@ import numpy as np
 from PIL import Image, ImageDraw, ImageFilter, ImageFont
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
-ASSETS = os.path.join(ROOT, "public", "assets")
+ASSETS = os.path.join(ROOT, "src", "assets")
 ICONS = os.path.join(ROOT, "public", "icons")
 RED_LIGHT, RED_DARK = (245, 32, 42), (190, 14, 28)
 

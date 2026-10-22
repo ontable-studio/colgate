@@ -2,7 +2,7 @@
 
 Needs: pip install markdown, and Google Chrome (used headless to print the PDF).
 Run from the repo root:  python tools/docs-pdf/build_pdf.py
-Brand assets come from public/assets (game-ready exports of the files in .resources).
+Brand assets come from src/assets (game-ready exports of the files in .resources).
 """
 
 import json
@@ -18,7 +18,7 @@ import markdown
 ROOT = Path(__file__).resolve().parents[2]
 SRC = ROOT / "docs" / "INSTALL.md"
 OUT = ROOT / "docs" / "INSTALL.pdf"
-ASSETS = ROOT / "public" / "assets"
+ASSETS = ROOT / "src" / "assets"
 CHROME_CANDIDATES = [
     r"C:\Program Files\Google\Chrome\Application\chrome.exe",
     r"C:\Program Files (x86)\Google\Chrome\Application\chrome.exe",

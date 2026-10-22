@@ -26,6 +26,8 @@ export default defineConfig({
   build: {
     target: 'es2020',
     chunkSizeWarningLimit: 1500,
+    // Keep the short sound effects as files too (Vite would inline anything under 4 kB as base64).
+    assetsInlineLimit: 0,
     rollupOptions: {
       output: {
         manualChunks: (id) => (id.includes('node_modules/phaser') ? 'phaser' : undefined),

@@ -2,7 +2,7 @@
 
 Usage (from the repo root):
     pip install -r tools/generate-audio/requirements.txt
-    python tools/generate-audio/generate_audio.py [--out public/assets/audio] [--report]
+    python tools/generate-audio/generate_audio.py [--out src/assets/audio] [--report]
 
 Sound direction
     Bright, clean and fresh like the product: glassy bells and plucks (the "sparkle" of Vitamin C),
@@ -536,7 +536,7 @@ def report(name: str, audio: np.ndarray, out_dir: str) -> str:
 
 def main() -> None:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--out", default="public/assets/audio")
+    ap.add_argument("--out", default="src/assets/audio")
     ap.add_argument("--report", action="store_true", help="print level / size summary")
     args = ap.parse_args()
     os.makedirs(args.out, exist_ok=True)

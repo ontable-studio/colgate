@@ -1,5 +1,5 @@
 /**
- * Audio files live in public/assets/audio and are produced by tools/generate-audio.
+ * Audio files live in src/assets/audio and are produced by tools/generate-audio.
  * Both ogg and mp3 exist for every key; the browser picks whichever it can play.
  */
 export const SFX_KEYS = [

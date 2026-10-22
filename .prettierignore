@@ -4,4 +4,4 @@ dev-dist
 coverage
 .resources
 pnpm-lock.yaml
-public/assets
+src/assets
