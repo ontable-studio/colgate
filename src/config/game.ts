@@ -24,14 +24,17 @@ export interface GameRules {
   readonly spawn: {
     /** Never more than this many molecules on screen at once. */
     readonly maxOnScreen: number;
-    /** Time between two new molecules while there is room. */
+    /** Time between two new molecules while there is room (start of the round: a busy screen). */
     readonly intervalMs: number;
     /** A molecule that is not tapped fades away after this long. */
     readonly lifetimeMs: number;
     /** Slow drift speed (px/s) of a molecule. */
     readonly driftSpeed: number;
   };
-  /** Final stretch: molecules live shorter and shorter and drift faster and faster. */
+  /**
+   * Final stretch: molecules show up less often, live shorter, drift faster and pay more, all
+   * changing evenly until the round ends.
+   */
   readonly rush: {
     /** Starts this many seconds before the end of the round. */
     readonly lastSec: number;
@@ -39,6 +42,10 @@ export interface GameRules {
     readonly minLifetimeMs: number;
     /** Drift speed multiplier when the round ends (1 = normal speed). */
     readonly maxSpeedFactor: number;
+    /** Time between two new molecules when the round ends. */
+    readonly maxIntervalMs: number;
+    /** Points multiplier when the round ends (1 = base points). */
+    readonly maxPointsFactor: number;
   };
   /** Rectangle molecules float in (clear of the HUD at the top and the toothbrush at the left). */
   readonly area: {
@@ -64,12 +71,18 @@ export const RULES: GameRules = {
   durationSec: 30,
   targetPoints: 95,
   bubbles: {
-    small: { diameter: 100, points: 5, weight: 3 },
-    medium: { diameter: 150, points: 3, weight: 4 },
-    large: { diameter: 210, points: 2, weight: 3 },
+    small: { diameter: 100, points: 2, weight: 3 },
+    medium: { diameter: 150, points: 1, weight: 4 },
+    large: { diameter: 210, points: 0.5, weight: 3 },
   },
-  spawn: { maxOnScreen: 6, intervalMs: 800, lifetimeMs: 2200, driftSpeed: 70 },
-  rush: { lastSec: 10, minLifetimeMs: 1100, maxSpeedFactor: 1.8 },
+  spawn: { maxOnScreen: 7, intervalMs: 380, lifetimeMs: 2200, driftSpeed: 110 },
+  rush: {
+    lastSec: 15,
+    minLifetimeMs: 1100,
+    maxSpeedFactor: 2.5,
+    maxIntervalMs: 1500,
+    maxPointsFactor: 12,
+  },
   area: { left: 130, right: 950, top: 330, bottom: 1560 },
   tapForgiveness: 0.15,
   missRange: 1,

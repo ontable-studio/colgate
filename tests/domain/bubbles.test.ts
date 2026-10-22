@@ -1,6 +1,14 @@
 import { describe, expect, it } from 'vitest';
 import { RULES } from '@/config/game';
-import { findMissed, findTapped, lifetimeFor, pickSize, speedFactorFor } from '@/domain/bubbles';
+import {
+  findMissed,
+  findTapped,
+  lifetimeFor,
+  pickSize,
+  pointsFactorFor,
+  spawnIntervalFor,
+  speedFactorFor,
+} from '@/domain/bubbles';
 
 describe('pickSize', () => {
   it('follows the weights from one end of the roll to the other', () => {
@@ -30,6 +38,19 @@ describe('speedFactorFor', () => {
     expect(speedFactorFor(RULES, lastSec * 1000)).toBe(1);
     expect(speedFactorFor(RULES, (lastSec * 1000) / 2)).toBeCloseTo((1 + maxSpeedFactor) / 2);
     expect(speedFactorFor(RULES, 0)).toBe(maxSpeedFactor);
+  });
+});
+
+describe('spawnIntervalFor and pointsFactorFor', () => {
+  it('start busy and cheap, end sparse and rich, evenly over the final stretch', () => {
+    const { lastSec, maxIntervalMs, maxPointsFactor } = RULES.rush;
+    const { intervalMs } = RULES.spawn;
+    expect(spawnIntervalFor(RULES, 30_000)).toBe(intervalMs);
+    expect(spawnIntervalFor(RULES, lastSec * 1000)).toBe(intervalMs);
+    expect(spawnIntervalFor(RULES, 0)).toBe(maxIntervalMs);
+    expect(pointsFactorFor(RULES, 30_000)).toBe(1);
+    expect(pointsFactorFor(RULES, 0)).toBe(maxPointsFactor);
+    expect(pointsFactorFor(RULES, (lastSec * 1000) / 2)).toBeCloseTo((1 + maxPointsFactor) / 2);
   });
 });
 

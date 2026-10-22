@@ -6,6 +6,7 @@ import {
   findTapped,
   lifetimeFor,
   pickSize,
+  spawnIntervalFor,
   speedFactorFor,
   type BubbleBody,
 } from '@/domain/bubbles';
@@ -174,7 +175,7 @@ export class GameplayScene extends Phaser.Scene {
 
   private spawnIfDue(step: number): void {
     this.sinceSpawnMs += step;
-    if (this.sinceSpawnMs < RULES.spawn.intervalMs) return;
+    if (this.sinceSpawnMs < spawnIntervalFor(RULES, this.session.remainingMs)) return;
     if (this.bubbles.length >= RULES.spawn.maxOnScreen) return;
     this.sinceSpawnMs = 0;
     this.spawn();
