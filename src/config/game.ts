@@ -78,7 +78,7 @@ export const RULES: GameRules = {
     medium: { diameter: 150, points: 2, weight: 3, lateWeight: 2 },
     large: { diameter: 210, points: 1, weight: 3, lateWeight: 1 },
   },
-  spawn: { maxOnScreen: 7, intervalMs: 330, lifetimeMs: 2200, driftSpeed: 80 },
+  spawn: { maxOnScreen: 7, intervalMs: 330, lifetimeMs: 3000, driftSpeed: 40 },
   rush: {
     lastSec: 15,
     maxIntervalMs: 500,
