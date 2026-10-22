@@ -5,7 +5,6 @@ export const SceneKey = {
   HowToPlay: 'HowToPlay',
   Gameplay: 'Gameplay',
   Result: 'Result',
-  Admin: 'Admin',
 } as const;
 
 export type SceneKey = (typeof SceneKey)[keyof typeof SceneKey];
@@ -15,8 +14,4 @@ export type SceneKey = (typeof SceneKey)[keyof typeof SceneKey];
  * Gameplay is excluded on purpose: a round always ends by itself, and cutting it short
  * would lose the player's result.
  */
-export const IDLE_RESET_SCENES: readonly SceneKey[] = [
-  SceneKey.HowToPlay,
-  SceneKey.Result,
-  SceneKey.Admin,
-];
+export const IDLE_RESET_SCENES: readonly SceneKey[] = [SceneKey.HowToPlay, SceneKey.Result];

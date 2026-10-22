@@ -72,9 +72,8 @@ const shots = [
   ['03-gameplay', 'Gameplay', {}, 7000],
   ['04-result', 'Result', { result }, 4500],
   ['05-result-time-up', 'Result', { result: lose }, 4500],
-  ['06-admin', 'Admin', {}, 2500],
 ];
-const keys = ['Attract', 'HowToPlay', 'Gameplay', 'Result', 'Admin'];
+const keys = ['Attract', 'HowToPlay', 'Gameplay', 'Result'];
 for (const [name, scene, data, wait] of shots) {
   await run(
     `${JSON.stringify(keys)}.forEach(k => __game.scene.stop(k)); __game.scene.start(${JSON.stringify(scene)}, ${JSON.stringify(data)}); 1`,

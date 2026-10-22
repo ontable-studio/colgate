@@ -7,9 +7,6 @@ import { addBackground, addGlow, addHeader } from '@/ui/effects';
 import { fadeIn, popIn, riseIn } from '@/ui/motion';
 import { SceneKey } from './keys';
 
-const ADMIN_HOTSPOT_SIZE = 220;
-const ADMIN_HOLD_MS = 2000;
-
 /*
  * Vertical layout (1080x1920), everything centred:
  *   0-190     Colgate tab            235-425   Optic White lockup
@@ -45,7 +42,6 @@ export class AttractScene extends Phaser.Scene {
     this.addHero();
     addHeader(this);
     this.addTitle();
-    this.addAdminHotspot();
 
     // Warm halo that breathes behind the call to action.
     const halo = addGlow(this, cx, BUTTON_Y, 1000, 0.25).setDepth(4);
@@ -107,27 +103,6 @@ export class AttractScene extends Phaser.Scene {
         ease: 'Sine.easeInOut',
       });
     });
-  }
-
-  /** Invisible top-left corner: press and hold for 2 s to open the operator screen. */
-  private addAdminHotspot(): void {
-    let timer: Phaser.Time.TimerEvent | undefined;
-    const cancel = (): void => {
-      timer?.remove(false);
-      timer = undefined;
-    };
-    this.add
-      .zone(0, 0, ADMIN_HOTSPOT_SIZE, ADMIN_HOTSPOT_SIZE)
-      .setOrigin(0)
-      .setInteractive()
-      .on('pointerdown', () => {
-        cancel();
-        timer = this.time.delayedCall(ADMIN_HOLD_MS, () => {
-          this.scene.start(SceneKey.Admin);
-        });
-      })
-      .on('pointerup', cancel)
-      .on('pointerout', cancel);
   }
 
   /** Hero: the tube with a warm glow behind it. */

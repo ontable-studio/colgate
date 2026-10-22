@@ -6,11 +6,11 @@ Goal: a booth game that keeps working when things go wrong (no internet, idle vi
 
 ```
 src/
-  main.ts            entry: register service worker, init services, create game
-  app/               composition root (container.ts) and Phaser game factory (createGame.ts)
-  config/            tunables: game.ts (resolution, rules, idle timeout), env.ts (build-time env)
+  main.ts            entry: register service worker, create game
+  app/               Phaser game factory (createGame.ts), updates, watchdog
+  config/            tunables: game.ts (resolution, rules, idle timeout)
   domain/            PURE logic, no Phaser, no browser APIs  -> unit tested
-  services/          I/O: storage (IndexedDB), idle watcher
+  services/          I/O: idle watcher
   scenes/            Phaser scenes (thin: input, rendering, call into domain/services)
   ui/                reusable Phaser UI pieces: button, panel, keyboard, meter, effects, theme
   ui/art/            procedural canvas textures (background, skins, icons, objects, brand marks)
@@ -25,7 +25,7 @@ Dependency rule: `scenes -> domain/services/config`, `services -> domain/config`
 ```
 Boot -> Preload -> Attract -> HowToPlay -> Gameplay -> Result -> (Play again -> Gameplay | Home -> Attract)
                       ^                                    |
-                      +---------- idle 30 s on HowToPlay / Result / Admin ----------+
+                      +---------- idle 30 s on HowToPlay / Result ----------+
 ```
 
 Scene keys are in `src/scenes/keys.ts`. Scenes pass data with `scene.start(key, data)`.
@@ -34,17 +34,13 @@ Scene keys are in `src/scenes/keys.ts`. Scenes pass data with `scene.start(key, 
 
 `GameSession` (`domain/session.ts`) owns score, brightness meter and timer. `GameplayScene` only spawns objects and forwards catches (`session.catch(kind)`). All numbers come from `RULES` in `config/game.ts`; change rules there, not in scenes.
 
-## Data (offline-first)
+## Data
 
-1. `ResultScene` writes a `PlayRecord` to IndexedDB via `PlaysRepository`. Nothing leaves the device.
-2. The admin screen lists the stored plays from local data, so it never depends on the network.
-3. The operator exports all plays from the admin screen as CSV (`domain/csv.ts`).
-
-Idb caveat: a transaction auto-closes if you await unrelated async work (e.g. `fetch`) inside it. Keep transactions short and never network inside one.
+The game has no backend and keeps no player data: `ResultScene` only shows the result. Nothing is stored or exported.
 
 ## Booth-proofing
 
-- `IdleWatcher` returns to Attract after 30 s without pointer/key activity, but only from HowToPlay, Result and Admin (`IDLE_RESET_SCENES` in `scenes/keys.ts`). A scene can implement `IdleAware.onIdle()` to handle it itself instead. Gameplay is excluded: a round ends by itself, and cutting it short loses the player's result.
+- `IdleWatcher` returns to Attract after 30 s without pointer/key activity, but only from HowToPlay and Result (`IDLE_RESET_SCENES` in `scenes/keys.ts`). A scene can implement `IdleAware.onIdle()` to handle it itself instead. Gameplay is excluded: a round ends by itself, and cutting it short loses the player's result.
 - `style.css` disables scroll, zoom, text selection, long-press callouts and pull-to-refresh; Phaser's context menu is disabled.
 - Fullscreen is requested from the first tap on START (needs a user gesture).
 - PWA (`vite-plugin-pwa`, `autoUpdate`) precaches the build so the game runs offline. Asset types must be listed in `workbox.globPatterns` (`vite.config.ts`) or they will not be cached.
@@ -64,7 +60,6 @@ All audio is synthesised by `tools/generate-audio/generate_audio.py` (no samples
 - **Music:** `bgm-attract` (92 BPM, 8 bars, calm and sparkling) plays on Attract, How to Play and Result. `bgm-game` (124 BPM, 16 bars, four sections that build up) plays during a round and cross-fades in and out.
 - **Moments:** button taps, keyboard keys (with random pitch jitter), catch (a streak of capsules climbs one semitone each, up to 8), stain and decoy hits, last-5-seconds ticks (rising pitch), time-up, the Unlock stinger (its chord is timed to the sparkle burst), score count ticks and the Result jingle.
 - **Code:** `config/audio.ts` lists keys and relative volumes; `domain/audioSettings.ts` is the testable logic (settings parsing, volume steps, combo pitch); `audio/audioManager.ts` wraps Phaser's sound manager (music cross-fades, mute and master volume saved in localStorage); scenes call the safe `audio` facade from `audio/index.ts`.
-- **Operator:** the admin screen has SOUND ON/OFF and a VOLUME button (25, 50, 75, 100%).
 - **Autoplay:** browsers only allow sound after the first touch. Effects before that are dropped, and music starts on the first tap (START). For attract music with nobody touching the screen, launch the booth browser with `--autoplay-policy=no-user-gesture-required`.
 - **Changing the sound:** edit the generator (tempo, chords, patterns and levels are plain constants at the top of each function) and re-run it; the random seed is fixed, so output is identical between runs.
 
@@ -89,13 +84,9 @@ Plain random spawning and box collisions felt unfair, so the round is built from
 
 The operator checklist lives in [INSTALL.md](INSTALL.md).
 
-## Operator (admin) screen
-
-Press and hold the invisible top-left corner of the Attract screen for 2 s. Shows the stored plays (time and percentage, newest first), the total count, and VOLUME / SOUND buttons. Buttons: EXPORT CSV (the download icon) (`domain/csv.ts`, UTF-8 BOM so Excel opens it; some TV browsers block downloads, so test this on the real TV), a trash icon that asks in a dialog (HAPUS / BATAL) before deleting all local plays, and BACK HOME. Idle for 30 s returns to Attract. There is no PIN: it relies on the hidden hotspot, so do not rely on it to protect personal data.
-
 ## Testing
 
-Vitest in a Node environment. Only non-Phaser code is unit tested (`domain`, `services`); IndexedDB is provided by `fake-indexeddb`. Scenes are verified manually on a real screen, see the TV checklist in PLAN.md.
+Vitest in a Node environment. Only non-Phaser code is unit tested (`domain`, `services`). Scenes are verified manually on a real screen, see the TV checklist in PLAN.md.
 
 ## Not built yet (see PLAN.md)
 

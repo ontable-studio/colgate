@@ -1,11 +1,7 @@
 import Phaser from 'phaser';
 import { audio } from '@/audio';
-import { getServices } from '@/app/container';
-import { env } from '@/config/env';
 import { GAME_WIDTH, RULES } from '@/config/game';
-import type { PlayRecord } from '@/domain/play';
 import type { SessionResult } from '@/domain/session';
-import { newId } from '@/util/id';
 import { createButton } from '@/ui/button';
 import { addBackground, addGlow, addHeader } from '@/ui/effects';
 import { bump, countUp, fadeIn, float, popIn, sparkBurst } from '@/ui/motion';
@@ -46,7 +42,6 @@ export class ResultScene extends Phaser.Scene {
     this.addMolecules();
     this.addMessage(cx, won);
     this.addBottomButtons();
-    void this.save();
   }
 
   /** Headline, the big percentage counting up, and what it measures. */
@@ -87,7 +82,7 @@ export class ResultScene extends Phaser.Scene {
     countUp(this, pct, Math.round(this.result.meterPct), 1200, 300, '%');
 
     const subtitle = this.add
-      .text(cx, 1090, 'High Purity Vitamin C Blast', textStyle({ size: 56, weight: 'light' }))
+      .text(cx, 1090, 'High Purity Vitamin C', textStyle({ size: 56, weight: 'light' }))
       .setOrigin(0.5);
     popIn(this, subtitle, 1300, 0.9);
     if (!won) {
@@ -100,16 +95,6 @@ export class ResultScene extends Phaser.Scene {
         )
         .setOrigin(0.5);
     }
-
-    const tagline = this.add
-      .text(
-        cx,
-        1560,
-        'UNLOCK YOUR BRIGHTEST DAY!',
-        textStyle({ size: 32, color: COLORS.goldSoft, glow: 'rgba(255,150,40,0.7)' }),
-      )
-      .setOrigin(0.5);
-    popIn(this, tagline, 1000, 0.85);
 
     this.time.delayedCall(1500, () => {
       bump(this, pct, 1.1, 140);
@@ -160,22 +145,5 @@ export class ResultScene extends Phaser.Scene {
     this.time.delayedCall(1700, () => {
       this.tweens.add({ targets: again, scale: 1.03, yoyo: true, repeat: -1, duration: 800 });
     });
-  }
-
-  /** Store the play locally (the admin screen exports it as CSV). No personal data is kept. */
-  private async save(): Promise<void> {
-    const { repo } = getServices();
-    const play: PlayRecord = {
-      id: newId(),
-      timestamp: new Date().toISOString(),
-      deviceId: env.deviceId,
-      score: this.result.score,
-      meterPct: this.result.meterPct,
-      pops: this.result.pops,
-      misses: this.result.misses,
-      durationSec: this.result.durationSec,
-      gameVersion: env.gameVersion,
-    };
-    await repo.add(play);
   }
 }

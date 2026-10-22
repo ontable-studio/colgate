@@ -6,7 +6,7 @@ See [docs/INSTALL.md](docs/INSTALL.md) for the on-site installation and operatio
 
 ## Stack
 
-Phaser 3.90 · TypeScript 6 · Vite 8 · vite-plugin-pwa (offline) · idb (IndexedDB) · Vitest · ESLint 10 + Prettier · Husky + lint-staged + commitlint
+Phaser 3.90 · TypeScript 6 · Vite 8 · vite-plugin-pwa (offline) · Vitest · ESLint 10 + Prettier · Husky + lint-staged + commitlint
 
 ## Getting started
 
@@ -42,13 +42,13 @@ Open the printed URL. Resize the window to a portrait ratio (9:16) to preview th
 
 Copy `.env.example` to `.env` (never commit it):
 
-| Variable         | Purpose                                        |
-| ---------------- | ---------------------------------------------- |
-| `VITE_DEVICE_ID` | Booth identifier used in the exported CSV name |
+| Variable        | Purpose                                                     |
+| --------------- | ----------------------------------------------------------- |
+| `VITE_SITE_URL` | Public address of the deployed game (canonical/share links) |
 
 Game rules (duration, points, spawn rates) live in `src/config/game.ts`. They are assumptions until the client confirms.
 
-Play data stays on the device (IndexedDB) and is exported from the admin screen as CSV.
+The game has no backend and stores no player data.
 
 ## Assets
 
@@ -68,4 +68,4 @@ Play data stays on the device (IndexedDB) and is exported from the admin screen 
 
 ## Sound
 
-Music and effects are generated, not recorded: `pip install -r tools/generate-audio/requirements.txt` then `python tools/generate-audio/generate_audio.py --report` (writes OGG + MP3 to `src/assets/audio/` and prints levels). Volumes per effect live in `src/config/audio.ts`; the operator can mute or change the master volume on the admin screen. See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md#sound) for the sound design and the browser autoplay note.
+Music and effects are generated, not recorded: `pip install -r tools/generate-audio/requirements.txt` then `python tools/generate-audio/generate_audio.py --report` (writes OGG + MP3 to `src/assets/audio/` and prints levels). Volumes per effect live in `src/config/audio.ts`. See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md#sound) for the sound design and the browser autoplay note.
