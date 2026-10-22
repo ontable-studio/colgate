@@ -1,4 +1,3 @@
-import { AdminScene } from './AdminScene';
 import { AttractScene } from './AttractScene';
 import { BootScene } from './BootScene';
 import { GameplayScene } from './GameplayScene';
@@ -13,5 +12,4 @@ export const scenes = [
   HowToPlayScene,
   GameplayScene,
   ResultScene,
-  AdminScene,
 ];

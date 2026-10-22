@@ -1,5 +1,4 @@
 import './style.css';
-import { initServices } from '@/app/container';
 import { createGame } from '@/app/createGame';
 import { initUpdates } from '@/app/updates';
 import {
@@ -20,7 +19,6 @@ async function bootstrap(): Promise<void> {
     document.fonts.load('700 48px "Colgate Ready"'),
     document.fonts.load('italic 700 48px "Colgate Ready"'),
   ]);
-  await initServices();
   const game = createGame('game');
   installFrameWatchdog(game);
   installFpsMonitor(game);

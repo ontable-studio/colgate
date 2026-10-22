@@ -52,7 +52,7 @@ export interface GameRules {
  * (see PLAN.md). Change here only, not in scene code.
  */
 export const RULES: GameRules = {
-  durationSec: 15,
+  durationSec: 30,
   targetPoints: 95,
   bubbles: {
     small: { diameter: 100, points: 5, weight: 3 },
