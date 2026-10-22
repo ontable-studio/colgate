@@ -34,6 +34,17 @@ export function speedFactorFor(rules: GameRules, remainingMs: number): number {
   return 1 + (rules.rush.maxSpeedFactor - 1) * rushProgress(rules, remainingMs);
 }
 
+/** Time to wait before the next molecule: short at first, longer and longer in the final stretch. */
+export function spawnIntervalFor(rules: GameRules, remainingMs: number): number {
+  const { intervalMs } = rules.spawn;
+  return intervalMs + (rules.rush.maxIntervalMs - intervalMs) * rushProgress(rules, remainingMs);
+}
+
+/** Multiplier on a molecule's points: 1 until the final stretch, then rising evenly. */
+export function pointsFactorFor(rules: GameRules, remainingMs: number): number {
+  return 1 + (rules.rush.maxPointsFactor - 1) * rushProgress(rules, remainingMs);
+}
+
 /** 0 until the final `rush.lastSec` seconds, then rising evenly to 1 when the round ends. */
 function rushProgress(rules: GameRules, remainingMs: number): number {
   const rushMs = rules.rush.lastSec * 1000;

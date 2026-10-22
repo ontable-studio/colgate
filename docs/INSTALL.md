@@ -14,12 +14,28 @@ Untuk tim yang memasang dan menjaga game di lokasi (24-25 Oktober instalasi, eve
 3. Kalibrasi sentuhan jika layar punya menu kalibrasi.
 4. Buka browser, masuk ke URL game, lalu:
    - Jadikan **halaman awal** atau tambahkan ke layar utama ("Add to Home screen") supaya terbuka otomatis saat TV menyala (kalau TV mendukung).
-   - Masuk **fullscreen** (tombol START juga memintanya pada sentuhan pertama).
+   - Masuk **fullscreen** (lihat di bawah).
 5. Atur volume TV ke tingkat yang pas (volume game tidak punya pengaturan sendiri).
+
+### Fullscreen dan keluar dari fullscreen (TV Android dengan remote)
+
+**Masuk fullscreen**
+
+- Otomatis: sentuh tombol **START** di layar Attract. Game langsung meminta browser tampil penuh layar.
+- Manual (jika START tidak membuatnya penuh): dengan remote, buka menu browser (tombol **Menu** atau **Options** di remote, atau pilih ikon titik tiga dengan tombol panah lalu **OK**), lalu pilih **Full screen**.
+
+**Keluar dari fullscreen** (misalnya untuk perawatan atau mengganti alamat)
+
+- Tekan tombol **Back** (panah kembali) di remote. Pada kebanyakan browser Android, ini keluar dari fullscreen.
+- Jika masih penuh layar, buka menu browser dengan tombol **Menu** atau **Options**, lalu pilih **Exit full screen**. Nama menu bisa berbeda tergantung browser di TV.
+- Hati-hati: menekan **Back** berulang kali setelah keluar dari fullscreen akan menutup halaman game atau browser. Bila itu terjadi, buka browser lagi dan masuk ke URL game.
+
+Setelah keluar dari fullscreen, game tetap berjalan. Sentuh START lagi untuk kembali ke fullscreen. **Coba kedua cara ini sekali di TV saat uji akhir (bagian 3)**, karena tombol remote dan menu tiap merek TV berbeda.
 
 ## 3. Uji akhir di lokasi (sekitar 15 menit)
 
 - [ ] Layar Attract tampil penuh, tidak ada bilah alamat atau tombol browser.
+- [ ] Coba keluar dari fullscreen dengan tombol **Back** di remote, lalu masuk lagi lewat START.
 - [ ] Sentuh START → How to Play → LET'S PLAY!: sentuhan terasa langsung.
 - [ ] Main satu ronde penuh dengan geser jari. Keranjang mengikuti jari tanpa jeda, animasi mulus.
 - [ ] Setelah timer habis, layar hasil menampilkan persentase. Tombol PLAY AGAIN dan HOME (ikon rumah) berfungsi.
