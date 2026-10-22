@@ -1,7 +1,14 @@
 import Phaser from 'phaser';
 import { audio } from '@/audio';
 import { GAME_WIDTH, RULES, type BubbleSize } from '@/config/game';
-import { findMissed, findTapped, pickSize, type BubbleBody } from '@/domain/bubbles';
+import {
+  findMissed,
+  findTapped,
+  lifetimeFor,
+  pickSize,
+  speedFactorFor,
+  type BubbleBody,
+} from '@/domain/bubbles';
 import { GameSession } from '@/domain/session';
 import { addArt } from '@/ui/art/canvas';
 import { makeButtonSkin } from '@/ui/art/skins';
@@ -32,6 +39,8 @@ interface Bubble extends BubbleBody {
   vx: number;
   vy: number;
   age: number;
+  /** Fades away after this long if nobody taps it. */
+  readonly lifetimeMs: number;
 }
 
 /** Tap the floating Vitamin C molecules; each one fills the toothbrush a little more. */
@@ -204,6 +213,7 @@ export class GameplayScene extends Phaser.Scene {
       vx: Math.cos(angle) * speed,
       vy: Math.sin(angle) * speed,
       age: 0,
+      lifetimeMs: lifetimeFor(RULES, this.session.remainingMs),
     });
     // Pop in: grows from nothing.
     const full = image.scale;
@@ -215,10 +225,11 @@ export class GameplayScene extends Phaser.Scene {
   private moveBubbles(step: number): void {
     const { left, right, top, bottom } = RULES.area;
     const seconds = step / 1000;
+    const speed = speedFactorFor(RULES, this.session.remainingMs);
     for (const b of [...this.bubbles]) {
       b.age += step;
-      b.x += b.vx * seconds;
-      b.y += b.vy * seconds;
+      b.x += b.vx * speed * seconds;
+      b.y += b.vy * speed * seconds;
       if (b.x < left + b.radius || b.x > right - b.radius) b.vx = -b.vx;
       if (b.y < top + b.radius || b.y > bottom - b.radius) b.vy = -b.vy;
       b.image.setPosition(b.x, b.y);
@@ -230,7 +241,7 @@ export class GameplayScene extends Phaser.Scene {
         this.remove(b);
         b.image.destroy();
         b.glow.destroy();
-      } else if (b.age >= RULES.spawn.lifetimeMs) {
+      } else if (b.age >= b.lifetimeMs) {
         // Nobody shot it in time: it gets away.
         this.vanish(b);
       }
