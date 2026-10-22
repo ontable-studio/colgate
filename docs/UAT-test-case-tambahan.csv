@@ -1,33 +1,25 @@
 ﻿ID Test Case,Modul / Halaman,Nama Fitur / Skenario,Prasyarat (Pre-condition),Langkah Pengujian (Test Steps),Hasil yang Diharapkan (Expected Result),Prioritas,Status,Hasil Aktual,Catatan / Bug Notes
-TC-06b,Gameplay,Gerak keranjang di layar sentuh (regresi TC-06),"Permainan berjalan, buka di HP/layar sentuh","1. Tap sekali di sisi kanan layar, lalu sisi kiri
-2. Geser (drag) jari dari kiri ke kanan","Keranjang MELUNCUR ke titik sentuh (menyeberang layar sekitar 0,6-0,8 detik), tidak berpindah mendadak. Drag tetap diikuti mulus.",High,,,,
-TC-21,Gameplay,Combo multiplier,Permainan berjalan,"1. Tangkap 3, 6, 10 kapsul emas berturut-turut tanpa meleset
-2. Lihat angka +N dan badge di bawah SCORE","Kapsul ke-3 bernilai +20 (badge x2), ke-6 +30 (x3), ke-10 +40 (x4), ke-15 +50 (x5). Badge x2 dst. muncul di bawah SCORE.",High,,,,
-TC-22,Gameplay,Combo putus,Combo sudah x2 atau lebih,"1. Biarkan satu kapsul emas lewat tanpa tertangkap
-2. Ulangi dengan menangkap noda
-3. Ulangi dengan menangkap decoy",Badge hilang dan kapsul berikutnya kembali +10. Penalti tidak dikalikan combo (tetap -10 / -1). Brightness Meter tidak dipengaruhi combo.,High,,,,
-TC-23,Gameplay,Meter penuh tidak mengakhiri ronde,Permainan berjalan,1. Tangkap kapsul sampai Brightness Meter 95% sebelum 00:00
-2. Lanjutkan bermain sampai timer habis,"Meter berhenti di 95% dan ronde tetap berjalan sampai 00:00 (selalu 15 detik). Tidak ada bonus waktu. Setelah timer habis lanjut ke halaman hasil (Result).",High,,,,
-TC-24,Gameplay,Keadilan tangkapan,Permainan berjalan,"1. Biarkan kapsul menyentuh tepi keranjang
-2. Biarkan noda lewat tipis di samping keranjang",Kapsul yang menyentuh tepi tetap dihitung. Noda yang hanya lewat di samping tidak mengenai (tidak ada penalti yang terasa tidak adil).,Medium,,,,
-TC-25,Gameplay,Objek bergantian,Ronde baru,1. Amati urutan objek yang jatuh di 5 ronde,"Objek pertama selalu kapsul emas. Setelah itu kapsul dan noda/decoy selalu bergantian; tidak pernah dua kapsul atau dua noda/decoy berturut-turut.",Low,,,,
-TC-27,Navigasi,Tombol HOME,Berada di halaman hasil (Result),1. Tekan ikon HOME di kiri bawah,Kembali ke Halaman Utama. Data ronde tetap tersimpan (cek di menu admin).,Medium,,,,
-TC-30,Booth,Idle tidak memotong ronde,Permainan berjalan,1. Jangan sentuh layar selama 30+ detik di tengah ronde,Ronde tetap berjalan sampai selesai dan hasilnya tersimpan. Tidak terlempar ke Halaman Utama.,High,,,,
-TC-31,Booth,Auto-reset di Result/How To Play,Berada di halaman hasil atau How To Play,1. Diamkan 30 detik,Kembali otomatis ke Halaman Utama.,Medium,,,,
-TC-32,Data,Data bertahan setelah reload,Sudah ada beberapa skor,"1. Reload halaman atau tutup lalu buka browser
-2. Mainkan satu ronde lagi",Daftar di menu admin masih memuat ronde sebelumnya. Tidak ada data hilang atau ganda.,High,,,,
-TC-33,Data,Offline lalu ekspor CSV,Berada di Halaman Utama,"1. Matikan internet, mainkan 3 ronde
-2. Buka menu admin, tekan EXPORT CSV
-3. Buka file CSV","Game tetap berjalan offline. 3 baris muncul di CSV tanpa duplikat (id unik). Tidak ada ronde hilang.",High,,,,
-TC-34,Data,Klik cepat di halaman hasil,Baru selesai satu ronde,"1. Tekan PLAY AGAIN atau HOME berulang cepat
-2. Cek jumlah baris di menu admin dan CSV",Satu ronde = satu baris (di menu admin dan CSV).,High,,,,
-TC-35,Admin,Menu admin,Berada di Halaman Utama,"1. Buka menu admin lewat area tersembunyi
-2. Ubah volume/mute, ekspor CSV",Kontrol suara berfungsi dan tersimpan setelah reload. CSV terunduh dan terbuka benar.,Medium,,,,
-TC-36,Audio,Kunci audio browser,"Buka game baru, belum menyentuh layar","1. Perhatikan suara sebelum sentuhan pertama
-2. Sentuh layar","Sebelum sentuhan pertama bisa hening (kebijakan browser). Setelah sentuhan pertama BGM/SFX berbunyi, tidak ada error di console.",Medium,,,,
-TC-37,Non-Fungsional,Layar target TV portrait,TV 43/55 inci portrait (atau jendela 1080x1920 / 2160x3840),"1. Buka game di browser TV
-2. Jalankan satu ronde penuh dan semua halaman",Tidak ada elemen terpotong atau bertabrakan. Tombol mudah disentuh jari. Semua teks terbaca dari jarak 1-2 meter.,High,,,,
-TC-38,Non-Fungsional,Performa terukur,"Chrome/browser TV, buka FPS counter atau DevTools",1. Mainkan ronde penuh dan catat FPS terendah dan rata-rata,"Rata-rata mendekati 60 fps (catat angka). Jika turun, mode hemat daya aktif otomatis tanpa freeze.",High,,,,
-TC-39,Non-Fungsional,Soak test,"Perangkat target, game dibiarkan di Halaman Utama",1. Biarkan dan mainkan berkala selama 3-4 jam,"Tidak ada crash, memori tidak terus naik, game pulih otomatis jika error. Catat jam mulai/selesai dan jumlah ronde.",High,,,,
-TC-40,Non-Fungsional,Pembaruan versi aman,Versi baru sudah dideploy,"1. Biarkan booth di Halaman Utama sampai pembaruan terdeteksi
-2. Mainkan ronde saat pembaruan menunggu",Pembaruan hanya diterapkan saat di Halaman Utama. Tidak pernah memotong ronde.,Medium,,,,
+TC-40,Gameplay,Timer 30 detik,Layar Attract,"1. Tekan START, lalu LET'S PLAY!
+2. Setelah hitung mundur, amati timer tanpa menyentuh layar",Timer mulai dari 00:30 dan berjalan turun sampai 00:00. Setelah habis lanjut ke halaman hasil (Result).,High,,,
+TC-41,Gameplay,Poin molekul menurut ukuran,Permainan berjalan,"1. Tap molekul kecil, sedang, dan besar
+2. Lihat angka +N yang muncul dan persen di samping sikat gigi","Kecil +3, sedang +2, besar +1. Persen bertambah sesuai poin. Tidak ada pengali.",High,,,
+TC-42,Gameplay,Tap meleset tidak mengurangi poin,Permainan berjalan,"1. Tap area kosong
+2. Tap tepat di dekat sebuah molekul (tapi tidak mengenainya)",Persen tidak berkurang. Molekul yang berada tepat di dekat tap menghilang (kabur). Tidak ada penalti lain.,Medium,,,
+TC-43,Gameplay,Molekul hilang sendiri,Permainan berjalan,1. Jangan sentuh layar dan amati satu molekul,"Molekul yang tidak ditekan memudar dan hilang sekitar 3 detik setelah muncul, tanpa mengurangi poin.",Medium,,,
+TC-44,Gameplay,Molekul tidak bertabrakan,Permainan berjalan,1. Amati layar selama satu ronde penuh tanpa menyentuh,Tidak ada molekul yang menumpuk atau menembus molekul lain. Molekul yang mendekat melambat lalu berhenti. Maksimal 7 molekul sekaligus.,High,,,
+TC-45,Gameplay,Kecepatan molekul konstan,Permainan berjalan,1. Bandingkan gerak molekul di detik awal dan di detik-detik akhir,Kecepatan gerak molekul sama sepanjang ronde dan pelan. Tiap molekul bergerak tidak jauh (sekitar 120 px) selama hidupnya.,Medium,,,
+TC-46,Gameplay,Perubahan menurut waktu,Permainan berjalan,"1. Amati 10 detik pertama
+2. Amati 15 detik terakhir",Awal ronde ramai. Dari detik 10 makin banyak molekul kecil (3 poin). Di 15 detik terakhir molekul muncul makin jarang.,Medium,,,
+TC-47,Gameplay,Menang tercapai di akhir ronde,Permainan berjalan,1. Main dengan serius sampai persen mencapai 95% atau waktu habis,Pemain yang cukup mahir baru mencapai 95% mendekati akhir ronde (setelah detik 15). Ronde langsung selesai saat 95% tercapai.,High,,,
+TC-48,Result,Teks halaman hasil,Ronde selesai,"1. Lihat halaman hasil menang
+2. Ulangi dengan ronde kalah","Menang: CONGRATULATIONS!, YOU HAVE REACHED, persen, dan 'High Purity Vitamin C' (tanpa kata Blast, tanpa tagline UNLOCK). Kalah: GOOD TRY! dan ajakan main lagi.",High,,,
+TC-49,Navigasi,Tombol HOME dan PLAY AGAIN,Berada di halaman hasil (Result),"1. Tekan PLAY AGAIN
+2. Ulangi sampai Result, lalu tekan ikon HOME",PLAY AGAIN memulai ronde baru. HOME kembali ke Halaman Utama (Attract).,High,,,
+TC-50,Booth,Auto-reset saat diam,Berada di How to Play atau Result,1. Jangan sentuh layar selama 30 detik,"Game kembali ke Halaman Utama sendiri. Saat ronde berjalan, game tidak di-reset di tengah ronde.",High,,,
+TC-51,Booth,Berjalan offline,Game sudah pernah dibuka online,"1. Matikan internet
+2. Mainkan satu ronde penuh",Game tetap berjalan sampai halaman hasil.,High,,,
+TC-52,Booth,"Fullscreen dan keluar fullscreen (TV Android, remote)",Browser TV terbuka di URL game,"1. Sentuh START dan pastikan layar penuh
+2. Tekan tombol Back di remote
+3. Sentuh START lagi",Layar penuh saat START. Back di remote keluar dari fullscreen. START kembali ke fullscreen.,Medium,,,
+TC-53,Data,Tidak ada data yang disimpan,Beberapa ronde sudah dimainkan,"1. Mainkan beberapa ronde
+2. Cari menu admin, daftar pemain, atau ekspor data","Tidak ada layar admin, daftar pemain, leaderboard, inisial, ataupun ekspor CSV. Game tidak meminta data apa pun dari pemain.",Medium,,,
