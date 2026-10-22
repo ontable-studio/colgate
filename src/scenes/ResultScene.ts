@@ -105,7 +105,7 @@ export class ResultScene extends Phaser.Scene {
       .text(
         cx,
         1560,
-        'BRIGHTER SMILES, BRIGHTER DAYS',
+        'UNLOCK YOUR BRIGHTEST DAY!',
         textStyle({ size: 32, color: COLORS.goldSoft, glow: 'rgba(255,150,40,0.7)' }),
       )
       .setOrigin(0.5);

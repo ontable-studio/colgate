@@ -8,7 +8,7 @@ import { SceneKey } from './keys';
 const IMAGES = [
   'capsule',
   'btn-gold',
-  'packshot',
+  'tube',
   'bg-photo',
   'brush-empty',
   'brush-fill',

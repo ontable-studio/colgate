@@ -94,33 +94,6 @@ export function lockupContent(): { width: number; centerX: number; top: number }
   return { width: right - left, centerX: (left + right) / 2, top };
 }
 
-/** Glowing "C": an open ring with its gap facing right, behind the tube (820x820). */
-export function makeRing(scene: Phaser.Scene): void {
-  drawTexture(scene, 'ring', 820, 820, (ctx, w, h) => {
-    const rim = ctx.createLinearGradient(0, h, w, 0);
-    rim.addColorStop(0, '#FFE9A6');
-    rim.addColorStop(0.5, '#FFF7DD');
-    rim.addColorStop(1, '#FFB52E');
-    ctx.lineCap = 'round';
-
-    ctx.save();
-    ctx.shadowColor = 'rgba(255,150,40,0.95)';
-    ctx.shadowBlur = 44;
-    ctx.lineWidth = 18;
-    ctx.strokeStyle = rim;
-    ctx.beginPath();
-    ctx.arc(w / 2, h / 2, 350, (38 * Math.PI) / 180, (322 * Math.PI) / 180);
-    ctx.stroke();
-    ctx.restore();
-
-    ctx.lineWidth = 7;
-    ctx.strokeStyle = 'rgba(255,255,255,0.9)';
-    ctx.beginPath();
-    ctx.arc(w / 2, h / 2, 350, (38 * Math.PI) / 180, (322 * Math.PI) / 180);
-    ctx.stroke();
-  });
-}
-
 /** The "C" of Vitamin C as a glowing white letter (460x460) plus a gold orbit that circles it. */
 export function makeBigC(scene: Phaser.Scene): void {
   drawTexture(scene, 'big-c', 460, 460, (ctx, w, h) => {
@@ -227,43 +200,5 @@ export function makeGradientText(
 
       top += line.size * (1 + gap);
     }
-  });
-}
-
-/**
- * Orange "BARU" tag (new) that sits beside the tube (164x80): straight top and bottom edges, flat left edge (tucked
- * behind the tube), a sharp tip at the top right and a big curve at the bottom right, with slanted
- * bold white letters that start clear of the tube.
- */
-export function makeBaruBadge(scene: Phaser.Scene): void {
-  drawTexture(scene, 'badge-baru', 164, 80, (ctx, w, h) => {
-    ctx.save();
-    ctx.shadowColor = 'rgba(90,10,0,0.4)';
-    ctx.shadowBlur = 8;
-    ctx.shadowOffsetY = 3;
-    const body = ctx.createLinearGradient(0, 0, 0, h);
-    body.addColorStop(0, '#FA9322');
-    body.addColorStop(1, '#F07F10');
-    ctx.fillStyle = body;
-    // Straight top and bottom edges; the only curves are the tip at the top right (a sharp
-    // corner) and the big round-off at the bottom right.
-    ctx.beginPath();
-    ctx.moveTo(0, 14);
-    ctx.lineTo(w - 40, 14);
-    // The tip flicks up and out a little past the straight edge.
-    ctx.quadraticCurveTo(w - 16, 12, w - 2, 3);
-    ctx.bezierCurveTo(w - 10, h * 0.4, w - 22, h - 10, w - 86, h - 10);
-    ctx.lineTo(0, h - 10);
-    ctx.closePath();
-    ctx.fill();
-    ctx.restore();
-    ctx.fillStyle = '#FFFFFF';
-    ctx.font = canvasFont('boldItalic', 34);
-    ctx.textAlign = 'left';
-    ctx.textBaseline = 'alphabetic';
-    // The left 30 px hide behind the tube; the letters start 6 px after that. The body spans
-    // y 14..70, so its middle (42) is where the middle of the capitals goes.
-    const capHeight = 34 * 0.7;
-    ctx.fillText('BARU', 36, 42 + capHeight / 2);
   });
 }

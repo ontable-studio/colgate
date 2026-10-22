@@ -1,20 +1,13 @@
 import type Phaser from 'phaser';
-import {
-  makeBaruBadge,
-  makeBigC,
-  makeGradientText,
-  makeLockup,
-  makeLogoTab,
-  makeRing,
-} from './brand';
+import { makeBigC, makeGradientText, makeLockup, makeLogoTab } from './brand';
 import { makeIcons } from './icons';
 import { makeObjects } from './objects';
 import { makeCrosshair } from './brush';
 
 /**
  * Draw every procedural texture once at boot. Needs 'logo-colgate' to be loaded already.
- * Texture keys: logo-tab, lockup, ring, big-c, c-orbit, title-game, title-how,
- * ico-*, crosshair, badge-baru, spark, glow, confetti, capsule-gray
+ * Texture keys: logo-tab, lockup, big-c, c-orbit, title-game, title-how,
+ * ico-*, crosshair, spark, glow, confetti, capsule-gray
  * (buttons/panels are cached on demand).
  */
 export function registerUiArt(scene: Phaser.Scene): void {
@@ -23,9 +16,7 @@ export function registerUiArt(scene: Phaser.Scene): void {
   makeCrosshair(scene);
   makeLogoTab(scene);
   makeLockup(scene);
-  makeRing(scene);
   makeBigC(scene);
-  makeBaruBadge(scene);
 
   makeGradientText(
     scene,

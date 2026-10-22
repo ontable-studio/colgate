@@ -1,10 +1,10 @@
 import Phaser from 'phaser';
 import { audio } from '@/audio';
-import { GAME_HEIGHT, GAME_WIDTH } from '@/config/game';
+import { GAME_WIDTH } from '@/config/game';
 import { addArt } from '@/ui/art/canvas';
 import { createButton } from '@/ui/button';
 import { addBackground, addGlow, addHeader } from '@/ui/effects';
-import { fadeIn, float, popIn, riseIn } from '@/ui/motion';
+import { fadeIn, popIn, riseIn } from '@/ui/motion';
 import { SceneKey } from './keys';
 
 const ADMIN_HOTSPOT_SIZE = 220;
@@ -14,34 +14,20 @@ const ADMIN_HOLD_MS = 2000;
  * Vertical layout (1080x1920), everything centred:
  *   0-190     Colgate tab            235-425   Optic White lockup
  *   520-740   title "95% VITAMIN C BLAST", then a clear gap
- *   780-1540  the smaller "C" (gap facing right), the tube in front of it
- *   900-1920  packshot: the tube on its glossy podium, START in front of it
+ *   760-1630  the tube, clear of the START button (top edge ~1660)
  */
 const CX = GAME_WIDTH / 2;
-const RING_Y = 1180;
-const RING_SIZE = 760;
 const TITLE_Y = 550;
-/**
- * The packshot (tube standing on the podium) is drawn at this scale. The file is 1520x1616: the
- * artwork is 1416 tall and the last 200 rows are the podium's bottom edge repeated, so the whole
- * thing can be lifted PACK_LIFT px off the bottom of the screen without a gap under the podium.
- * The tube is 394 px wide and 1030 px tall in the file, so it stands about 740 px tall on screen.
- */
-const PACK_SCALE = 0.72;
-const PACK_LIFT = 90;
-const PACK_ART_BOTTOM = GAME_HEIGHT - PACK_LIFT;
-const PACK_Y = PACK_ART_BOTTOM - 1416 * PACK_SCALE + (1616 * PACK_SCALE) / 2;
-const TUBE_TOP = PACK_ART_BOTTOM - 1416 * PACK_SCALE;
-const TUBE_HEIGHT = 1030 * PACK_SCALE;
-const TUBE_HALF_WIDTH = (394 / 2) * PACK_SCALE;
+/** The tube artwork is 511x1400; it is drawn at this height (so about 317 px wide). */
+const TUBE_TOP = 760;
+const TUBE_HEIGHT = 870;
+const TUBE_CENTER_Y = TUBE_TOP + TUBE_HEIGHT / 2;
 const BUTTON_Y = 1745;
 
-/** Entrance order (ms): the C, the tube, the title, the badge, the button. */
+/** Entrance order (ms): the tube, the title, the button. */
 const ENTER = {
-  ring: 300,
   tube: 550,
   title: 1000,
-  badge: 1450,
   cta: 1650,
 };
 
@@ -56,11 +42,9 @@ export class AttractScene extends Phaser.Scene {
     fadeIn(this);
     audio.playMusic('bgm-attract');
     addBackground(this);
-    this.addRing();
     this.addHero();
     addHeader(this);
     this.addTitle();
-    this.addBadge();
     this.addAdminHotspot();
 
     // Warm halo that breathes behind the call to action.
@@ -98,29 +82,13 @@ export class AttractScene extends Phaser.Scene {
         sound: 'sfx-ui-start',
       },
     );
-    // The button rises last (in front of the podium), then keeps pulsing.
+    // The button rises last (in front of the tube), then keeps pulsing.
     cta.setDepth(5);
     riseIn(this, cta, 160, ENTER.cta, 600);
     this.time.delayedCall(ENTER.cta + 700, () => {
       this.tweens.add({ targets: cta, scale: 1.04, yoyo: true, repeat: -1, duration: 800 });
     });
     this.time.delayedCall(ENTER.cta, () => audio.playSfx('sfx-pop'));
-  }
-
-  /** Gold "C" (an open ring, gap facing right), floating gently. Drawn before the tube so it stands in front. */
-  private addRing(): void {
-    const ring = addArt(this, CX, RING_Y, 'ring').setDisplaySize(RING_SIZE, RING_SIZE);
-    // The C swings in (a little turn plus a pop), then floats.
-    popIn(this, ring, ENTER.ring, 0.55);
-    ring.setAngle(-40);
-    this.tweens.add({
-      targets: ring,
-      angle: 0,
-      duration: 900,
-      delay: ENTER.ring,
-      ease: 'Cubic.easeOut',
-    });
-    this.time.delayedCall(ENTER.ring + 900, () => float(this, ring, 14, 3000));
   }
 
   /** The game title popping in inside the ring. */
@@ -162,30 +130,14 @@ export class AttractScene extends Phaser.Scene {
       .on('pointerout', cancel);
   }
 
-  /** Hero: the packshot (tube on its podium) in front of the "C", with a warm glow behind the tube. */
+  /** Hero: the tube with a warm glow behind it. */
   private addHero(): void {
-    const glow = addGlow(this, CX, TUBE_TOP + TUBE_HEIGHT / 2, 760, 0);
+    const glow = addGlow(this, CX, TUBE_CENTER_Y, 760, 0);
     this.tweens.add({ targets: glow, alpha: 0.6, delay: ENTER.tube + 300, duration: 800 });
-    const pack = this.add.image(CX, PACK_Y, 'packshot').setScale(PACK_SCALE).setDepth(2);
+    const tube = this.add.image(CX, TUBE_CENTER_Y, 'tube').setDepth(2);
+    tube.setScale(TUBE_HEIGHT / tube.height);
     // The product rises up into place.
-    // No overshoot: the podium must never dip below the bottom edge of the screen.
-    riseIn(this, pack, 420, ENTER.tube, 800, 'Cubic.easeOut');
+    riseIn(this, tube, 420, ENTER.tube, 800, 'Cubic.easeOut');
     this.time.delayedCall(ENTER.tube, () => audio.playSfx('sfx-whoosh'));
-  }
-
-  /** The orange "BARU" tag beside the top of the tube pops on with a small wobble. */
-  private addBadge(): void {
-    // Its flat left end tucks behind the tube's edge.
-    const x = CX + TUBE_HALF_WIDTH + 82 - 30;
-    const y = TUBE_TOP + 64;
-    const badge = addArt(this, x, y, 'badge-baru').setDepth(1);
-    popIn(this, badge, ENTER.badge, 0.3);
-    this.tweens.add({
-      targets: badge,
-      angle: { from: -14, to: 0 },
-      duration: 700,
-      delay: ENTER.badge,
-      ease: 'Back.easeOut',
-    });
   }
 }
