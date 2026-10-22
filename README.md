@@ -1,4 +1,4 @@
-# Colgate Optic White Vitamin C - Catch the Brightness
+# Colgate Optic White Vitamin C - 95% Vitamin C Blast
 
 Booth touchscreen game by Ontable Studio. Portrait TV (43"/55", Full HD/4K) running in the TV browser, offline-first.
 

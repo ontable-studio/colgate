@@ -70,7 +70,7 @@ CSS = """
 @font-face{font-family:'Colgate Ready';font-weight:700;font-style:italic;src:url('%(f_boldit)s')}
 :root{--red:#c8102e;--red-dark:#8f0a21;--orange:#f7941d;--ink:#2a2a2a;--soft:#fbeef0}
 @page{size:A4;margin:24mm 18mm 20mm 18mm;
-  @top-left{content:'Catch the Brightness \\00B7  Panduan Instalasi Booth';font:700 8pt 'Colgate Ready',sans-serif;color:var(--red);
+  @top-left{content:'95%% Vitamin C Blast \\00B7  Panduan Instalasi Booth';font:700 8pt 'Colgate Ready',sans-serif;color:var(--red);
     border-bottom:1.2pt solid var(--red);padding-bottom:3mm;vertical-align:bottom}
   @top-right{content:url('%(logo_red)s');text-align:right;vertical-align:bottom;border-bottom:1.2pt solid var(--red);padding-bottom:3mm}
   @bottom-left{content:'Ontable Studio  \\00B7  Colgate Optic White Vitamin C';font:300 8pt 'Colgate Ready',sans-serif;color:#777;vertical-align:top;padding-top:4mm}
@@ -147,7 +147,7 @@ def build_html(body: str, toc, version: str, today: str) -> str:
     }
     toc_items = "".join(f'<li><a href="#{i}">{t}</a></li>' for i, t in toc)
     return f"""<!doctype html><html lang="id"><head><meta charset="utf-8">
-<title>Panduan Instalasi Booth - Catch the Brightness</title><style>{css}</style></head><body>
+<title>Panduan Instalasi Booth - 95% Vitamin C Blast</title><style>{css}</style></head><body>
 <section class="cover">
   <div class="shade"></div>
   <img class="logo" src="{uri(ASSETS / 'logo-colgate.webp')}" alt="Colgate">
@@ -156,7 +156,7 @@ def build_html(body: str, toc, version: str, today: str) -> str:
     <div class="l2">VITAMIN<span>C</span></div>
   </div>
   <div class="rule"></div>
-  <h1>Catch the Brightness<small>Panduan instalasi dan operasional booth touchscreen</small></h1>
+  <h1>95% Vitamin C Blast<small>Panduan instalasi dan operasional booth touchscreen</small></h1>
   <svg class="ring" viewBox="0 0 820 820">
     <defs>
       <linearGradient id="rim" x1="0" y1="1" x2="1" y2="0">

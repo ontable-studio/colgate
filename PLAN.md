@@ -1,4 +1,4 @@
-# Colgate Optic White Vitamin C — Catch the Brightness
+# Colgate Optic White Vitamin C — 95% Vitamin C Blast
 
 Rencana kerja Ontable Studio (Irsal = Developer, Oji = Artist). Dokumen hidup: update saat klien menjawab.
 
@@ -11,7 +11,7 @@ Rencana kerja Ontable Studio (Irsal = Developer, Oji = Artist). Dokumen hidup: u
 
 **Masuk:**
 
-- Satu game: Catch the Brightness (touch, portrait; brief awal 30-45 detik, sekarang 15 detik atas permintaan tim)
+- Satu game: 95% Vitamin C Blast (touch, portrait; brief awal 30-45 detik, sekarang 15 detik atas permintaan tim)
 - Layar: Attract, How to Play, Gameplay, Unlock, Akhir (skor, meter, inisial, top 10, Play Again)
 - Booth-proofing: attract mode, auto-reset idle, leaderboard lokal
 - Simpan hasil lokal di perangkat

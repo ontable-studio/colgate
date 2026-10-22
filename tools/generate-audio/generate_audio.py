@@ -1,4 +1,4 @@
-"""Procedural sound design for "Catch the Brightness" (no samples, everything is synthesised).
+"""Procedural sound design for "95% Vitamin C Blast" (no samples, everything is synthesised).
 
 Usage (from the repo root):
     pip install -r tools/generate-audio/requirements.txt
