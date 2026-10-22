@@ -25,11 +25,20 @@ export function pickSize(bubbles: GameRules['bubbles'], roll: number): BubbleSiz
  */
 export function lifetimeFor(rules: GameRules, remainingMs: number): number {
   const { lifetimeMs } = rules.spawn;
-  const { lastSec, minLifetimeMs } = rules.rush;
-  const rushMs = lastSec * 1000;
-  if (remainingMs >= rushMs) return lifetimeMs;
-  const share = Math.max(0, remainingMs) / rushMs;
-  return minLifetimeMs + (lifetimeMs - minLifetimeMs) * share;
+  const progress = rushProgress(rules, remainingMs);
+  return lifetimeMs + (rules.rush.minLifetimeMs - lifetimeMs) * progress;
+}
+
+/** Multiplier on the drift speed of every molecule: 1 until the final stretch, then rising evenly. */
+export function speedFactorFor(rules: GameRules, remainingMs: number): number {
+  return 1 + (rules.rush.maxSpeedFactor - 1) * rushProgress(rules, remainingMs);
+}
+
+/** 0 until the final `rush.lastSec` seconds, then rising evenly to 1 when the round ends. */
+function rushProgress(rules: GameRules, remainingMs: number): number {
+  const rushMs = rules.rush.lastSec * 1000;
+  if (remainingMs >= rushMs) return 0;
+  return 1 - Math.max(0, remainingMs) / rushMs;
 }
 
 /**

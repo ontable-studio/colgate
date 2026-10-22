@@ -1,7 +1,14 @@
 import Phaser from 'phaser';
 import { audio } from '@/audio';
 import { GAME_WIDTH, RULES, type BubbleSize } from '@/config/game';
-import { findMissed, findTapped, lifetimeFor, pickSize, type BubbleBody } from '@/domain/bubbles';
+import {
+  findMissed,
+  findTapped,
+  lifetimeFor,
+  pickSize,
+  speedFactorFor,
+  type BubbleBody,
+} from '@/domain/bubbles';
 import { GameSession } from '@/domain/session';
 import { addArt } from '@/ui/art/canvas';
 import { makeButtonSkin } from '@/ui/art/skins';
@@ -218,10 +225,11 @@ export class GameplayScene extends Phaser.Scene {
   private moveBubbles(step: number): void {
     const { left, right, top, bottom } = RULES.area;
     const seconds = step / 1000;
+    const speed = speedFactorFor(RULES, this.session.remainingMs);
     for (const b of [...this.bubbles]) {
       b.age += step;
-      b.x += b.vx * seconds;
-      b.y += b.vy * seconds;
+      b.x += b.vx * speed * seconds;
+      b.y += b.vy * speed * seconds;
       if (b.x < left + b.radius || b.x > right - b.radius) b.vx = -b.vx;
       if (b.y < top + b.radius || b.y > bottom - b.radius) b.vy = -b.vy;
       b.image.setPosition(b.x, b.y);
