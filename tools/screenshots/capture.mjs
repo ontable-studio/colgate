@@ -79,10 +79,25 @@ for (const [name, scene, data, wait] of shots) {
     `${JSON.stringify(keys)}.forEach(k => __game.scene.stop(k)); __game.scene.start(${JSON.stringify(scene)}, ${JSON.stringify(data)}); 1`,
   );
   if (scene === 'Gameplay') {
-    // Tap the floating molecules a few times so the shot shows a round in progress.
-    await run(
-      "(async()=>{const g=__game.scene.getScene('Gameplay'); await new Promise(r=>setTimeout(r,3300)); for (let i=0;i<8;i++){ const b=g.bubbles[0]; if (b) g.onTap(b.x,b.y); await new Promise(r=>setTimeout(r,500)); } })()",
-    );
+    // Wait for the countdown to end and for molecules to float in, tap a few so the meter has
+    // some progress, then wait until the screen is busy again before the shot.
+    const gameState =
+      "(() => { const g = __game.scene.getScene('Gameplay'); return g.countdownLeftMs <= 0 ? g.bubbles.length : -1; })()";
+    const waitForBubbles = async (min) => {
+      for (let i = 0; i < 60; i++) {
+        const r = await run(gameState);
+        if ((r.result?.value ?? -1) >= min) return;
+        await sleep(250);
+      }
+    };
+    await waitForBubbles(4);
+    for (let i = 0; i < 4; i++) {
+      await run(
+        "(() => { const g = __game.scene.getScene('Gameplay'); const b = g.bubbles[0]; if (b) g.onTap(b.x, b.y); return 1; })()",
+      );
+      await sleep(400);
+    }
+    await waitForBubbles(4);
   } else {
     // Wiggle the mouse now and then so the idle timeout does not send us back to the start screen.
     for (let waited = 0; waited < wait; waited += 500) {

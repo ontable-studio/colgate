@@ -7,7 +7,20 @@ Rencana kerja Ontable Studio (Irsal = Developer, Oji = Artist). Dokumen hidup: u
 - Budget: Rp3,5-4 juta | Pembayaran: DP 50% saat deal, 50% saat instalasi
 - Garansi: bug fix dan maintenance 30 hari
 
-## 1. Scope
+## Kondisi game saat ini (22 Okt 2026)
+
+Bagian ini yang berlaku. Bagian 1 dan seterusnya di bawah adalah rencana awal dan riwayat keputusan; banyak isinya (kapsul, noda, pengecoh, combo, Unlock, inisial, top 10, leaderboard lokal, menu admin, ekspor CSV, ronde 15 detik) sudah tidak dipakai.
+
+- **Cara main:** tap molekul Vitamin C yang melayang selama **30 detik**. Poin = persen: 95 poin = 95% = menang. Ronde selesai saat 95% tercapai atau waktu habis.
+- **Poin:** molekul kecil 3, sedang 2, besar 1. Tanpa pengali, tanpa penalti. Tap meleset hanya dicatat sebagai miss, dan molekul di dekat tap kabur.
+- **Kesulitan menurut waktu:** sampai detik 10 normal (kecil 40% / sedang 30% / besar 30%); detik 10-30 peluang molekul kecil naik merata ke 70% (sedang 20%, besar 10%); 15 detik terakhir jeda munculnya molekul melebar dari 0,33 ke 0,5 detik.
+- **Tetap sepanjang ronde:** umur molekul 3 detik, kecepatan melayang 40 px/s, maksimal 7 molekul di layar, molekul tidak saling menabrak (melambat saat mendekat, spawn menjaga jarak).
+- **Layar:** Attract, How to Play, Gameplay (dengan hitung mundur), Result. Result menampilkan CONGRATULATIONS! atau GOOD TRY!, persen, "High Purity Vitamin C", tombol HOME dan PLAY AGAIN.
+- **Tidak ada:** backend, data pemain, penyimpanan lokal, layar admin, ekspor CSV, leaderboard, inisial, layar Unlock, volume di dalam game (atur dari volume TV).
+- **Perangkat:** TV Android 43 inch dengan remote. Panduan pasang: `docs/INSTALL.md` dan `docs/INSTALL.pdf`.
+- **Angka aturan:** semuanya di `src/config/game.ts`. Hasil tuning masih berdasar model pemain sederhana, belum play-test nyata.
+
+## 1. Scope (rencana awal, sebagian usang)
 
 **Masuk:**
 

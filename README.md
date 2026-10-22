@@ -2,6 +2,8 @@
 
 Booth touchscreen game by Ontable Studio. Portrait TV (43"/55", Full HD/4K) running in the TV browser, offline-first.
 
+**What the game is now:** tap the floating Vitamin C molecules for 30 seconds to fill the toothbrush to 95%. Screens: Attract, How to Play, Gameplay, Result (HOME / PLAY AGAIN). There is no backend, no player data, no admin screen, no leaderboard and no CSV export. Older notes about capsules, stains, decoys, combo, initials, Top 10 or a 15-second round describe earlier versions and are out of date (see [CLAUDE.md](CLAUDE.md)).
+
 See [docs/INSTALL.md](docs/INSTALL.md) for the on-site installation and operation checklist (Indonesian), [PLAN.md](PLAN.md) for scope, schedule, assumptions and open client questions, and [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for how the code is organised.
 
 ## Stack
@@ -46,7 +48,7 @@ Copy `.env.example` to `.env` (never commit it):
 | --------------- | ----------------------------------------------------------- |
 | `VITE_SITE_URL` | Public address of the deployed game (canonical/share links) |
 
-Game rules (duration, points, spawn rates) live in `src/config/game.ts`. They are assumptions until the client confirms.
+Game rules (duration, points, spawn rates, how the round gets harder) live in `src/config/game.ts`. They are assumptions until the client confirms.
 
 The game has no backend and stores no player data.
 
@@ -61,7 +63,7 @@ The game has no backend and stores no player data.
   python tools/export-assets/export_assets.py
   ```
 
-- The rest of the UI kit is drawn in code from the client's storyboard (`src/ui/art/`): red radial background with light rays, glowing pill buttons, panels, HUD icons, Brightness Meter, gold gradient titles, Colgate basket, stain and decoy bubble. Drawing them in code keeps the download small and sharp at 4K. If Oji delivers final art for any of these, load it in `PreloadScene` under the same texture key and delete the matching draw call.
+- The rest of the UI kit is drawn in code from the client's storyboard (`src/ui/art/`): red radial background with light rays, glowing pill buttons, panels, HUD icons, Brightness Meter, gold gradient titles and the toothbrush meter. Drawing them in code keeps the download small and sharp at 4K. If Oji delivers final art for any of these, load it in `PreloadScene` under the same texture key and delete the matching draw call.
 - Brand font: Colgate Ready (Light, Bold, Bold Italic) is in `src/assets/fonts/` and loaded in `src/style.css`; `src/main.ts` waits for it before the game starts.
 - Brand colours come from the client's palette file (`COLGATE COLOR.ai`): red `#ED1C24`, orange `#F37021`, gold `#FDB415` (see `src/ui/theme.ts`).
 - The PWA icons in `public/icons/` are solid-colour placeholders.
