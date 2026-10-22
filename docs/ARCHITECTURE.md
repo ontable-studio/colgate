@@ -10,7 +10,7 @@ src/
   app/               composition root (container.ts) and Phaser game factory (createGame.ts)
   config/            tunables: game.ts (resolution, rules, idle timeout), env.ts (build-time env)
   domain/            PURE logic, no Phaser, no browser APIs  -> unit tested
-  services/          I/O: storage (IndexedDB), sync (Google Sheets), idle watcher
+  services/          I/O: storage (IndexedDB), idle watcher
   scenes/            Phaser scenes (thin: input, rendering, call into domain/services)
   ui/                reusable Phaser UI pieces: button, panel, keyboard, meter, effects, theme
   ui/art/            procedural canvas textures (background, skins, icons, objects, brand marks)
@@ -34,13 +34,11 @@ Scene keys are in `src/scenes/keys.ts`. Scenes pass data with `scene.start(key, 
 
 `GameSession` (`domain/session.ts`) owns score, brightness meter and timer. `GameplayScene` only spawns objects and forwards catches (`session.catch(kind)`). All numbers come from `RULES` in `config/game.ts`; change rules there, not in scenes.
 
-## Data and sync (offline-first)
+## Data (offline-first)
 
-1. `ResultScene` writes a `PlayRecord` (`syncStatus: 'pending'`) to IndexedDB via `PlaysRepository`. This always happens first.
+1. `ResultScene` writes a `PlayRecord` to IndexedDB via `PlaysRepository`. Nothing leaves the device.
 2. The leaderboard (top N) is read from local data, so it never depends on the network.
-3. `SyncService` drains `pending` on an interval, when the browser fires `online`, and with exponential backoff after failures. It reads a batch, closes the transaction, calls `SendBatch`, then marks only the ids the server accepted as `synced`.
-4. `createSheetsClient` posts JSON as `text/plain` to a Google Apps Script web app (a "simple" CORS request, no preflight). The script de-duplicates by `id`, so retries are safe.
-5. If `VITE_SYNC_ENDPOINT` is empty, sync is disabled and everything stays local.
+3. The operator exports all plays from the admin screen as CSV (`domain/csv.ts`).
 
 Idb caveat: a transaction auto-closes if you await unrelated async work (e.g. `fetch`) inside it. Keep transactions short and never network inside one.
 
@@ -86,7 +84,7 @@ Plain random spawning and box collisions felt unfair, so the round is built from
 
 - **Crash guard** (`app/watchdog.ts`): an uncaught error or rejected promise reloads the page back to Attract. A rate limit (`domain/reloadGuard.ts`, 3 reloads per minute) stops a bug that fails on every boot from looping; after the limit it shows "Something went wrong" and retries once the window has passed, so an unattended booth recovers by itself. WebGL context loss and a failed boot use the same path.
 - **Frame watchdog:** if the render loop stops advancing for 15 s while the page is visible, the page reloads.
-- **Safe updates** (`app/updates.ts`, `domain/updateController.ts`): the service worker uses `registerType: 'prompt'`, so a new build waits instead of replacing the running one. The page asks for updates every 10 minutes (a kiosk never navigates) and activates a waiting build only while the attract screen is showing, never mid-round. Verified end to end: held during How to Play, applied after the idle reset to Attract.
+- **Safe updates** (`app/updates.ts`, `domain/updateController.ts`): the service worker uses `registerType: 'prompt'`, so a new build waits instead of replacing the running one. The page asks for updates every 2 minutes (a kiosk never navigates; `public/_headers` keeps `sw.js` out of the HTTP cache so the check sees new builds) and activates a waiting build only while the attract screen is showing, never mid-round. Verified end to end: held during How to Play, applied after the idle reset to Attract.
 - **Light mode** (`config/quality.ts`, `domain/lowPower.ts`): if the frame rate stays below 38 fps for five checks in a row, sparkles and confetti are cut to a third for the rest of the session. `?quality=low` forces it (useful to test on a weak TV); the admin screen shows the current quality.
 - **Initials filter** (`domain/initials.ts`): a short block list of offensive three-letter combinations, also matched inside the 5-letter initials. SAVE refuses them ("TRY OTHER LETTERS"); the idle timeout never loses a play and stores it as `---` instead.
 
@@ -94,7 +92,7 @@ The operator checklist lives in [INSTALL.md](INSTALL.md).
 
 ## Operator (admin) screen
 
-Press and hold the invisible top-left corner of the Attract screen for 2 s. Shows device id, version, online state, sync on/off, plays and pending counts, last sync and error. Buttons: SYNC NOW (flush the queue immediately), EXPORT CSV (`domain/csv.ts`, UTF-8 BOM so Excel opens it; some TV browsers block downloads, so test this on the real TV), RESET DATA (two taps within 4 s, deletes all local plays) and BACK. Idle for 30 s returns to Attract. There is no PIN: it relies on the hidden hotspot, so do not rely on it to protect personal data.
+Press and hold the invisible top-left corner of the Attract screen for 2 s. Shows device id, version, plays count and quality. Buttons: EXPORT CSV (`domain/csv.ts`, UTF-8 BOM so Excel opens it; some TV browsers block downloads, so test this on the real TV), RESET DATA (two taps within 4 s, deletes all local plays) and BACK. Idle for 30 s returns to Attract. There is no PIN: it relies on the hidden hotspot, so do not rely on it to protect personal data.
 
 ## Testing
 

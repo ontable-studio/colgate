@@ -2,7 +2,7 @@ import { registerSW } from 'virtual:pwa-register';
 import { UpdateController } from '@/domain/updateController';
 
 /** A kiosk never navigates, so ask the browser for a new version on a timer. */
-const UPDATE_CHECK_MS = 10 * 60_000;
+const UPDATE_CHECK_MS = 2 * 60_000;
 /** How often to see whether a waiting update may be applied. */
 const APPLY_TICK_MS = 15_000;
 

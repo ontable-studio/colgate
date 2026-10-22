@@ -1,4 +1,5 @@
 import 'fake-indexeddb/auto';
+import { openDB } from 'idb';
 import { beforeEach, describe, expect, it } from 'vitest';
 import type { PlayRecord } from '@/domain/play';
 import { openBoothDb } from '@/services/storage/db';
@@ -15,7 +16,6 @@ const play = (over: Partial<PlayRecord> = {}): PlayRecord => ({
   misses: 0,
   durationSec: 40,
   gameVersion: '0.0.0',
-  syncStatus: 'pending',
   ...over,
 });
 
@@ -25,28 +25,27 @@ beforeEach(async () => {
 });
 
 describe('PlaysRepository', () => {
-  it('tracks pending plays and marks them synced', async () => {
-    const a = play();
-    const b = play();
-    await repo.add(a);
-    await repo.add(b);
-    expect(await repo.pendingCount()).toBe(2);
-    await repo.markSynced([a.id]);
-    expect(await repo.pendingCount()).toBe(1);
-    expect((await repo.pending(10)).map((p) => p.id)).toEqual([b.id]);
-    expect((await repo.all()).find((p) => p.id === a.id)?.syncStatus).toBe('synced');
-  });
-
   it('counts and clears all plays', async () => {
     await repo.add(play());
     await repo.add(play());
     expect(await repo.count()).toBe(2);
     await repo.clear();
     expect(await repo.count()).toBe(0);
-    expect(await repo.pendingCount()).toBe(0);
   });
 
-  it('ignores unknown ids when marking synced', async () => {
-    await expect(repo.markSynced(['nope'])).resolves.toBeUndefined();
+  it('keeps plays stored by the previous database version', async () => {
+    const name = 'legacy-booth';
+    const old = await openDB(name, 1, {
+      upgrade(db) {
+        const store = db.createObjectStore('plays', { keyPath: 'id' });
+        store.createIndex('by-status', 'syncStatus');
+        store.createIndex('by-score', 'score');
+      },
+    });
+    await old.put('plays', { ...play({ id: 'old1' }), syncStatus: 'synced' });
+    old.close();
+
+    const migrated = new PlaysRepository(await openBoothDb(name));
+    expect((await migrated.all()).map((p) => p.id)).toEqual(['old1']);
   });
 });

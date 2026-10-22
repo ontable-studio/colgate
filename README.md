@@ -42,15 +42,13 @@ Open the printed URL. Resize the window to a portrait ratio (9:16) to preview th
 
 Copy `.env.example` to `.env` (never commit it):
 
-| Variable             | Purpose                                                     |
-| -------------------- | ----------------------------------------------------------- |
-| `VITE_SYNC_ENDPOINT` | Google Apps Script web app URL. Empty = local-only, no sync |
-| `VITE_SYNC_SECRET`   | Shared secret checked by the script (noise reduction only)  |
-| `VITE_DEVICE_ID`     | Booth identifier written to the sheet                       |
+| Variable         | Purpose                                        |
+| ---------------- | ---------------------------------------------- |
+| `VITE_DEVICE_ID` | Booth identifier used in the exported CSV name |
 
 Game rules (duration, points, spawn rates) live in `src/config/game.ts`. They are assumptions until the client confirms.
 
-Google Sheet setup: [docs/apps-script/README.md](docs/apps-script/README.md).
+Play data stays on the device (IndexedDB) and is exported from the admin screen as CSV.
 
 ## Assets
 

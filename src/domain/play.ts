@@ -1,6 +1,4 @@
-export type SyncStatus = 'pending' | 'synced';
-
-/** One finished play (no personal data). `id` is the idempotency key used by the sheet to drop duplicates. */
+/** One finished play (no personal data). `id` is a unique key. */
 export interface PlayRecord {
   id: string;
   timestamp: string;
@@ -11,5 +9,4 @@ export interface PlayRecord {
   misses: number;
   durationSec: number;
   gameVersion: string;
-  syncStatus: SyncStatus;
 }

@@ -19,13 +19,13 @@ TC-30,Booth,Idle tidak memotong ronde,Permainan berjalan,1. Jangan sentuh layar 
 TC-31,Booth,Auto-reset di Result/How To Play,Berada di Leaderboard,1. Diamkan 30 detik,Kembali otomatis ke Halaman Utama.,Medium,,,,
 TC-32,Data,Data bertahan setelah reload,Sudah ada beberapa skor,"1. Reload halaman atau tutup lalu buka browser
 2. Mainkan satu ronde lagi",Top 10 masih memuat skor sebelumnya. Tidak ada skor hilang atau ganda.,High,,,,
-TC-33,Data,Offline lalu sinkron ke Google Sheet,Endpoint Sheet sudah dikonfigurasi,"1. Matikan internet, mainkan 3 ronde
-2. Nyalakan internet, tunggu sampai 1 menit
-3. Cek Sheet","Game tetap berjalan offline. Setelah online, 3 baris muncul di Sheet tanpa duplikat (id unik). Tidak ada ronde hilang.",High,,,,
+TC-33,Data,Offline lalu ekspor CSV,Berada di Halaman Utama,"1. Matikan internet, mainkan 3 ronde
+2. Buka menu admin, tekan EXPORT CSV
+3. Buka file CSV","Game tetap berjalan offline. 3 baris muncul di CSV tanpa duplikat (id unik). Tidak ada ronde hilang.",High,,,,
 TC-34,Data,Kirim ganda / klik cepat,Online,"1. Klik SAVE berulang cepat
-2. Cek jumlah baris di Sheet dan Leaderboard",Satu ronde = satu baris (di Sheet dan Leaderboard).,High,,,,
+2. Cek jumlah baris di CSV dan Leaderboard",Satu ronde = satu baris (di CSV dan Leaderboard).,High,,,,
 TC-35,Admin,Menu admin,Berada di Halaman Utama,"1. Buka menu admin lewat area tersembunyi
-2. Ubah volume/mute, lihat jumlah data pending, ekspor CSV",Kontrol suara berfungsi dan tersimpan setelah reload. Jumlah data pending sesuai. CSV terunduh dan terbuka benar.,Medium,,,,
+2. Ubah volume/mute, ekspor CSV",Kontrol suara berfungsi dan tersimpan setelah reload. CSV terunduh dan terbuka benar.,Medium,,,,
 TC-36,Audio,Kunci audio browser,"Buka game baru, belum menyentuh layar","1. Perhatikan suara sebelum sentuhan pertama
 2. Sentuh layar","Sebelum sentuhan pertama bisa hening (kebijakan browser). Setelah sentuhan pertama BGM/SFX berbunyi, tidak ada error di console.",Medium,,,,
 TC-37,Non-Fungsional,Layar target TV portrait,TV 43/55 inci portrait (atau jendela 1080x1920 / 2160x3840),"1. Buka game di browser TV

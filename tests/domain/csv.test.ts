@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { playsToCsv } from '@/domain/csv';
+import { formatTimestamp, playsToCsv } from '@/domain/csv';
 import type { PlayRecord } from '@/domain/play';
 
 const play = (over: Partial<PlayRecord> = {}): PlayRecord => ({
@@ -12,8 +12,18 @@ const play = (over: Partial<PlayRecord> = {}): PlayRecord => ({
   misses: 3,
   durationSec: 40,
   gameVersion: '0.1.0',
-  syncStatus: 'pending',
   ...over,
+});
+
+describe('formatTimestamp', () => {
+  it('uses the local time as YYYY-MM-DD HH:mm:ss', () => {
+    const d = new Date(2026, 9, 28, 9, 5, 7);
+    expect(formatTimestamp(d.toISOString())).toBe('2026-10-28 09:05:07');
+  });
+
+  it('leaves an unparseable value as it is', () => {
+    expect(formatTimestamp('not a date')).toBe('not a date');
+  });
 });
 
 describe('playsToCsv', () => {
@@ -23,9 +33,9 @@ describe('playsToCsv', () => {
     expect(csv.startsWith('\uFEFF')).toBe(true);
     expect(lines).toHaveLength(3);
     expect(lines[0]).toBe(
-      'id,timestamp,deviceId,score,meterPct,pops,misses,durationSec,gameVersion,syncStatus',
+      'id,timestamp,deviceId,score,meterPct,pops,misses,durationSec,gameVersion',
     );
-    expect(lines[1]).toBe('a1,2026-10-28T10:00:00.000Z,booth-01,120,55,12,3,40,0.1.0,pending');
+    expect(lines[1]).toBe(`a1,${formatTimestamp(play().timestamp)},booth-01,120,55,12,3,40,0.1.0`);
   });
 
   it('quotes cells containing commas, quotes or newlines', () => {

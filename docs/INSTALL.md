@@ -5,8 +5,8 @@ Untuk tim yang memasang dan menjaga game di lokasi (24-25 Oktober instalasi, eve
 ## 1. Sebelum berangkat
 
 - [ ] Game sudah di-deploy ke hosting dan bisa dibuka lewat HTTPS dari HP/laptop lain.
-- [ ] Build memakai `.env` yang benar (`VITE_SYNC_ENDPOINT`, `VITE_SYNC_SECRET`, `VITE_DEVICE_ID`). Variabel ini dibaca **saat build**, jadi build ulang setiap kali diubah.
-- [ ] Sinkron Google Sheet sudah dicoba dari build yang sama (satu ronde → baris muncul di Sheet).
+- [ ] Build memakai `.env` yang benar (`VITE_DEVICE_ID`). Variabel ini dibaca **saat build**, jadi build ulang setiap kali diubah.
+- [ ] EXPORT CSV sudah dicoba dari build yang sama (satu ronde → baris muncul di file CSV).
 - [ ] Sudah dites di TV yang sama atau sejenis (lihat bagian 3).
 - [ ] Bawa cadangan: laptop/mini PC dengan Chrome, kabel HDMI, dan kabel USB sentuh. Browser bawaan TV adalah titik paling berisiko.
 
@@ -55,9 +55,9 @@ Kalau Chrome terpasang di lokasi lain, sesuaikan bagian `C:\Program Files\...\ch
 - [ ] Main satu ronde penuh dengan geser jari. Keranjang mengikuti jari tanpa jeda, animasi mulus.
 - [ ] Ketik inisial, tekan SAVE, papan skor muncul dan baris Anda ter-highlight.
 - [ ] Suara terdengar jelas tapi tidak mengganggu stan sebelah. Setel di admin.
-- [ ] **Uji offline:** cabut internet, mainkan satu ronde. Harus tetap jalan. Sambung lagi, buka admin: `PENDING` turun ke 0 dalam kurang dari satu menit.
-- [ ] Buka admin dan cek: `SYNC on`, `LAST ERROR -`, `QUALITY normal`.
-- [ ] Hapus data uji lewat admin (RESET DATA, dua ketukan), lalu pastikan baris uji di Sheet dihapus.
+- [ ] **Uji offline:** cabut internet, mainkan satu ronde. Harus tetap jalan dan ronde tercatat di daftar admin.
+- [ ] Buka admin dan cek: `QUALITY normal`.
+- [ ] Hapus data uji lewat admin (RESET DATA, dua ketukan), lalu pastikan daftar pemain kosong.
 
 ## 4. Menyalakan dan mematikan tiap hari
 
@@ -67,17 +67,15 @@ Nyalakan TV dan tunggu game ke layar Attract. Tidak perlu apa-apa lagi: game mem
 
 Tahan pojok kiri atas layar Attract selama 2 detik. Layar admin menampilkan:
 
-| Baris                      | Arti                                                                           |
-| -------------------------- | ------------------------------------------------------------------------------ |
-| `PLAYS` / `PENDING`        | Jumlah permainan tersimpan / yang belum terkirim ke Sheet                      |
-| `LAST SYNC` / `LAST ERROR` | Waktu kirim terakhir / pesan galat terakhir                                    |
-| `ONLINE`                   | Perkiraan browser saja, bisa "yes" walau jaringan putus. Percayai `LAST ERROR` |
-| `QUALITY`                  | `low` berarti layar kewalahan dan efek diringankan otomatis                    |
-| `SOUND`                    | Status dan volume                                                              |
+| Baris     | Arti                                                        |
+| --------- | ----------------------------------------------------------- |
+| `PLAYS`   | Jumlah permainan tersimpan di perangkat                     |
+| `QUALITY` | `low` berarti layar kewalahan dan efek diringankan otomatis |
+| `SOUND`   | Status dan volume                                           |
 
-Tombol: **SYNC NOW** (kirim sekarang), **EXPORT CSV** (unduh data), **RESET DATA** (hapus semua data lokal, dua ketukan), **SOUND ON/OFF**, **VOLUME** (25/50/75/100%), **BACK**.
+Tombol: **EXPORT CSV** (unduh data), **RESET DATA** (hapus semua data lokal, dua ketukan), **SOUND ON/OFF**, **VOLUME** (25/50/75/100%), **BACK**.
 
-Setiap hari sebelum pulang: pastikan `PENDING 0` (tekan SYNC NOW kalau perlu), lalu EXPORT CSV sebagai cadangan. **Jangan RESET DATA sebelum data terkirim atau diekspor.**
+Setiap hari sebelum pulang: EXPORT CSV dan simpan filenya. **Jangan RESET DATA sebelum data diekspor.**
 
 ## 6. Jika ada masalah
 
@@ -86,17 +84,29 @@ Setiap hari sebelum pulang: pastikan `PENDING 0` (tekan SYNC NOW kalau perlu), l
 | Layar putih atau game beku            | Tunggu sebentar; game me-reload sendiri. Kalau muncul "Something went wrong...", tunggu sekitar 70 detik (mencoba lagi otomatis) atau muat ulang halaman manual |
 | Tidak ada suara                       | Sentuh layar sekali (browser mengunci suara sebelum sentuhan). Cek volume TV dan menu admin (SOUND: ON). Mode PC: pakai opsi `--autoplay-policy` di atas        |
 | Animasi patah-patah                   | Buka URL dengan tambahan `?quality=low`, atau biarkan game mendeteksinya sendiri (baris `QUALITY` di admin)                                                     |
-| `PENDING` tidak turun                 | Cek internet. Baca `LAST ERROR`. SYNC NOW. Data aman di perangkat dan terkirim begitu jaringan kembali                                                          |
+| EXPORT CSV tidak mengunduh            | Browser TV mungkin memblokir unduhan. Coba dari laptop/browser cadangan; data tetap aman di perangkat                                                           |
 | Sentuhan tidak merespon               | Bersihkan layar, cek kabel USB sentuh, kalibrasi ulang. Pindah ke perangkat cadangan bila perlu                                                                 |
 | Inisial ditolak ("TRY OTHER LETTERS") | Normal: kombinasi huruf tertentu diblokir demi menjaga brand                                                                                                    |
 
 ## 7. Memperbarui game saat event berjalan
 
-Setelah versi baru di-deploy, perangkat mengecek tiap 10 menit dan baru mengganti versi **saat layar Attract**, jadi tidak pernah memutus pemain di tengah ronde. Pembaruan tampak sebagai muat ulang singkat.
+Setelah versi baru di-deploy, perangkat mengecek tiap 2 menit dan baru mengganti versi **saat layar Attract**, jadi tidak pernah memutus pemain di tengah ronde. Pembaruan tampak sebagai muat ulang singkat. Biasanya versi baru sudah tampil dalam 2-3 menit setelah deploy, selama perangkat online dan berada di layar Attract (atau kembali ke sana setelah 30 detik tanpa sentuhan).
+
+### Kalau masih tampil versi lama (cache)
+
+Game menyimpan semua filenya di perangkat supaya tetap jalan saat offline. Akibatnya, **reload biasa (F5) tetap menampilkan versi lama**: versi baru diunduh di latar belakang dan baru dipakai saat layar Attract. Ini normal, bukan galat.
+
+Cara memastikan versi terbaru:
+
+1. Tunggu 2-3 menit di layar Attract tanpa menyentuh layar. Halaman akan memuat ulang sendiri.
+2. Belum berubah? **Hard reload**: tekan `Ctrl + Shift + R` (Mac: `Cmd + Shift + R`). Cara ini melewati cache dan langsung mengambil versi terbaru dari server.
+3. Di TV tanpa keyboard: tutup browser sepenuhnya lalu buka lagi, atau hapus data situs dari pengaturan browser (**Clear cache / Site data**) lalu buka URL game kembali. Data permainan ikut terhapus bila memilih hapus data situs, jadi **EXPORT CSV dulu**.
+4. Pastikan perubahan dari versi baru memang sudah terlihat di layar (misalnya tampilan atau teks yang baru diubah).
+
+Saat menguji di laptop: buka DevTools → **Application** → **Service Workers**, lalu centang **Update on reload**. Dengan begitu F5 biasa sudah cukup.
 
 ## 8. Setelah event
 
-- [ ] EXPORT CSV dan simpan, pastikan semua data sudah di Sheet.
-- [ ] Hapus baris uji dari Sheet (`TST`, `DUP`, `SAA`, dan sejenisnya).
-- [ ] Ganti `SECRET` di Apps Script dan nonaktifkan deployment bila game tidak dipakai lagi.
+- [ ] EXPORT CSV dan simpan file dari setiap perangkat.
+- [ ] Hapus baris uji dari CSV (`TST`, `DUP`, `SAA`, dan sejenisnya).
 - [ ] Serahkan data sesuai kesepakatan dengan klien.
