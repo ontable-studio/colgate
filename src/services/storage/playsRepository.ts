@@ -8,27 +8,6 @@ export class PlaysRepository {
     await this.db.put('plays', play);
   }
 
-  async pending(limit: number): Promise<PlayRecord[]> {
-    const rows = await this.db.getAllFromIndex('plays', 'by-status', 'pending');
-    return rows.slice(0, limit);
-  }
-
-  async pendingCount(): Promise<number> {
-    return this.db.countFromIndex('plays', 'by-status', 'pending');
-  }
-
-  /** One short transaction: never await anything unrelated inside (idb would close it). */
-  async markSynced(ids: readonly string[]): Promise<void> {
-    const tx = this.db.transaction('plays', 'readwrite');
-    await Promise.all([
-      ...ids.map(async (id) => {
-        const row = await tx.store.get(id);
-        if (row) await tx.store.put({ ...row, syncStatus: 'synced' });
-      }),
-      tx.done,
-    ]);
-  }
-
   async all(): Promise<PlayRecord[]> {
     return this.db.getAll('plays');
   }

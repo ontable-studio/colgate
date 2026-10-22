@@ -20,7 +20,7 @@ const REFRESH_MS = 1500;
  *   volume | sound        the two audio buttons side by side
  *   DATA PEMAIN           header of the list
  *   list                  one row per play (time and score), newest first, scrolls
- *   status                last action / sync state
+ *   status                last action message
  *   total | save | reset  player count, save as CSV, reset (icons; reset asks in a dialog)
  *   BACK HOME
  */
@@ -192,17 +192,13 @@ export class AdminScene extends Phaser.Scene {
   }
 
   private async refresh(): Promise<void> {
-    const { repo, sync } = getServices();
-    const [plays, pending] = await Promise.all([repo.all(), repo.pendingCount()]);
+    const plays = await getServices().repo.all();
     if (!this.scene.isActive()) return;
 
     this.playCount = plays.length;
     this.total.setText(`TOTAL PEMAIN : ${plays.length}`);
     this.renderList(plays);
-    // Idle state of the status line: sync health, unless an action message is showing.
-    if (!this.messageBusy) {
-      this.message.setText(sync ? `SYNC ON  |  PENDING ${pending}` : 'SYNC OFF (NO ENDPOINT)');
-    }
+    if (!this.messageBusy) this.message.setText('');
   }
 
   /** Newest first; rebuilt only when the set of plays changed, so scrolling is not disturbed. */
@@ -328,7 +324,7 @@ export class AdminScene extends Phaser.Scene {
     await this.refresh();
   }
 
-  /** Show an action message for a while, then the status line takes over again. */
+  /** Show an action message for a while, then the status line is cleared. */
   private say(text: string, ms = 3000): void {
     this.message.setText(text);
     this.messageBusy = true;

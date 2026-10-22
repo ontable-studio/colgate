@@ -14,8 +14,8 @@ Rencana kerja Ontable Studio (Irsal = Developer, Oji = Artist). Dokumen hidup: u
 - Satu game: Catch the Brightness (touch, portrait; brief awal 30-45 detik, sekarang 15 detik atas permintaan tim)
 - Layar: Attract, How to Play, Gameplay, Unlock, Akhir (skor, meter, inisial, top 10, Play Again)
 - Booth-proofing: attract mode, auto-reset idle, leaderboard lokal
-- Simpan hasil lokal, sinkron ke Google Sheet saat ada internet
-- Menu admin tersembunyi (status sync, ekspor CSV)
+- Simpan hasil lokal di perangkat
+- Menu admin tersembunyi (ekspor CSV)
 
 **Tidak masuk (hitung terpisah jika diminta):** game kedua, Photo Booth, Live Streaming, leaderboard online, data kontak (HP/email), 3D, video, audio custom.
 
@@ -34,28 +34,22 @@ TV touchscreen 43" atau 55", portrait, Full HD/4K. TV bisa akses browser (Androi
 | Offline           | PWA lewat vite-plugin-pwa, `registerType: 'autoUpdate'`                                        |
 | Precache          | **Wajib** tambah `workbox.globPatterns` untuk png/webp/audio/font (default hanya js/css/html)  |
 | Penyimpanan lokal | IndexedDB lewat `idb`, minta `navigator.storage.persist()`                                     |
-| Sinkron           | Antrean di IndexedDB → Google Apps Script web app → Google Sheet                               |
+| Ekspor data       | Admin tersembunyi → unduh CSV dari IndexedDB                                                   |
 | Input             | Keranjang mengikuti `pointer.x`, `input.activePointers: 1`, blok zoom/long-press/selection     |
 | Hosting           | Cloudflare Pages / Netlify (statis, gratis)                                                    |
 | Cadangan          | Build web yang sama di Chrome kiosk pada mini PC; atau Unity APK jika TV Android boleh install |
 
 Catatan: Unity WebGL tidak dipakai (berat untuk browser TV).
 
-## 4. Alur data dan sinkron
+## 4. Alur data
 
-1. Game selesai → simpan ke IndexedDB, status `pending`.
+1. Game selesai → simpan ke IndexedDB di perangkat. Tidak ada data yang dikirim keluar.
 2. Leaderboard top 10 dibaca dari data lokal (tidak bergantung internet).
-3. Sync worker tiap ~30 detik dan saat event `online`: kirim batch `pending`, tandai `synced` jika sukses.
-4. Gagal → coba lagi dengan backoff. Data tidak dihapus sebelum sukses.
-5. Sheet menolak duplikat berdasarkan `id` (UUID), jadi kirim ulang aman.
+3. Operator mengunduh semua data lewat EXPORT CSV di menu admin.
 
-**Penting (idb):** transaksi IndexedDB tertutup otomatis jika ada `await` lain di tengahnya. Urutan di sync worker: baca pending → tutup transaksi → `fetch` → transaksi baru untuk update status.
+**Penting (idb):** transaksi IndexedDB tertutup otomatis jika ada `await` lain di tengahnya. Jaga transaksi tetap pendek.
 
-**Skema (satu baris per permainan):** `id`, `timestamp`, `deviceId`, `initials`, `score`, `meterPct`, `catches`, `hits`, `durationSec`, `gameVersion`.
-
-**Keamanan:** URL Apps Script terlihat di kode game → pakai shared secret, hanya terima field yang dikenal, batasi panjang, sheet tidak publik. Tanpa nomor HP/email sampai klien menjawab.
-
-**Perlu dites:** CORS dan redirect Apps Script dari browser TV (fallback: `text/plain` atau form POST).
+**Skema (satu baris per permainan):** `id`, `timestamp`, `deviceId`, `score`, `meterPct`, `pops`, `misses`, `durationSec`, `gameVersion`. Tanpa nomor HP/email sampai klien menjawab.
 
 ## 5. Aturan game (asumsi sementara, semua di satu file config)
 
@@ -94,7 +88,7 @@ Brand: merah Colgate dengan gradient merah gelap radial, aksen oranye-emas. Klai
 | Jum 16 - Sab 17 | Prototype loop inti (placeholder)                               | Mockup dari wireframe          |
 | Min 18          | Buffer                                                          | Review mockup, aset final awal |
 | Sen 19 - Sel 20 | Skor, meter, timer, attract, auto-reset, IndexedDB, leaderboard | Aset final                     |
-| Rab 21          | Sync Apps Script, menu admin                                    | Polishing                      |
+| Rab 21          | Ekspor CSV, menu admin                                          | Polishing                      |
 | Kam 22          | Integrasi aset final, tuning                                    | Cek warna dan layout           |
 | Jum 23          | Soak test 3-4 jam di TV asli, bug fix                           | Cek visual di TV               |
 | Sab 24 - Min 25 | Instalasi dan serah                                             | Cek visual di lokasi           |
@@ -109,14 +103,14 @@ Scope beku setelah 19 Okt; revisi besar tidak masuk.
 - Resolusi dan DPR yang dilaporkan browser (1080p atau 4K), FPS animasi
 - Browser apa dan versi berapa; bisa auto-buka URL saat TV nyala atau tidak
 - Offline: halaman tetap jalan tanpa internet (service worker)
-- Apps Script: kirim data dari browser TV berhasil (CORS)
+- Ekspor CSV: unduhan dari browser TV berhasil
 
 Jika banyak yang gagal → pindah ke cadangan hari itu juga.
 
 ## 9. Pengujian akhir
 
 - Touch dengan jari di TV asli, termasuk sentuhan cepat dan tidak sengaja
-- Offline penuh → internet menyala: antrean terkirim, tanpa duplikat di sheet
+- Offline penuh: ronde tetap tercatat, CSV hasil ekspor lengkap tanpa duplikat
 - Tutup/buka browser atau TV: data lokal tetap ada
 - Soak 3-4 jam tanpa crash atau memori bocor
 - Idle reset: skor/inisial tidak bocor ke pemain berikutnya

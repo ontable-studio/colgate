@@ -5,18 +5,22 @@ interface BoothDB extends DBSchema {
   plays: {
     key: string;
     value: PlayRecord;
-    indexes: { 'by-status': string; 'by-score': number };
+    indexes: { 'by-score': number };
   };
 }
 
 export type BoothDatabase = IDBPDatabase<BoothDB>;
 
 export function openBoothDb(name = 'colgate-booth'): Promise<BoothDatabase> {
-  return openDB<BoothDB>(name, 1, {
-    upgrade(db) {
-      const plays = db.createObjectStore('plays', { keyPath: 'id' });
-      plays.createIndex('by-status', 'syncStatus');
-      plays.createIndex('by-score', 'score');
+  return openDB<BoothDB>(name, 2, {
+    upgrade(db, oldVersion, _newVersion, tx) {
+      if (oldVersion < 1) {
+        const plays = db.createObjectStore('plays', { keyPath: 'id' });
+        plays.createIndex('by-score', 'score');
+      } else if (oldVersion < 2) {
+        // v2 dropped the sync queue; stored plays are kept as they are.
+        (tx.objectStore('plays') as unknown as IDBObjectStore).deleteIndex('by-status');
+      }
     },
   });
 }

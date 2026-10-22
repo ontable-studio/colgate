@@ -162,7 +162,7 @@ export class ResultScene extends Phaser.Scene {
     });
   }
 
-  /** Store the play locally (the sync service sends it on). No personal data is kept. */
+  /** Store the play locally (the admin screen exports it as CSV). No personal data is kept. */
   private async save(): Promise<void> {
     const { repo } = getServices();
     const play: PlayRecord = {
@@ -175,7 +175,6 @@ export class ResultScene extends Phaser.Scene {
       misses: this.result.misses,
       durationSec: this.result.durationSec,
       gameVersion: env.gameVersion,
-      syncStatus: 'pending',
     };
     await repo.add(play);
   }
