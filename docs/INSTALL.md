@@ -17,7 +17,7 @@ Untuk tim yang memasang dan menjaga game di lokasi (24-25 Oktober instalasi, eve
 3. Kalibrasi sentuhan jika layar punya menu kalibrasi.
 4. Buka browser, masuk ke URL game, lalu:
    - Jadikan **halaman awal** atau tambahkan ke layar utama ("Add to Home screen") supaya terbuka otomatis saat TV menyala (kalau TV mendukung).
-   - Masuk **fullscreen** (tombol PLAY NOW juga memintanya pada sentuhan pertama).
+   - Masuk **fullscreen** (tombol START juga memintanya pada sentuhan pertama).
 5. Atur volume TV dulu ke tingkat sedang, lalu setel volume game di menu admin (bagian 5).
 
 ### Jika memakai PC/mini PC dengan Chrome
@@ -25,10 +25,10 @@ Untuk tim yang memasang dan menjaga game di lokasi (24-25 Oktober instalasi, eve
 Mode kiosk membuat Chrome tampil penuh layar seperti aplikasi: tanpa bilah alamat, tanpa tab, dan pengunjung tidak bisa keluar sendiri. Cukup disiapkan sekali dengan membuat pintasan (shortcut):
 
 1. Klik kanan di Desktop → **New** → **Shortcut**.
-2. Pada kolom lokasi, tempel baris berikut (satu baris utuh), lalu ganti `https://URL-GAME-ANDA` dengan alamat game yang sebenarnya:
+2. Pada kolom lokasi, tempel baris berikut (satu baris utuh). Alamat game sudah terisi; ganti hanya jika alamatnya berubah:
 
    ```
-   "C:\Program Files\Google\Chrome\Application\chrome.exe" --kiosk --noerrdialogs --disable-pinch --overscroll-history-navigation=0 --autoplay-policy=no-user-gesture-required https://URL-GAME-ANDA
+   "C:\Program Files\Google\Chrome\Application\chrome.exe" --kiosk --noerrdialogs --disable-pinch --overscroll-history-navigation=0 --autoplay-policy=no-user-gesture-required https://colgate-omega.vercel.app/
    ```
 
 3. Beri nama, misalnya `Catch the Brightness`, lalu klik **Finish**.
@@ -44,20 +44,20 @@ Arti tiap bagian baris tadi:
 | `--disable-pinch`                            | Mematikan cubit-untuk-zoom, jadi layar tidak bisa terperbesar tanpa sengaja    |
 | `--overscroll-history-navigation=0`          | Mencegah geseran dari tepi layar membuat halaman kembali (back)                |
 | `--autoplay-policy=no-user-gesture-required` | Mengizinkan musik layar awal berbunyi sendiri, tanpa menunggu sentuhan pertama |
-| `https://URL-GAME-ANDA`                      | Alamat game yang dibuka otomatis                                               |
+| `https://colgate-omega.vercel.app/`          | Alamat game yang dibuka otomatis                                               |
 
 Kalau Chrome terpasang di lokasi lain, sesuaikan bagian `C:\Program Files\...\chrome.exe`.
 
 ## 3. Uji akhir di lokasi (sekitar 15 menit)
 
 - [ ] Layar Attract tampil penuh, tidak ada bilah alamat atau tombol browser.
-- [ ] Sentuh PLAY NOW → How to Play → LET'S PLAY: sentuhan terasa langsung.
+- [ ] Sentuh START → How to Play → LET'S PLAY!: sentuhan terasa langsung.
 - [ ] Main satu ronde penuh dengan geser jari. Keranjang mengikuti jari tanpa jeda, animasi mulus.
-- [ ] Ketik inisial, tekan SAVE, papan skor muncul dan baris Anda ter-highlight.
+- [ ] Setelah timer habis, layar hasil menampilkan persentase. Tombol PLAY AGAIN dan HOME (ikon rumah) berfungsi.
 - [ ] Suara terdengar jelas tapi tidak mengganggu stan sebelah. Setel di admin.
 - [ ] **Uji offline:** cabut internet, mainkan satu ronde. Harus tetap jalan dan ronde tercatat di daftar admin.
-- [ ] Buka admin dan cek: `QUALITY normal`.
-- [ ] Hapus data uji lewat admin (RESET DATA, dua ketukan), lalu pastikan daftar pemain kosong.
+- [ ] Buka admin dan cek: `TOTAL PEMAIN` bertambah sesuai jumlah ronde yang dimainkan.
+- [ ] Hapus data uji lewat admin (ikon tempat sampah, lalu HAPUS), lalu pastikan daftar pemain kosong.
 
 ## 4. Menyalakan dan mematikan tiap hari
 
@@ -67,26 +67,27 @@ Nyalakan TV dan tunggu game ke layar Attract. Tidak perlu apa-apa lagi: game mem
 
 Tahan pojok kiri atas layar Attract selama 2 detik. Layar admin menampilkan:
 
-| Baris     | Arti                                                        |
-| --------- | ----------------------------------------------------------- |
-| `PLAYS`   | Jumlah permainan tersimpan di perangkat                     |
-| `QUALITY` | `low` berarti layar kewalahan dan efek diringankan otomatis |
-| `SOUND`   | Status dan volume                                           |
+| Bagian             | Arti                                                                                           |
+| ------------------ | ---------------------------------------------------------------------------------------------- |
+| `VOLUME`           | Ketuk untuk berganti 25 / 50 / 75 / 100%                                                       |
+| `SOUND`            | Ketuk untuk menyalakan atau mematikan suara                                                    |
+| `DATA PEMAIN`      | Daftar ronde yang tersimpan di perangkat (waktu dan persentase), terbaru di atas. Bisa digeser |
+| `TOTAL PEMAIN`     | Jumlah ronde yang tersimpan                                                                    |
+| Ikon unduh         | **EXPORT CSV**: unduh semua data sebagai file CSV                                              |
+| Ikon tempat sampah | **Hapus semua data**: muncul dialog konfirmasi, data hanya terhapus bila HAPUS ditekan         |
+| `BACK HOME`        | Kembali ke layar Attract                                                                       |
 
-Tombol: **EXPORT CSV** (unduh data), **RESET DATA** (hapus semua data lokal, dua ketukan), **SOUND ON/OFF**, **VOLUME** (25/50/75/100%), **BACK**.
-
-Setiap hari sebelum pulang: EXPORT CSV dan simpan filenya. **Jangan RESET DATA sebelum data diekspor.**
+Setiap hari sebelum pulang: EXPORT CSV dan simpan filenya. **Jangan hapus data (ikon tempat sampah) sebelum data diekspor.**
 
 ## 6. Jika ada masalah
 
-| Gejala                                | Yang dilakukan                                                                                                                                                  |
-| ------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Layar putih atau game beku            | Tunggu sebentar; game me-reload sendiri. Kalau muncul "Something went wrong...", tunggu sekitar 70 detik (mencoba lagi otomatis) atau muat ulang halaman manual |
-| Tidak ada suara                       | Sentuh layar sekali (browser mengunci suara sebelum sentuhan). Cek volume TV dan menu admin (SOUND: ON). Mode PC: pakai opsi `--autoplay-policy` di atas        |
-| Animasi patah-patah                   | Buka URL dengan tambahan `?quality=low`, atau biarkan game mendeteksinya sendiri (baris `QUALITY` di admin)                                                     |
-| EXPORT CSV tidak mengunduh            | Browser TV mungkin memblokir unduhan. Coba dari laptop/browser cadangan; data tetap aman di perangkat                                                           |
-| Sentuhan tidak merespon               | Bersihkan layar, cek kabel USB sentuh, kalibrasi ulang. Pindah ke perangkat cadangan bila perlu                                                                 |
-| Inisial ditolak ("TRY OTHER LETTERS") | Normal: kombinasi huruf tertentu diblokir demi menjaga brand                                                                                                    |
+| Gejala                     | Yang dilakukan                                                                                                                                                  |
+| -------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Layar putih atau game beku | Tunggu sebentar; game me-reload sendiri. Kalau muncul "Something went wrong...", tunggu sekitar 70 detik (mencoba lagi otomatis) atau muat ulang halaman manual |
+| Tidak ada suara            | Sentuh layar sekali (browser mengunci suara sebelum sentuhan). Cek volume TV dan menu admin (SOUND: ON). Mode PC: pakai opsi `--autoplay-policy` di atas        |
+| Animasi patah-patah        | Buka URL dengan tambahan `?quality=low`, atau biarkan game mendeteksinya sendiri (efek diringankan otomatis bila layar kewalahan)                               |
+| EXPORT CSV tidak mengunduh | Browser TV mungkin memblokir unduhan. Coba dari laptop/browser cadangan; data tetap aman di perangkat                                                           |
+| Sentuhan tidak merespon    | Bersihkan layar, cek kabel USB sentuh, kalibrasi ulang. Pindah ke perangkat cadangan bila perlu                                                                 |
 
 ## 7. Memperbarui game saat event berjalan
 
@@ -108,5 +109,4 @@ Saat menguji di laptop: buka DevTools → **Application** → **Service Workers*
 ## 8. Setelah event
 
 - [ ] EXPORT CSV dan simpan file dari setiap perangkat.
-- [ ] Hapus baris uji dari CSV (`TST`, `DUP`, `SAA`, dan sejenisnya).
 - [ ] Serahkan data sesuai kesepakatan dengan klien.
